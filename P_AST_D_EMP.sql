@@ -149,17 +149,17 @@ BEGIN
 				,STKPLG_GUAR_SECMV   	= 	COALESCE(B3.STKPLG_GUAR_SECMV   ,0)		*    C.PERFM_RATIO_1		--股票质押担保证券市值
 				,STKPLG_FIN_BAL      	= 	COALESCE(B3.STKPLG_FIN_BAL      ,0)		*    C.PERFM_RATIO_1		--股票质押融资余额	
 				,APPTBUYB_BAL        	= 	COALESCE(B4.APPTBUYB_BAL        ,0)		*    C.PERFM_RATIO_1		--约定购回余额
-				,CRED_MARG           	= 	COALESCE(B1.CRED_MARG           ,0)		*    C.PERFM_RATIO_9		--信用保证金	
+				,CRED_MARG           	= 	COALESCE(B2.CRED_MARG           ,0)		*    C.PERFM_RATIO_9		--信用保证金	
 				,INTR_LIAB           	= 	COALESCE(B2.INTR_LIAB           ,0)		*    C.PERFM_RATIO_9		--利息负债	
 				,FEE_LIAB            	= 	COALESCE(B2.FEE_LIAB            ,0)		*    C.PERFM_RATIO_9		--费用负债	
 				,OTHLIAB             	= 	COALESCE(B2.OTHLIAB             ,0)		*    C.PERFM_RATIO_9		--其他负债	
 				,FIN_LIAB            	= 	COALESCE(B2.FIN_LIAB            ,0)		*    C.PERFM_RATIO_9		--融资负债	
 				,CRDT_STK_LIAB       	= 	COALESCE(B2.CRDT_STK_LIAB       ,0)		*    C.PERFM_RATIO_9		--融券负债	
-				,CREDIT_TOT_AST      	= 	COALESCE(B1.CREDIT_TOT_AST      ,0)		*    C.PERFM_RATIO_9		--融资融券总资产
-				,CREDIT_TOT_LIAB     	= 	COALESCE(B1.CREDIT_TOT_LIAB     ,0)		*    C.PERFM_RATIO_9		--融资融券总负债
+				,CREDIT_TOT_AST      	= 	COALESCE(B2.CREDIT_TOT_AST      ,0)		*    C.PERFM_RATIO_9		--融资融券总资产
+				,CREDIT_TOT_LIAB     	= 	COALESCE(B2.CREDIT_TOT_LIAB     ,0)		*    C.PERFM_RATIO_9		--融资融券总负债
 				,APPTBUYB_GUAR_SECMV 	= 	COALESCE(B4.APPTBUYB_GUAR_SECMV ,0)		*    C.PERFM_RATIO_4		--约定购回担保证券市值
-				,CREDIT_GUAR_SECMV   	= 	COALESCE(B1.CREDIT_GUAR_SECMV   ,0)		*    C.PERFM_RATIO_9		--融资融券担保证券市值
-		FROM #TMP_T_EVT_TRD_D_EMP A
+				,CREDIT_GUAR_SECMV   	= 	COALESCE(B2.CREDIT_GUAR_SECMV   ,0)		*    C.PERFM_RATIO_9		--融资融券担保证券市值
+		FROM #TMP_T_AST_D_EMP A
 		--普通资产
 		LEFT JOIN (
 				SELECT 
@@ -205,7 +205,7 @@ BEGIN
 		--融资融券资产
 		LEFT JOIN (
 				SELECT 
-					T.CUST_ID	  					AS 		MAIN_CPTL_ACCT			--资金账号（客户编号）			
+					 T.CUST_ID	  					AS 		MAIN_CPTL_ACCT			--资金账号（客户编号）			
 					,T.CRED_MARG					AS      CREDIT_MARG          	--融资融券保证金
 					,T.NET_AST						AS      CREDIT_NET_AST       	--融资融券净资产
 					,T.CRED_MARG					AS      CRED_MARG            	--信用保证金	
