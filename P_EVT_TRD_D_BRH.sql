@@ -14,12 +14,12 @@ BEGIN
 
 	SELECT
     	 A.AFATWO_YGH 	AS 		EMP_ID			--员工编码
-		,A.JGBH_YG 		AS 		BRH_ID			--营业部编码
+		,A.PK_ORG 		AS 		BRH_ID			--营业部编码
   	INTO #TMP_ORG_EMP_RELA
-  	FROM  DBA.T_DDW_SERV_RELATION_D A
+  	FROM DBA.T_EDW_PERSON_D A
   	WHERE A.RQ=@V_DATE
   	GROUP BY A.AFATWO_YGH
-  	        ,A.JGBH_YG;
+  	        ,A.PK_ORG;
 
 	-- 在T_EVT_TRD_D_BRH的基础上增加营业部字段来创建临时表
 
