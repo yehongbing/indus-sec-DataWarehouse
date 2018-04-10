@@ -1,0 +1,897 @@
+
+CREATE TABLE dm.T_EVT_INCM_D_BRH
+(	OCCUR_DT             numeric(8,0) NOT NULL,
+	BRH_ID               varchar(30) NOT NULL,
+	NET_CMS              numeric(38,8) NULL,
+	GROSS_CMS            numeric(38,8) NULL,
+	SCDY_CMS             numeric(38,8) NULL,
+	SCDY_NET_CMS         numeric(38,8) NULL,
+	SCDY_TRAN_FEE        numeric(38,8) NULL,
+	ODI_TRD_TRAN_FEE     numeric(38,8) NULL,
+	CRED_TRD_TRAN_FEE    numeric(38,8) NULL,
+	STKF_CMS             numeric(38,8) NULL,
+	STKF_TRAN_FEE        numeric(38,8) NULL,
+	STKF_NET_CMS         numeric(38,8) NULL,
+	BOND_CMS             numeric(38,8) NULL,
+	BOND_NET_CMS         numeric(38,8) NULL,
+	REPQ_CMS             numeric(38,8) NULL,
+	REPQ_NET_CMS         numeric(38,8) NULL,
+	HGT_CMS              numeric(38,8) NULL,
+	HGT_NET_CMS          numeric(38,8) NULL,
+	HGT_TRAN_FEE         numeric(38,8) NULL,
+	SGT_CMS              numeric(38,8) NULL,
+	SGT_NET_CMS          numeric(38,8) NULL,
+	SGT_TRAN_FEE         numeric(38,8) NULL,
+	BGDL_CMS             numeric(38,8) NULL,
+	BGDL_NET_CMS         numeric(38,8) NULL,
+	BGDL_TRAN_FEE        numeric(38,8) NULL,
+	PSTK_OPTN_CMS        numeric(38,8) NULL,
+	PSTK_OPTN_NET_CMS    numeric(38,8) NULL,
+	CREDIT_ODI_CMS       numeric(38,8) NULL,
+	CREDIT_ODI_NET_CMS   numeric(38,8) NULL,
+	CREDIT_ODI_TRAN_FEE  numeric(38,8) NULL,
+	CREDIT_CRED_CMS      numeric(38,8) NULL,
+	CREDIT_CRED_NET_CMS  numeric(38,8) NULL,
+	CREDIT_CRED_TRAN_FEE numeric(38,8) NULL,
+	FIN_RECE_INT         numeric(38,8) NULL,
+	FIN_PAIDINT          numeric(38,8) NULL,
+	STKPLG_CMS           numeric(38,8) NULL,
+	STKPLG_NET_CMS       numeric(38,8) NULL,
+	STKPLG_PAIDINT       numeric(38,8) NULL,
+	STKPLG_RECE_INT      numeric(38,8) NULL,
+	APPTBUYB_CMS         numeric(38,8) NULL,
+	APPTBUYB_NET_CMS     numeric(38,8) NULL,
+	APPTBUYB_PAIDINT     numeric(38,8) NULL,
+	FIN_IE               numeric(38,8) NULL,
+	CRDT_STK_IE          numeric(38,8) NULL,
+	OTH_IE               numeric(38,8) NULL,
+	FEE_RECE_INT         numeric(38,8) NULL,
+	OTH_RECE_INT         numeric(38,8) NULL,
+	CREDIT_CPTL_COST     numeric(38,8) NULL
+);
+
+
+
+COMMENT ON TABLE dm.T_EVT_INCM_D_BRH IS '营业部收入表_日表';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.BRH_ID IS '营业部编码';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.OCCUR_DT IS '业务日期';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.SCDY_CMS IS '二级佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.SCDY_NET_CMS IS '二级净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.SCDY_TRAN_FEE IS '二级过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.ODI_TRD_TRAN_FEE IS '普通交易过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.STKF_CMS IS '股基佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.STKF_TRAN_FEE IS '股基过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.STKF_NET_CMS IS '股基净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.BOND_CMS IS '债券佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.BOND_NET_CMS IS '债券净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.REPQ_CMS IS '报价回购佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.REPQ_NET_CMS IS '报价回购净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.HGT_CMS IS '沪港通佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.HGT_NET_CMS IS '沪港通净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.HGT_TRAN_FEE IS '沪港通过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.SGT_CMS IS '深港通佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.SGT_NET_CMS IS '深港通净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.SGT_TRAN_FEE IS '深港通过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.BGDL_CMS IS '大宗交易佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.BGDL_NET_CMS IS '大宗交易净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.BGDL_TRAN_FEE IS '大宗交易过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.PSTK_OPTN_CMS IS '个股期权佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.PSTK_OPTN_NET_CMS IS '个股期权净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CREDIT_ODI_CMS IS '融资融券普通佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CREDIT_ODI_NET_CMS IS '融资融券普通净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CREDIT_ODI_TRAN_FEE IS '融资融券普通过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CREDIT_CRED_CMS IS '融资融券信用佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CREDIT_CRED_NET_CMS IS '融资融券信用净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CREDIT_CRED_TRAN_FEE IS '融资融券信用过户费';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.FIN_RECE_INT IS '融资应收利息';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.FIN_PAIDINT IS '融资实收利息';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.STKPLG_CMS IS '股票质押佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.STKPLG_NET_CMS IS '股票质押净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.STKPLG_PAIDINT IS '股票质押实收利息';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.STKPLG_RECE_INT IS '股票质押应收利息';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.APPTBUYB_CMS IS '约定购回佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.APPTBUYB_NET_CMS IS '约定购回净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.APPTBUYB_PAIDINT IS '约定购回实收利息';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.FIN_IE IS '融资利息支出';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CRDT_STK_IE IS '融券利息支出';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.OTH_IE IS '其他利息支出';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.FEE_RECE_INT IS '费用应收利息';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.OTH_RECE_INT IS '其他应收利息';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CREDIT_CPTL_COST IS '融资融券资金成本';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.NET_CMS IS '净佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.GROSS_CMS IS '毛佣金';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_D_BRH.CRED_TRD_TRAN_FEE IS '信用交易过户费';
+
+
+
+ALTER TABLE dm.T_EVT_INCM_D_BRH
+	ADD PRIMARY KEY (OCCUR_DT,BRH_ID);
+
+
+
+CREATE TABLE dm.T_EVT_INCM_M_BRH
+(	YEAR                 varchar(4) NOT NULL,
+	MTH                  varchar(2) NOT NULL,
+	BRH_ID               varchar(30) NOT NULL,
+	OCCUR_DT             numeric(10,0) NULL,
+	NET_CMS_MTD          numeric(38,8) NULL,
+	GROSS_CMS_MTD        numeric(38,8) NULL,
+	SCDY_CMS_MTD         numeric(38,8) NULL,
+	SCDY_NET_CMS_MTD     numeric(38,8) NULL,
+	SCDY_TRAN_FEE_MTD    numeric(38,8) NULL,
+	ODI_TRD_TRAN_FEE_MTD numeric(38,8) NULL,
+	CRED_TRD_TRAN_FEE_MTD numeric(38,8) NULL,
+	STKF_CMS_MTD         numeric(38,8) NULL,
+	STKF_TRAN_FEE_MTD    numeric(38,8) NULL,
+	STKF_NET_CMS_MTD     numeric(38,8) NULL,
+	BOND_CMS_MTD         numeric(38,8) NULL,
+	BOND_NET_CMS_MTD     numeric(38,8) NULL,
+	REPQ_CMS_MTD         numeric(38,8) NULL,
+	REPQ_NET_CMS_MTD     numeric(38,8) NULL,
+	HGT_CMS_MTD          numeric(38,8) NULL,
+	HGT_NET_CMS_MTD      numeric(38,8) NULL,
+	HGT_TRAN_FEE_MTD     numeric(38,8) NULL,
+	SGT_CMS_MTD          numeric(38,8) NULL,
+	SGT_NET_CMS_MTD      numeric(38,8) NULL,
+	SGT_TRAN_FEE_MTD     numeric(38,8) NULL,
+	BGDL_CMS_MTD         numeric(38,8) NULL,
+	BGDL_NET_CMS_MTD     numeric(38,8) NULL,
+	BGDL_TRAN_FEE_MTD    numeric(38,8) NULL,
+	PSTK_OPTN_CMS_MTD    numeric(38,8) NULL,
+	PSTK_OPTN_NET_CMS_MTD numeric(38,8) NULL,
+	CREDIT_ODI_CMS_MTD   numeric(38,8) NULL,
+	CREDIT_ODI_NET_CMS_MTD numeric(38,8) NULL,
+	CREDIT_ODI_TRAN_FEE_MTD numeric(38,8) NULL,
+	CREDIT_CRED_CMS_MTD  numeric(38,8) NULL,
+	CREDIT_CRED_NET_CMS_MTD numeric(38,8) NULL,
+	CREDIT_CRED_TRAN_FEE_MTD numeric(38,8) NULL,
+	FIN_RECE_INT_MTD     numeric(38,8) NULL,
+	FIN_PAIDINT_MTD      numeric(38,8) NULL,
+	STKPLG_CMS_MTD       numeric(38,8) NULL,
+	STKPLG_NET_CMS_MTD   numeric(38,8) NULL,
+	STKPLG_PAIDINT_MTD   numeric(38,8) NULL,
+	STKPLG_RECE_INT_MTD  numeric(38,8) NULL,
+	APPTBUYB_CMS_MTD     numeric(38,8) NULL,
+	APPTBUYB_NET_CMS_MTD numeric(38,8) NULL,
+	APPTBUYB_PAIDINT_MTD numeric(38,8) NULL,
+	FIN_IE_MTD           numeric(38,8) NULL,
+	CRDT_STK_IE_MTD      numeric(38,8) NULL,
+	OTH_IE_MTD           numeric(38,8) NULL,
+	FEE_RECE_INT_MTD     numeric(38,8) NULL,
+	OTH_RECE_INT_MTD     numeric(38,8) NULL,
+	CREDIT_CPTL_COST_MTD numeric(38,8) NULL,
+	NET_CMS_YTD          numeric(38,8) NULL,
+	GROSS_CMS_YTD        numeric(38,8) NULL,
+	SCDY_CMS_YTD         numeric(38,8) NULL,
+	SCDY_NET_CMS_YTD     numeric(38,8) NULL,
+	SCDY_TRAN_FEE_YTD    numeric(38,8) NULL,
+	ODI_TRD_TRAN_FEE_YTD numeric(38,8) NULL,
+	CRED_TRD_TRAN_FEE_YTD numeric(38,8) NULL,
+	STKF_CMS_YTD         numeric(38,8) NULL,
+	STKF_TRAN_FEE_YTD    numeric(38,8) NULL,
+	STKF_NET_CMS_YTD     numeric(38,8) NULL,
+	BOND_CMS_YTD         numeric(38,8) NULL,
+	BOND_NET_CMS_YTD     numeric(38,8) NULL,
+	REPQ_CMS_YTD         numeric(38,8) NULL,
+	REPQ_NET_CMS_YTD     numeric(38,8) NULL,
+	HGT_CMS_YTD          numeric(38,8) NULL,
+	HGT_TRAN_FEE_YTD     numeric(38,8) NULL,
+	SGT_CMS_YTD          numeric(38,8) NULL,
+	SGT_NET_CMS_YTD      numeric(38,8) NULL,
+	SGT_TRAN_FEE_YTD     numeric(38,8) NULL,
+	BGDL_CMS_YTD         numeric(38,8) NULL,
+	BGDL_NET_CMS_YTD     numeric(38,8) NULL,
+	BGDL_TRAN_FEE_YTD    numeric(38,8) NULL,
+	PSTK_OPTN_CMS_YTD    numeric(38,8) NULL,
+	PSTK_OPTN_NET_CMS_YTD numeric(38,8) NULL,
+	ORDR_FEE_YTD         numeric(38,8) NULL,
+	CREDIT_ODI_CMS_YTD   numeric(38,8) NULL,
+	CREDIT_ODI_NET_CMS_YTD numeric(38,8) NULL,
+	CREDIT_ODI_TRAN_FEE_YTD numeric(38,8) NULL,
+	CREDIT_CRED_CMS_YTD  numeric(38,8) NULL,
+	CREDIT_CRED_NET_CMS_YTD numeric(38,8) NULL,
+	CREDIT_CRED_TRAN_FEE_YTD numeric(38,8) NULL,
+	FIN_RECE_INT_YTD     numeric(38,8) NULL,
+	FIN_PAIDINT_YTD      numeric(38,8) NULL,
+	STKPLG_CMS_YTD       numeric(38,8) NULL,
+	STKPLG_NET_CMS_YTD   numeric(38,8) NULL,
+	STKPLG_PAIDINT_YTD   numeric(38,8) NULL,
+	STKPLG_RECE_INT_YTD  numeric(38,8) NULL,
+	APPTBUYB_CMS_YTD     numeric(38,8) NULL,
+	APPTBUYB_NET_CMS_YTD numeric(38,8) NULL,
+	APPTBUYB_PAIDINT_YTD numeric(38,8) NULL,
+	FIN_IE_YTD           numeric(38,8) NULL,
+	CRDT_STK_IE_YTD      numeric(38,8) NULL,
+	OTH_IE_YTD           numeric(38,8) NULL,
+	FEE_RECE_INT_YTD     numeric(38,8) NULL,
+	OTH_RECE_INT_YTD     numeric(38,8) NULL,
+	CREDIT_CPTL计_COST_YTD numeric(38,8) NULL
+);
+
+
+
+COMMENT ON TABLE dm.T_EVT_INCM_M_BRH IS '营业部收入表_月表';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.OCCUR_DT IS '业务日期';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SCDY_CMS_MTD IS '二级佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SCDY_NET_CMS_MTD IS '二级净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SCDY_TRAN_FEE_MTD IS '二级过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.ODI_TRD_TRAN_FEE_MTD IS '普通交易过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKF_CMS_MTD IS '股基佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKF_TRAN_FEE_MTD IS '股基过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKF_NET_CMS_MTD IS '股基净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BOND_CMS_MTD IS '债券佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BOND_NET_CMS_MTD IS '债券净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.REPQ_CMS_MTD IS '报价回购佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.REPQ_NET_CMS_MTD IS '报价回购净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.HGT_CMS_MTD IS '沪港通佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.HGT_NET_CMS_MTD IS '沪港通净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.HGT_TRAN_FEE_MTD IS '沪港通过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SGT_CMS_MTD IS '深港通佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SGT_NET_CMS_MTD IS '深港通净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SGT_TRAN_FEE_MTD IS '深港通过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BGDL_CMS_MTD IS '大宗交易佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BGDL_NET_CMS_MTD IS '大宗交易净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BGDL_TRAN_FEE_MTD IS '大宗交易过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.PSTK_OPTN_CMS_MTD IS '个股期权佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.PSTK_OPTN_NET_CMS_MTD IS '个股期权净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_ODI_CMS_MTD IS '融资融券普通佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_ODI_NET_CMS_MTD IS '融资融券普通净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_ODI_TRAN_FEE_MTD IS '融资融券普通过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CRED_CMS_MTD IS '融资融券信用佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CRED_NET_CMS_MTD IS '融资融券信用净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CRED_TRAN_FEE_MTD IS '融资融券信用过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FIN_RECE_INT_MTD IS '融资应收利息_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FIN_PAIDINT_MTD IS '融资实收利息_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_CMS_MTD IS '股票质押佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_NET_CMS_MTD IS '股票质押净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_PAIDINT_MTD IS '股票质押实收利息_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_RECE_INT_MTD IS '股票质押应收利息_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.APPTBUYB_CMS_MTD IS '约定购回佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.APPTBUYB_NET_CMS_MTD IS '约定购回净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.APPTBUYB_PAIDINT_MTD IS '约定购回实收利息_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FIN_IE_MTD IS '融资利息支出_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CRDT_STK_IE_MTD IS '融券利息支出_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.OTH_IE_MTD IS '其他利息支出_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FEE_RECE_INT_MTD IS '费用应收利息_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.OTH_RECE_INT_MTD IS '其他应收利息_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CPTL_COST_MTD IS '融资融券资金成本_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.NET_CMS_MTD IS '净佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.GROSS_CMS_MTD IS '毛佣金_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CRED_TRD_TRAN_FEE_MTD IS '信用交易过户费_月累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.NET_CMS_YTD IS '净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.GROSS_CMS_YTD IS '毛佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SCDY_CMS_YTD IS '二级佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SCDY_NET_CMS_YTD IS '二级净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SCDY_TRAN_FEE_YTD IS '二级过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.ODI_TRD_TRAN_FEE_YTD IS '普通交易过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CRED_TRD_TRAN_FEE_YTD IS '信用交易过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKF_CMS_YTD IS '股基佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKF_TRAN_FEE_YTD IS '股基过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKF_NET_CMS_YTD IS '股基净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BOND_CMS_YTD IS '债券佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BOND_NET_CMS_YTD IS '债券净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.REPQ_CMS_YTD IS '报价回购佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.REPQ_NET_CMS_YTD IS '报价回购净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.HGT_CMS_YTD IS '沪港通佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.HGT_TRAN_FEE_YTD IS '沪港通过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SGT_CMS_YTD IS '深港通佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SGT_NET_CMS_YTD IS '深港通净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.SGT_TRAN_FEE_YTD IS '深港通过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BGDL_CMS_YTD IS '大宗交易佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BGDL_NET_CMS_YTD IS '大宗交易净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BGDL_TRAN_FEE_YTD IS '大宗交易过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.PSTK_OPTN_CMS_YTD IS '个股期权佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.PSTK_OPTN_NET_CMS_YTD IS '个股期权净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.ORDR_FEE_YTD IS '委托费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_ODI_CMS_YTD IS '融资融券普通佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_ODI_NET_CMS_YTD IS '融资融券普通净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_ODI_TRAN_FEE_YTD IS '融资融券普通过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CRED_CMS_YTD IS '融资融券信用佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CRED_NET_CMS_YTD IS '融资融券信用净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CRED_TRAN_FEE_YTD IS '融资融券信用过户费_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FIN_RECE_INT_YTD IS '融资应收利息_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FIN_PAIDINT_YTD IS '融资实收利息_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_CMS_YTD IS '股票质押佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_NET_CMS_YTD IS '股票质押净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_PAIDINT_YTD IS '股票质押实收利息_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.STKPLG_RECE_INT_YTD IS '股票质押应收利息_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.APPTBUYB_CMS_YTD IS '约定购回佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.APPTBUYB_NET_CMS_YTD IS '约定购回净佣金_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.APPTBUYB_PAIDINT_YTD IS '约定购回实收利息_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FIN_IE_YTD IS '融资利息支出_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CRDT_STK_IE_YTD IS '融券利息支出_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.OTH_IE_YTD IS '其他利息支出_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.FEE_RECE_INT_YTD IS '费用应收利息_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.OTH_RECE_INT_YTD IS '其他应收利息_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CPTL计_COST_YTD IS '融资融券资金计成本_年累计';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.BRH_ID IS '营业部编码';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.YEAR IS '年';
+
+
+
+
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.MTH IS '月';
+
+
+
+ALTER TABLE dm.T_EVT_INCM_M_BRH
+	ADD PRIMARY KEY (YEAR,MTH,BRH_ID);
+
+
+
+
+
+
+

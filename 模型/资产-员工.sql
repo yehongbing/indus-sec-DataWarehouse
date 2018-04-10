@@ -1,0 +1,958 @@
+
+CREATE TABLE dm.T_AST_D_EMP
+(	OCCUR_DT             numeric(8,0) NOT NULL,
+	EMP_ID               varchar(30) NOT NULL,
+	TOT_AST               numeric(38,8) NULL,
+	SCDY_MVAL            numeric(38,8) NULL,
+	STKF_MVAL            numeric(38,8) NULL,
+	A_SHR_MVAL           numeric(38,8) NULL,
+	NOTS_MVAL            numeric(38,8) NULL,
+	OFFUND_MVAL          numeric(38,8) NULL,
+	OPFUND_MVAL          numeric(38,8) NULL,
+	SB_MVAL              numeric(38,8) NULL,
+	IMGT_PD_MVAL         numeric(38,8) NULL,
+	BANK_CHRM_MVAL       numeric(38,8) NULL,
+	SECU_CHRM_MVAL       numeric(38,8) NULL,
+	PSTK_OPTN_MVAL       numeric(38,8) NULL,
+	B_SHR_MVAL           numeric(38,8) NULL,
+	OUTMARK_MVAL         numeric(38,8) NULL,
+	CPTL_BAL             numeric(38,8) NULL,
+	NO_ARVD_CPTL         numeric(38,8) NULL,
+	PTE_FUND_MVAL        numeric(38,8) NULL,
+	CPTL_BAL_RMB         numeric(38,8) NULL,
+	CPTL_BAL_HKD         numeric(38,8) NULL,
+	CPTL_BAL_USD         numeric(38,8) NULL,
+	FUND_SPACCT_MVAL     numeric(38,8) NULL,
+	HGT_MVAL             numeric(38,8) NULL,
+	SGT_MVAL             numeric(38,8) NULL,
+	TOT_AST_CONTAIN_NOTS  numeric(38,8) NULL,
+	BOND_MVAL            numeric(38,8) NULL,
+	REPO_MVAL            numeric(38,8) NULL,
+	TREA_REPO_MVAL       numeric(38,8) NULL,
+	REPQ_MVAL            numeric(38,8) NULL,
+	PO_FUND_MVAL         numeric(38,8) NULL,
+	APPTBUYB_PLG_MVAL    numeric(38,8) NULL,
+	OTH_PROD_MVAL        numeric(38,8) NULL,
+	STKT_FUND_MVAL       numeric(38,8) NULL,
+	OTH_AST_MVAL         numeric(38,8) NULL,
+	CREDIT_MARG          numeric(38,8) NULL,
+	CREDIT_NET_AST       numeric(38,8) NULL,
+	PROD_TOT_MVAL        numeric(38,8) NULL,
+	JQL9_MVAL            numeric(38,8) NULL,
+	STKPLG_GUAR_SECMV    numeric(38,8) NULL,
+	STKPLG_FIN_BAL       numeric(38,8) NULL,
+	APPTBUYB_BAL         numeric(38,8) NULL,
+	CRED_MARG            numeric(38,8) NULL,
+	INTR_LIAB            numeric(38,8) NULL,
+	FEE_LIAB             numeric(38,8) NULL,
+	OTHLIAB              numeric(38,8) NULL,
+	FIN_LIAB             numeric(38,8) NULL,
+	CRDT_STK_LIAB        numeric(38,8) NULL,
+	CREDIT_TOT_AST        numeric(38,8) NULL,
+	CREDIT_TOT_LIAB      numeric(38,8) NULL,
+	APPTBUYB_GUAR_SECMV  numeric(38,8) NULL,
+	CREDIT_GUAR_SECMV    numeric(38,8) NULL
+);
+
+
+
+COMMENT ON TABLE dm.T_AST_D_EMP IS '员工资产_日表';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.OCCUR_DT IS '业务日期';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.JQL9_MVAL IS '金麒麟9市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.SCDY_MVAL IS '二级市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.STKF_MVAL IS '股基市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.A_SHR_MVAL IS 'A股市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.NOTS_MVAL IS '限售股市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.OFFUND_MVAL IS '场内基金市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.OPFUND_MVAL IS '场外基金市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.SB_MVAL IS '三板市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.IMGT_PD_MVAL IS '资管产品市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.BANK_CHRM_MVAL IS '银行理财市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.SECU_CHRM_MVAL IS '证券理财市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.PSTK_OPTN_MVAL IS '个股期权市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.B_SHR_MVAL IS 'B股市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.OUTMARK_MVAL IS '体外市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CPTL_BAL IS '资金余额';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.NO_ARVD_CPTL IS '未到账资金';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.PTE_FUND_MVAL IS '私募基金市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CPTL_BAL_RMB IS '资金余额人民币';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CPTL_BAL_HKD IS '资金余额港币';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CPTL_BAL_USD IS '资金余额美元';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.FUND_SPACCT_MVAL IS '基金专户市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.HGT_MVAL IS '沪港通市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.SGT_MVAL IS '深港通市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.TOT_AST_CONTAIN_NOTS IS '总资产_含限售股';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.BOND_MVAL IS '债券市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.REPO_MVAL IS '回购市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.TREA_REPO_MVAL IS '国债回购市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.REPQ_MVAL IS '报价回购市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.PO_FUND_MVAL IS '公募基金市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.APPTBUYB_PLG_MVAL IS '约定购回质押市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.OTH_PROD_MVAL IS '其他产品市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.STKT_FUND_MVAL IS '股票型基金市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.OTH_AST_MVAL IS '其他资产市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CREDIT_MARG IS '融资融券保证金';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CREDIT_NET_AST IS '融资融券净资产';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.PROD_TOT_MVAL IS '产品总市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.TOT_AST IS '总资产';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.STKPLG_GUAR_SECMV IS '股票质押担保证券市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.STKPLG_FIN_BAL IS '股票质押融资余额';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.APPTBUYB_BAL IS '约定购回余额';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.INTR_LIAB IS '利息负债';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.FEE_LIAB IS '费用负债';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.OTHLIAB IS '其他负债';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CRED_MARG IS '信用保证金';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.FIN_LIAB IS '融资负债';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CRDT_STK_LIAB IS '融券负债';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.EMP_ID IS '员工编码';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CREDIT_TOT_AST IS '融资融券总资产';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CREDIT_TOT_LIAB IS '融资融券总负债';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.APPTBUYB_GUAR_SECMV IS '约定购回担保证券市值';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_D_EMP.CREDIT_GUAR_SECMV IS '融资融券担保证券市值';
+
+
+
+ALTER TABLE dm.T_AST_D_EMP
+	ADD PRIMARY KEY (OCCUR_DT,EMP_ID);
+
+
+
+CREATE TABLE dm.T_AST_M_EMP
+(	YEAR                 varchar(4) NOT NULL,
+	MTH                  varchar(2) NOT NULL,
+	EMP_ID               varchar(30) NOT NULL,
+	OCCUR_DT             numeric(8,0) NULL,
+	TOT_AST_MDA           numeric(38,8) NULL,
+	TOT_AST_YDA           numeric(38,8) NULL,
+	SCDY_MVAL_MDA        numeric(38,8) NULL,
+	SCDY_MVAL_YDA        numeric(38,8) NULL,
+	STKF_MVAL_MDA        numeric(38,8) NULL,
+	STKF_MVAL_YDA        numeric(38,8) NULL,
+	A_SHR_MVAL_MDA       numeric(38,8) NULL,
+	A_SHR_MVAL_YDA       numeric(38,8) NULL,
+	NOTS_MVAL_MDA        numeric(38,8) NULL,
+	NOTS_MVAL_YDA        numeric(38,8) NULL,
+	OFFUND_MVAL_MDA      numeric(38,8) NULL,
+	OFFUND_MVAL_YDA      numeric(38,8) NULL,
+	OPFUND_MVAL_MDA      numeric(38,8) NULL,
+	OPFUND_MVAL_YDA      numeric(38,8) NULL,
+	SB_MVAL_MDA          numeric(38,8) NULL,
+	SB_MVAL_YDA          numeric(38,8) NULL,
+	IMGT_PD_MVAL_MDA     numeric(38,8) NULL,
+	IMGT_PD_MVAL_YDA     numeric(38,8) NULL,
+	BANK_CHRM_MVAL_YDA   numeric(38,8) NULL,
+	BANK_CHRM_MVAL_MDA   numeric(38,8) NULL,
+	SECU_CHRM_MVAL_MDA   numeric(38,8) NULL,
+	SECU_CHRM_MVAL_YDA   numeric(38,8) NULL,
+	PSTK_OPTN_MVAL_MDA   numeric(38,8) NULL,
+	PSTK_OPTN_MVAL_YDA   numeric(38,8) NULL,
+	B_SHR_MVAL_MDA       numeric(38,8) NULL,
+	B_SHR_MVAL_YDA       numeric(38,8) NULL,
+	OUTMARK_MVAL_MDA     numeric(38,8) NULL,
+	OUTMARK_MVAL_YDA     numeric(38,8) NULL,
+	CPTL_BAL_MDA         numeric(38,8) NULL,
+	CPTL_BAL_YDA         numeric(38,8) NULL,
+	NO_ARVD_CPTL_MDA     numeric(38,8) NULL,
+	NO_ARVD_CPTL_YDA     numeric(38,8) NULL,
+	PTE_FUND_MVAL_MDA    numeric(38,8) NULL,
+	PTE_FUND_MVAL_YDA    numeric(38,8) NULL,
+	CPTL_BAL_RMB_MDA     numeric(38,8) NULL,
+	CPTL_BAL_RMB_YDA     numeric(38,8) NULL,
+	CPTL_BAL_HKD_MDA     numeric(38,8) NULL,
+	CPTL_BAL_HKD_YDA     numeric(38,8) NULL,
+	CPTL_BAL_USD_MDA     numeric(38,8) NULL,
+	CPTL_BAL_USD_YDA     numeric(38,8) NULL,
+	FUND_SPACCT_MVAL_MDA numeric(38,8) NULL,
+	FUND_SPACCT_MVAL_YDA numeric(38,8) NULL,
+	HGT_MVAL_MDA         numeric(38,8) NULL,
+	HGT_MVAL_YDA         numeric(38,8) NULL,
+	SGT_MVAL_MDA         numeric(38,8) NULL,
+	SGT_MVAL_YDA         numeric(38,8) NULL,
+	TOT_AST_CONTAIN_NOTS_MDA numeric(38,8) NULL,
+	TOT_AST_CONTAIN_NOTS_YDA numeric(38,8) NULL,
+	BOND_MVAL_MDA        numeric(38,8) NULL,
+	BOND_MVAL_YDA        numeric(38,8) NULL,
+	REPO_MVAL_MDA        numeric(38,8) NULL,
+	REPO_MVAL_YDA        numeric(38,8) NULL,
+	TREA_REPO_MVAL_MDA   numeric(38,8) NULL,
+	TREA_REPO_MVAL_YDA   numeric(38,8) NULL,
+	REPQ_MVAL_MDA        numeric(38,8) NULL,
+	REPQ_MVAL_YDA        numeric(38,8) NULL,
+	PO_FUND_MVAL_MDA     numeric(38,8) NULL,
+	PO_FUND_MVAL_YDA     numeric(38,8) NULL,
+	APPTBUYB_PLG_MVAL_MDA numeric(38,8) NULL,
+	APPTBUYB_PLG_MVAL_YDA numeric(38,8) NULL,
+	OTH_PROD_MVAL_MDA    numeric(38,8) NULL,
+	STKT_FUND_MVAL_MDA   numeric(38,8) NULL,
+	OTH_AST_MVAL_MDA     numeric(38,8) NULL,
+	OTH_PROD_MVAL_YDA    numeric(38,8) NULL,
+	APPTBUYB_BAL_YDA     numeric(38,8) NULL,
+	CREDIT_MARG_MDA      numeric(38,8) NULL,
+	CREDIT_MARG_YDA      numeric(38,8) NULL,
+	CREDIT_NET_AST_MDA   numeric(38,8) NULL,
+	CREDIT_NET_AST_YDA   numeric(38,8) NULL,
+	PROD_TOT_MVAL_MDA    numeric(38,8) NULL,
+	PROD_TOT_MVAL_YDA    numeric(38,8) NULL,
+	JQL9_MVAL_MDA        numeric(38,8) NULL,
+	JQL9_MVAL_YDA        numeric(38,8) NULL,
+	STKPLG_GUAR_SECMV_MDA numeric(38,8) NULL,
+	STKPLG_GUAR_SECMV_YDA numeric(38,8) NULL,
+	STKPLG_FIN_BAL_MDA   numeric(38,8) NULL,
+	STKPLG_FIN_BAL_YDA   numeric(38,8) NULL,
+	APPTBUYB_BAL_MDA     numeric(38,8) NULL,
+	CRED_MARG_MDA        numeric(38,8) NULL,
+	CRED_MARG_YDA        numeric(38,8) NULL,
+	INTR_LIAB_MDA        numeric(38,8) NULL,
+	INTR_LIAB_YDA        numeric(38,8) NULL,
+	FEE_LIAB_MDA         numeric(38,8) NULL,
+	FEE_LIAB_YDA         numeric(38,8) NULL,
+	OTHLIAB_MDA          numeric(38,8) NULL,
+	OTHLIAB_YDA          numeric(38,8) NULL,
+	FIN_LIAB_MDA         numeric(38,8) NULL,
+	CRDT_STK_LIAB_YDA    numeric(38,8) NULL,
+	CRDT_STK_LIAB_MDA    numeric(38,8) NULL,
+	FIN_LIAB_YDA         numeric(38,8) NULL,
+	CREDIT_TOT_AST_MDA    numeric(38,8) NULL,
+	CREDIT_TOT_AST_YDA    numeric(38,8) NULL,
+	CREDIT_TOT_LIAB_MDA  numeric(38,8) NULL,
+	CREDIT_TOT_LIAB_YDA  numeric(38,8) NULL,
+	APPTBUYB_GUAR_SECMV_MDA numeric(38,8) NULL,
+	APPTBUYB_GUAR_SECMV_YDA numeric(38,8) NULL,
+	CREDIT_GUAR_SECMV_MDA numeric(38,8) NULL,
+	CREDIT_GUAR_SECMV_YDA numeric(38,8) NULL
+);
+
+
+
+COMMENT ON TABLE dm.T_AST_M_EMP IS '员工资产_月表';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OCCUR_DT IS '业务日期';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.JQL9_MVAL_MDA IS '金麒麟9市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SCDY_MVAL_MDA IS '二级市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.STKF_MVAL_MDA IS '股基市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.A_SHR_MVAL_MDA IS 'A股市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.NOTS_MVAL_MDA IS '限售股市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OFFUND_MVAL_MDA IS '场内基金市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OPFUND_MVAL_MDA IS '场外基金市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SB_MVAL_MDA IS '三板市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.IMGT_PD_MVAL_MDA IS '资管产品市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.BANK_CHRM_MVAL_MDA IS '银行理财市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SECU_CHRM_MVAL_MDA IS '证券理财市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PSTK_OPTN_MVAL_MDA IS '个股期权市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.B_SHR_MVAL_MDA IS 'B股市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OUTMARK_MVAL_MDA IS '体外市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_MDA IS '资金余额_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.NO_ARVD_CPTL_MDA IS '未到账资金_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PTE_FUND_MVAL_MDA IS '私募基金市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_RMB_MDA IS '资金余额人民币_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_HKD_MDA IS '资金余额港币_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_USD_MDA IS '资金余额美元_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.FUND_SPACCT_MVAL_MDA IS '基金专户市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.HGT_MVAL_MDA IS '沪港通市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SGT_MVAL_MDA IS '深港通市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.TOT_AST_CONTAIN_NOTS_MDA IS '总资产_含限售股_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.BOND_MVAL_MDA IS '债券市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.REPO_MVAL_MDA IS '回购市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.TREA_REPO_MVAL_MDA IS '国债回购市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.REPQ_MVAL_MDA IS '报价回购市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PO_FUND_MVAL_MDA IS '公募基金市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.APPTBUYB_PLG_MVAL_MDA IS '约定购回质押市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OTH_PROD_MVAL_MDA IS '其他产品市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.STKT_FUND_MVAL_MDA IS '股票型基金市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OTH_AST_MVAL_MDA IS '其他资产市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_MARG_MDA IS '融资融券保证金_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_NET_AST_MDA IS '融资融券净资产_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PROD_TOT_MVAL_MDA IS '产品总市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.TOT_AST_MDA IS '总资产_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.STKPLG_GUAR_SECMV_MDA IS '股票质押担保证券市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.STKPLG_FIN_BAL_MDA IS '股票质押融资余额_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.APPTBUYB_BAL_MDA IS '约定购回余额_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.INTR_LIAB_MDA IS '利息负债_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.FEE_LIAB_MDA IS '费用负债_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OTHLIAB_MDA IS '其他负债_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CRED_MARG_MDA IS '信用保证金_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.FIN_LIAB_MDA IS '融资负债_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CRDT_STK_LIAB_MDA IS '融券负债_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.EMP_ID IS '员工编码';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_TOT_AST_MDA IS '融资融券总资产_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_TOT_LIAB_MDA IS '融资融券总负债_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.APPTBUYB_GUAR_SECMV_MDA IS '约定购回担保证券市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_GUAR_SECMV_MDA IS '融资融券担保证券市值_月日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.TOT_AST_YDA IS '总资产_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SCDY_MVAL_YDA IS '二级市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.STKF_MVAL_YDA IS '股基市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.A_SHR_MVAL_YDA IS 'A股市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.NOTS_MVAL_YDA IS '限售股市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OFFUND_MVAL_YDA IS '场内基金市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OPFUND_MVAL_YDA IS '场外基金市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SB_MVAL_YDA IS '三板市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.IMGT_PD_MVAL_YDA IS '资管产品市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.BANK_CHRM_MVAL_YDA IS '银行理财市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SECU_CHRM_MVAL_YDA IS '证券理财市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PSTK_OPTN_MVAL_YDA IS '个股期权市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.B_SHR_MVAL_YDA IS 'B股市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OUTMARK_MVAL_YDA IS '体外市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_YDA IS '资金余额_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.NO_ARVD_CPTL_YDA IS '未到账资金_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PTE_FUND_MVAL_YDA IS '私募基金市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_RMB_YDA IS '资金余额人民币_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_HKD_YDA IS '资金余额港币_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CPTL_BAL_USD_YDA IS '资金余额美元_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.FUND_SPACCT_MVAL_YDA IS '基金专户市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.HGT_MVAL_YDA IS '沪港通市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.SGT_MVAL_YDA IS '深港通市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.TOT_AST_CONTAIN_NOTS_YDA IS '总资产_含限售股_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.BOND_MVAL_YDA IS '债券市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.REPO_MVAL_YDA IS '回购市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.TREA_REPO_MVAL_YDA IS '国债回购市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.REPQ_MVAL_YDA IS '报价回购市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PO_FUND_MVAL_YDA IS '公募基金市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.APPTBUYB_PLG_MVAL_YDA IS '约定购回质押市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OTH_PROD_MVAL_YDA IS '其他产品市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_MARG_YDA IS '融资融券保证金_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_NET_AST_YDA IS '融资融券净资产_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.PROD_TOT_MVAL_YDA IS '产品总市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.JQL9_MVAL_YDA IS '金麒麟9市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.STKPLG_GUAR_SECMV_YDA IS '股票质押担保证券市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.STKPLG_FIN_BAL_YDA IS '股票质押融资余额_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.APPTBUYB_BAL_YDA IS '约定购回余额_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CRED_MARG_YDA IS '信用保证金_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.INTR_LIAB_YDA IS '利息负债_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.FEE_LIAB_YDA IS '费用负债_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.OTHLIAB_YDA IS '其他负债_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CRDT_STK_LIAB_YDA IS '融券负债_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.FIN_LIAB_YDA IS '融资负债_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_TOT_LIAB_YDA IS '融资融券总负债_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_TOT_AST_YDA IS '融资融券总资产_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.APPTBUYB_GUAR_SECMV_YDA IS '约定购回担保证券市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.CREDIT_GUAR_SECMV_YDA IS '融资融券担保证券市值_年日均';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.YEAR IS '年';
+
+
+
+
+COMMENT ON COLUMN dm.T_AST_M_EMP.MTH IS '月';
+
+
+
+ALTER TABLE dm.T_AST_M_EMP
+	ADD PRIMARY KEY (YEAR,MTH,EMP_ID);
+
+
+
+
+
+
+
+
