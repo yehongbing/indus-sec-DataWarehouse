@@ -1,4 +1,4 @@
-
+DROP  TABLE dm.T_EVT_INCM_D_BRH;
 CREATE TABLE dm.T_EVT_INCM_D_BRH
 (	OCCUR_DT             numeric(8,0) NOT NULL,
 	BRH_ID               varchar(30) NOT NULL,
@@ -300,7 +300,7 @@ ALTER TABLE dm.T_EVT_INCM_D_BRH
 	ADD PRIMARY KEY (OCCUR_DT,BRH_ID);
 
 
-
+DROP TABLE dm.T_EVT_INCM_M_BRH;
 CREATE TABLE dm.T_EVT_INCM_M_BRH
 (	YEAR                 varchar(4) NOT NULL,
 	MTH                  varchar(2) NOT NULL,
@@ -367,6 +367,7 @@ CREATE TABLE dm.T_EVT_INCM_M_BRH
 	REPQ_CMS_YTD         numeric(38,8) NULL,
 	REPQ_NET_CMS_YTD     numeric(38,8) NULL,
 	HGT_CMS_YTD          numeric(38,8) NULL,
+	HGT_NET_CMS_YTD      numeric(38,8) NULL,
 	HGT_TRAN_FEE_YTD     numeric(38,8) NULL,
 	SGT_CMS_YTD          numeric(38,8) NULL,
 	SGT_NET_CMS_YTD      numeric(38,8) NULL,
@@ -397,7 +398,7 @@ CREATE TABLE dm.T_EVT_INCM_M_BRH
 	OTH_IE_YTD           numeric(38,8) NULL,
 	FEE_RECE_INT_YTD     numeric(38,8) NULL,
 	OTH_RECE_INT_YTD     numeric(38,8) NULL,
-	CREDIT_CPTL计_COST_YTD numeric(38,8) NULL
+	CREDIT_CPTL_COST_YTD numeric(38,8) NULL
 );
 
 
@@ -714,6 +715,7 @@ COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.REPQ_NET_CMS_YTD IS '报价回购净佣金_年累计
 
 COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.HGT_CMS_YTD IS '沪港通佣金_年累计';
 
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.HGT_NET_CMS_YTD IS '沪港通净佣金_年累计';
 
 
 
@@ -867,7 +869,7 @@ COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.OTH_RECE_INT_YTD IS '其他应收利息_年累计';
 
 
 
-COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CPTL计_COST_YTD IS '融资融券资金计成本_年累计';
+COMMENT ON COLUMN dm.T_EVT_INCM_M_BRH.CREDIT_CPTL_COST_YTD IS '融资融券资金成本_年累计';
 
 
 
