@@ -14,9 +14,10 @@ BEGIN
 
 
 	CREATE TABLE #TMP_T_AST_D_EMP(
-	    OCCUR_DT             numeric(8,0) 	NOT NULL,
-		EMP_ID               varchar(30) 	NOT NULL,
-		MAIN_CPTL_ACCT		  varchar(30) 	NOT NULL,
+	    OCCUR_DT             numeric(8,0)  NOT NULL,
+		EMP_ID               varchar(30)   NOT NULL,
+		MAIN_CPTL_ACCT		 varchar(30)   NOT NULL,
+		CUST_ID				 varchar(30)   NOT NULL,
 		TOT_AST              numeric(38,8) NULL,
 		SCDY_MVAL            numeric(38,8) NULL,
 		STKF_MVAL            numeric(38,8) NULL,
@@ -73,21 +74,26 @@ BEGIN
 		 OCCUR_DT					
 		,EMP_ID						
 		,MAIN_CPTL_ACCT
+		,CUST_ID
 	)			
 	SELECT 
 		 @V_DATE AS OCCUR_DT			--发生日期
 		,A.AFATWO_YGH AS EMP_ID			--员工编码
 		,A.ZJZH AS MAIN_CPTL_ACCT		--资金账号
+		,A.KHBH_HS AS CUST_ID 			--客户编号
 	FROM DBA.T_DDW_SERV_RELATION_D A
 	WHERE A.RQ=@V_DATE
+		AND A.ZJZH IS NOT NULL
   	GROUP BY A.AFATWO_YGH
-  		   ,A.ZJZH;
+  		   ,A.ZJZH
+  		   ,A.KHBH_HS;
 
 	-- 基于责权分配表统计（员工-客户）绩效分配比例
 
   	SELECT
     	 A.AFATWO_YGH AS EMP_ID
     	,A.ZJZH AS MAIN_CPTL_ACCT
+    	,A.KHBH_HS AS CUST_ID 		
     	,SUM(A.JXBL1) AS PERFM_RATIO_1
     	,SUM(A.JXBL2) AS PERFM_RATIO_2
     	,SUM(A.JXBL3) AS PERFM_RATIO_3
@@ -103,8 +109,10 @@ BEGIN
   	INTO #TMP_PERF_DISTR
   	FROM  DBA.T_DDW_SERV_RELATION_D A
   	WHERE A.RQ=@V_DATE
+  		AND A.ZJZH IS NOT NULL
   	GROUP BY A.AFATWO_YGH
-  	          ,A.ZJZH;
+  	          ,A.ZJZH
+  	          ,A.KHBH_HS;
 
 	--更新分配后的各项指标
 	UPDATE #TMP_T_AST_D_EMP
@@ -205,7 +213,7 @@ BEGIN
 		--融资融券资产
 		LEFT JOIN (
 				SELECT 
-					 T.CUST_ID	  					AS 		MAIN_CPTL_ACCT			--资金账号（客户编号）			
+					 T.CUST_ID	  					AS 		CUST_ID					--客户编号			
 					,T.CRED_MARG					AS      CREDIT_MARG          	--融资融券保证金
 					,T.NET_AST						AS      CREDIT_NET_AST       	--融资融券净资产
 					,T.CRED_MARG					AS      CRED_MARG            	--信用保证金	
@@ -219,27 +227,29 @@ BEGIN
 					,T.GUAR_SECU_MVAL				AS      CREDIT_GUAR_SECMV    	--融资融券担保证券市值
 				FROM DM.T_AST_CREDIT T
 				WHERE T.OCCUR_DT = @V_DATE
-			) B2 ON A.MAIN_CPTL_ACCT=B2.MAIN_CPTL_ACCT
-		--股票质押资产
+			) B2 ON A.CUST_ID=B2.CUST_ID
+		--股票质押资产(股票质押资产的客户编号可能对应多个合同编号，因此基于客户维度汇总所有合同的指标金额)
 		LEFT JOIN (
 				SELECT 
-					 T.CUST_ID	  					AS 		MAIN_CPTL_ACCT			--资金账号（客户编号）			
-					,T.GUAR_SECU_MVAL				AS      STKPLG_GUAR_SECMV    	--股票质押担保证券市值
-					,T.STKPLG_FIN_BAL				AS      STKPLG_FIN_BAL       	--股票质押融资余额	
+					 T.CUST_ID	  					AS 		CUST_ID					--客户编号			
+					,SUM(T.GUAR_SECU_MVAL)			AS      STKPLG_GUAR_SECMV    	--股票质押担保证券市值
+					,SUM(T.STKPLG_FIN_BAL)			AS      STKPLG_FIN_BAL       	--股票质押融资余额	
 				FROM DM.T_AST_STKPLG T
 				WHERE T.OCCUR_DT = @V_DATE
-			) B3 ON A.MAIN_CPTL_ACCT=B3.MAIN_CPTL_ACCT
+				GROUP BY T.CUST_ID
+			) B3 ON A.CUST_ID=B3.CUST_ID
 		--约定购回资产
 		LEFT JOIN (
 				SELECT 
-					 T.CUST_ID	  					AS 		MAIN_CPTL_ACCT			--资金账号（客户编号）			
+					 T.CUST_ID	  					AS 		CUST_ID					--客户编号			
 					,T.APPTBUYB_BAL					AS      APPTBUYB_BAL         	--约定购回余额
 					,T.GUAR_SECU_MVAL				AS      APPTBUYB_GUAR_SECMV  	--约定购回担保证券市值
 				FROM DM.T_AST_APPTBUYB T
 				WHERE T.OCCUR_DT = @V_DATE
-			) B4 ON A.MAIN_CPTL_ACCT=B4.MAIN_CPTL_ACCT
+			) B4 ON A.CUST_ID=B4.CUST_ID
 	  	LEFT JOIN #TMP_PERF_DISTR C
 	        ON C.MAIN_CPTL_ACCT = A.MAIN_CPTL_ACCT
+	          AND C.CUST_ID = A.CUST_ID
 	          AND C.EMP_ID = A.EMP_ID
 		WHERE A.OCCUR_DT = @V_DATE;
 	
