@@ -178,7 +178,7 @@ BEGIN
 		--关联客户普通交易日表
 		LEFT JOIN (
 				SELECT
-					 T.CUST_ID  				AS 		MAIN_CPTL_ACCT			--资金账号
+					 T.MAIN_CPTL_ACCT  			AS 		MAIN_CPTL_ACCT			--资金账号
 					,T.NET_CMS					AS 		NET_CMS             	--净佣金	
 					,T.GROSS_CMS				AS 		GROSS_CMS           	--毛佣金	
 					,T.SCDY_CMS					AS 		SCDY_CMS            	--二级佣金	
@@ -213,7 +213,7 @@ BEGIN
 			) B1 ON A.MAIN_CPTL_ACCT=B.MAIN_CPTL_ACCT
 		LEFT JOIN (
 				SELECT
-					 T.CUST_ID 					AS 		MAIN_CPTL_ACCT			--资金账号			
+					 T.MAIN_CPTL_ACCT 			AS 		MAIN_CPTL_ACCT			--资金账号			
 					,T.TRAN_FEE    				AS     	CRED_TRD_TRAN_FEE    	--信用交易过户费					
 					,T.STP_TAX     				AS     	CRED_TRD_STP_TAX     	--信用交易印花税					
 					,T.HANDLE_FEE  				AS     	CRED_TRD_HANDLE_FEE  	--信用交易经手费					
