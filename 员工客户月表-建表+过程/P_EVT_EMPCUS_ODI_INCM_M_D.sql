@@ -1,0 +1,286 @@
+CREATE OR REPLACE  PROCEDURE dm.P_EVT_EMPCUS_ODI_INCM_M_D(IN @V_BIN_DATE INT)
+
+BEGIN 
+  
+  /******************************************************************
+  程序功能: 在GP中创建员工客户普通收入月表
+  编写者: DCY
+  创建日期: 2018-02-05
+  简介：员工客户普通收入月表
+  *********************************************************************
+  修订记录： 修订日期       版本号    修订人             修改内容简要说明
+              20180415                  DCY                董重新更改字段
+  
+           
+  *********************************************************************/
+
+   --DECLARE @V_BIN_DATE INT ;
+    DECLARE @V_BIN_YEAR VARCHAR(4) ;    
+    DECLARE @V_BIN_MTH  VARCHAR(2) ;   
+	
+	----衍生变量
+    SET @V_BIN_DATE=@V_BIN_DATE;
+    SET @V_BIN_YEAR=SUBSTR(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
+    SET @V_BIN_MTH =SUBSTR(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+	
+  --PART0 删除当月数据
+  DELETE FROM DM.T_EVT_EMPCUS_ODI_INCM_M_D WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH;
+
+    ---汇总日责权汇总表---剔除部分客户再分配责权2条记录情况
+	select @V_BIN_YEAR 	as year,
+		   @V_BIN_MTH  	as mth,
+		   RQ   		AS OCCUR_DT,
+		   jgbh_hs 		as HS_ORG_ID,
+		   khbh_hs 		as HS_CUST_ID,
+		   zjzh    		AS CPTL_ACCT,
+		   ygh     		AS FST_EMPID_BROK_ID,
+		   afatwo_ygh 	as AFA_SEC_EMPID,
+		   jgbh_kh 		as WH_ORG_ID_CUST,
+		   jgbh_yg      as WH_ORG_ID_EMP,
+		   rylx         AS PRSN_TYPE,
+		   max(bz)      as MEMO,
+		   max(ygxm)    as EMP_NAME,
+		   sum(jxbl1)   as PERFM_RATI1,
+		   sum(jxbl2)   as PERFM_RATI2,
+		   sum(jxbl3)   as PERFM_RATI3,
+		   sum(jxbl4)   as PERFM_RATI4,
+		   sum(jxbl5)   as PERFM_RATI5,
+		   sum(jxbl6)   as PERFM_RATI6,
+		   sum(jxbl7)   as PERFM_RATI7,
+		   sum(jxbl8)   as PERFM_RATI8,
+		   sum(jxbl9)   as PERFM_RATI9,
+		   sum(jxbl10) as PERFM_RATI10,
+		   sum(jxbl11) as PERFM_RATI11,
+		   sum(jxbl12) as PERFM_RATI12 
+     INTO #T_PUB_SER_RELA
+	  from (select *
+			  from dba.t_ddw_serv_relation_d
+			 where jxbl1 + jxbl2 + jxbl3 + jxbl4 + jxbl5 + jxbl6 + jxbl7 + jxbl8 +
+				   jxbl9 + jxbl10 + jxbl11 + jxbl12 > 0
+		       AND RQ=@V_BIN_DATE) a
+	 group by YEAR, MTH,OCCUR_DT, HS_ORG_ID, HS_CUST_ID,CPTL_ACCT,FST_EMPID_BROK_ID,AFA_SEC_EMPID,WH_ORG_ID_CUST,WH_ORG_ID_EMP,PRSN_TYPE;
+
+	 --业务数据临时表
+	 SELECT
+ 		T1.YEAR
+ 		,T1.MTH
+		,T1.OCCUR_DT
+ 		,T1.CUST_ID
+ 		,SUM(COALESCE(T2.GROSS_CMS,0)) AS GROSS_CMS
+		,SUM(COALESCE(T2.TRAN_FEE,0)) AS TRAN_FEE
+		,SUM(COALESCE(T2.SCDY_TRAN_FEE,0)) AS SCDY_TRAN_FEE
+		,SUM(COALESCE(T2.STP_TAX,0)) AS STP_TAX
+		,SUM(COALESCE(T2.HANDLE_FEE,0)) AS HANDLE_FEE
+		,SUM(COALESCE(T2.SEC_RGLT_FEE,0)) AS SEC_RGLT_FEE
+		,SUM(COALESCE(T2.OTH_FEE,0)) AS OTH_FEE
+		,SUM(COALESCE(T2.STKF_CMS,0)) AS STKF_CMS
+		,SUM(COALESCE(T2.STKF_TRAN_FEE,0)) AS STKF_TRAN_FEE
+		,SUM(COALESCE(T2.STKF_NET_CMS,0)) AS STKF_NET_CMS
+		,SUM(COALESCE(T2.BOND_CMS,0)) AS BOND_CMS
+		,SUM(COALESCE(T2.BOND_NET_CMS,0)) AS BOND_NET_CMS
+		,SUM(COALESCE(T2.REPQ_CMS,0)) AS REPQ_CMS
+		,SUM(COALESCE(T2.REPQ_NET_CMS,0)) AS REPQ_NET_CMS
+		,SUM(COALESCE(T2.HGT_CMS,0)) AS HGT_CMS
+		,SUM(COALESCE(T2.HGT_NET_CMS,0)) AS HGT_NET_CMS
+		,SUM(COALESCE(T2.HGT_TRAN_FEE,0)) AS HGT_TRAN_FEE
+		,SUM(COALESCE(T2.SGT_CMS,0)) AS SGT_CMS
+		,SUM(COALESCE(T2.SGT_NET_CMS,0)) AS SGT_NET_CMS
+		,SUM(COALESCE(T2.SGT_TRAN_FEE,0)) AS SGT_TRAN_FEE
+		,SUM(COALESCE(T2.BGDL_CMS,0)) AS BGDL_CMS
+		,SUM(COALESCE(T2.NET_CMS,0)) AS NET_CMS
+		,SUM(COALESCE(T2.BGDL_NET_CMS,0)) AS BGDL_NET_CMS
+		,SUM(COALESCE(T2.BGDL_TRAN_FEE,0)) AS BGDL_TRAN_FEE
+		,SUM(COALESCE(T2.PSTK_OPTN_CMS,0)) AS PSTK_OPTN_CMS
+		,SUM(COALESCE(T2.PSTK_OPTN_NET_CMS,0)) AS PSTK_OPTN_NET_CMS
+		,SUM(COALESCE(T2.SCDY_CMS,0)) AS SCDY_CMS
+		,SUM(COALESCE(T2.SCDY_NET_CMS,0)) AS SCDY_NET_CMS
+		--20180411新增
+		,SUM(COALESCE(T2.PB_TRD_CMS,0)) AS PB_TRD_CMS
+		,SUM(COALESCE(T2.MARG_SPR_INCM,0)) AS MARG_SPR_INCM
+        
+	INTO #TEMP_T1
+ 	FROM DM.T_EVT_ODI_INCM_M_D T1
+ 	LEFT JOIN DM.T_EVT_ODI_INCM_M_D T2 ON T1.CUST_ID=T2.CUST_ID AND T1.YEAR=T2.YEAR AND T1.OCCUR_DT>=T2.OCCUR_DT
+	WHERE T1.OCCUR_DT=@V_BIN_DATE
+       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
+	   AND T1.CUST_ID NOT IN ('448999999',
+				'440000001',
+				'999900000001',
+				'440000011',
+				'440000015')--20180314 排除"总部专用账户"
+ 	GROUP BY
+ 		T1.YEAR
+ 		,T1.MTH
+		,T1.OCCUR_DT
+ 		,T1.CUST_ID;
+	 
+INSERT INTO DM.T_EVT_EMPCUS_ODI_INCM_M_D 
+(
+	 YEAR                   --年    
+    ,MTH                    --月
+	,OCCUR_DT
+    ,CUST_ID                --客户编码
+    ,AFA_SEC_EMPID          --AFA_二期员工号
+    ,YEAR_MTH               --年月
+    ,MAIN_CPTL_ACCT         --主资金账号
+    ,YEAR_MTH_CUST_ID       --年月客户编码
+    ,YEAR_MTH_PSN_JNO       --年月员工号
+    ,WH_ORG_ID_CUST         --仓库机构编码_客户
+    ,WH_ORG_ID_EMP          --仓库机构编码_员工
+    ,GROSS_CMS_MTD          --毛佣金_月累计
+    ,TRAN_FEE_MTD           --过户费_月累计
+    ,SCDY_TRAN_FEE_MTD      --二级过户费_月累计
+    ,STP_TAX_MTD            --印花税_月累计
+    ,HANDLE_FEE_MTD         --经手费_月累计
+    ,SEC_RGLT_FEE_MTD       --证管费_月累计
+    ,OTH_FEE_MTD            --其他费用_月累计
+    ,STKF_CMS_MTD           --股基佣金_月累计
+    ,STKF_TRAN_FEE_MTD      --股基过户费_月累计
+    ,STKF_NET_CMS_MTD       --股基净佣金_月累计
+    ,BOND_CMS_MTD           --债券佣金_月累计
+    ,BOND_NET_CMS_MTD       --债券净佣金_月累计
+    ,REPQ_CMS_MTD           --报价回购佣金_月累计
+    ,REPQ_NET_CMS_MTD       --报价回购净佣金_月累计
+    ,HGT_CMS_MTD            --沪港通佣金_月累计
+    ,HGT_NET_CMS_MTD        --沪港通净佣金_月累计
+    ,HGT_TRAN_FEE_MTD       --沪港通过户费_月累计
+    ,SGT_CMS_MTD            --深港通佣金_月累计
+    ,SGT_NET_CMS_MTD        --深港通净佣金_月累计
+    ,SGT_TRAN_FEE_MTD       --深港通过户费_月累计
+    ,BGDL_CMS_MTD           --大宗交易佣金_月累计
+    ,NET_CMS_MTD            --净佣金_月累计
+    ,BGDL_NET_CMS_MTD       --大宗交易净佣金_月累计
+    ,BGDL_TRAN_FEE_MTD      --大宗交易过户费_月累计
+    ,PSTK_OPTN_CMS_MTD      --个股期权佣金_月累计
+    ,PSTK_OPTN_NET_CMS_MTD  --个股期权净佣金_月累计
+    ,SCDY_CMS_MTD           --二级佣金_月累计
+    ,SCDY_NET_CMS_MTD       --二级净佣金_月累计
+    ,PB_TRD_CMS_MTD         --PB交易佣金_月累计
+    ,MARG_SPR_INCM_MTD      --保证金利差收入_月累计
+    ,GROSS_CMS_YTD          --毛佣金_年累计
+    ,TRAN_FEE_YTD           --过户费_年累计
+    ,SCDY_TRAN_FEE_YTD      --二级过户费_年累计
+    ,STP_TAX_YTD            --印花税_年累计
+    ,HANDLE_FEE_YTD         --经手费_年累计
+    ,SEC_RGLT_FEE_YTD       --证管费_年累计
+    ,OTH_FEE_YTD            --其他费用_年累计
+    ,STKF_CMS_YTD           --股基佣金_年累计
+    ,STKF_TRAN_FEE_YTD      --股基过户费_年累计
+    ,STKF_NET_CMS_YTD       --股基净佣金_年累计
+    ,BOND_CMS_YTD           --债券佣金_年累计
+    ,BOND_NET_CMS_YTD       --债券净佣金_年累计
+    ,REPQ_CMS_YTD           --报价回购佣金_年累计
+    ,REPQ_NET_CMS_YTD       --报价回购净佣金_年累计
+    ,HGT_CMS_YTD            --沪港通佣金_年累计
+    ,HGT_NET_CMS_YTD        --沪港通净佣金_年累计
+    ,HGT_TRAN_FEE_YTD       --沪港通过户费_年累计
+    ,SGT_CMS_YTD            --深港通佣金_年累计
+    ,SGT_NET_CMS_YTD        --深港通净佣金_年累计
+    ,SGT_TRAN_FEE_YTD       --深港通过户费_年累计
+    ,BGDL_CMS_YTD           --大宗交易佣金_年累计
+    ,NET_CMS_YTD            --净佣金_年累计
+    ,BGDL_NET_CMS_YTD       --大宗交易净佣金_年累计
+    ,BGDL_TRAN_FEE_YTD      --大宗交易过户费_年累计
+    ,PSTK_OPTN_CMS_YTD      --个股期权佣金_年累计
+    ,PSTK_OPTN_NET_CMS_YTD  --个股期权净佣金_年累计
+    ,SCDY_CMS_YTD           --二级佣金_年累计
+    ,SCDY_NET_CMS_YTD       --二级净佣金_年累计
+    ,PB_TRD_CMS_YTD         --PB交易佣金_年累计
+    ,MARG_SPR_INCM_YTD      --保证金利差收入_年累计
+    ,LOAD_DT                --清洗日期
+)
+
+SELECT 
+	T2.YEAR AS 年
+	,T2.MTH AS 月
+	,T2.OCCUR_DT
+	,T2.HS_CUST_ID AS 客户编码
+	,T2.AFA_SEC_EMPID AS AFA二期员工号
+	,T2.YEAR||T1.MTH AS 年月
+	,T2.CPTL_ACCT AS 主资金账号
+	,T2.YEAR||T1.MTH||T2.HS_CUST_ID AS 年月客户编号
+	,T2.YEAR||T1.MTH||T2.AFA_SEC_EMPID AS 年月员工号
+	,T2.WH_ORG_ID_CUST AS 仓库机构编码_客户
+	,T2.WH_ORG_ID_EMP AS 仓库机构编码_员工
+	
+	,COALESCE(T1.GROSS_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 毛佣金_月累计
+	,COALESCE(T1.TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 过户费_月累计
+	,COALESCE(T1.SCDY_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 二级过户费_月累计
+	,COALESCE(T1.STP_TAX,0)*COALESCE(T2.PERFM_RATI2,0) AS 印花税_月累计
+	,COALESCE(T1.HANDLE_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 经手费_月累计
+	,COALESCE(T1.SEC_RGLT_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 证管费_月累计
+	,COALESCE(T1.OTH_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 其他费用_月累计
+	,COALESCE(T1.STKF_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 股基佣金_月累计
+	,COALESCE(T1.STKF_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 股基过户费_月累计
+	,COALESCE(T1.STKF_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 股基净佣金_月累计
+	,COALESCE(T1.BOND_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 债券佣金_月累计
+	,COALESCE(T1.BOND_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 债券净佣金_月累计
+	,COALESCE(T1.REPQ_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 报价回购佣金_月累计
+	,COALESCE(T1.REPQ_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 报价回购净佣金_月累计
+	,COALESCE(T1.HGT_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 沪港通佣金_月累计
+	,COALESCE(T1.HGT_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 沪港通净佣金_月累计
+	,COALESCE(T1.HGT_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 沪港通过户费_月累计
+	,COALESCE(T1.SGT_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 深港通佣金_月累计
+	,COALESCE(T1.SGT_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 深港通净佣金_月累计
+	,COALESCE(T1.SGT_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 深港通过户费_月累计
+	,COALESCE(T1.BGDL_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 大宗交易佣金_月累计
+	,COALESCE(T1.NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 净佣金_月累计
+	,COALESCE(T1.BGDL_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 大宗交易净佣金_月累计
+	,COALESCE(T1.BGDL_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 大宗交易过户费_月累计
+	,COALESCE(T1.PSTK_OPTN_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 个股期权佣金_月累计
+	,COALESCE(T1.PSTK_OPTN_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 个股期权净佣金_月累计
+	,COALESCE(T1.SCDY_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 二级佣金_月累计
+	,COALESCE(T1.SCDY_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 二级净佣金_月累计
+	
+	,COALESCE(T1.PB_TRD_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS PB交易佣金_月累计
+	,COALESCE(T1.MARG_SPR_INCM,0)*COALESCE(T2.PERFM_RATI2,0) AS 保证金利差收入_月累计
+	
+	,COALESCE(T_NIAN.GROSS_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 毛佣金_年累计
+	,COALESCE(T_NIAN.TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 过户费_年累计
+	,COALESCE(T_NIAN.SCDY_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 二级过户费_年累计
+	,COALESCE(T_NIAN.STP_TAX,0)*COALESCE(T2.PERFM_RATI2,0) AS 印花税_年累计
+	,COALESCE(T_NIAN.HANDLE_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 经手费_年累计
+	,COALESCE(T_NIAN.SEC_RGLT_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 证管费_年累计
+	,COALESCE(T_NIAN.OTH_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 其他费用_年累计
+	,COALESCE(T_NIAN.STKF_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 股基佣金_年累计
+	,COALESCE(T_NIAN.STKF_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 股基过户费_年累计
+	,COALESCE(T_NIAN.STKF_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 股基净佣金_年累计
+	,COALESCE(T_NIAN.BOND_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 债券佣金_年累计
+	,COALESCE(T_NIAN.BOND_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 债券净佣金_年累计
+	,COALESCE(T_NIAN.REPQ_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 报价回购佣金_年累计
+	,COALESCE(T_NIAN.REPQ_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 报价回购净佣金_年累计
+	,COALESCE(T_NIAN.HGT_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 沪港通佣金_年累计
+	,COALESCE(T_NIAN.HGT_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 沪港通净佣金_年累计
+	,COALESCE(T_NIAN.HGT_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 沪港通过户费_年累计
+	,COALESCE(T_NIAN.SGT_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 深港通佣金_年累计
+	,COALESCE(T_NIAN.SGT_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 深港通净佣金_年累计
+	,COALESCE(T_NIAN.SGT_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 深港通过户费_年累计
+	,COALESCE(T_NIAN.BGDL_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 大宗交易佣金_年累计
+	,COALESCE(T_NIAN.NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 净佣金_年累计
+	,COALESCE(T_NIAN.BGDL_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 大宗交易净佣金_年累计
+	,COALESCE(T_NIAN.BGDL_TRAN_FEE,0)*COALESCE(T2.PERFM_RATI2,0) AS 大宗交易过户费_年累计
+	,COALESCE(T_NIAN.PSTK_OPTN_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 个股期权佣金_年累计
+	,COALESCE(T_NIAN.PSTK_OPTN_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 个股期权净佣金_年累计
+	,COALESCE(T_NIAN.SCDY_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 二级佣金_年累计
+	,COALESCE(T_NIAN.SCDY_NET_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS 二级净佣金_年累计
+
+	,COALESCE(T_NIAN.PB_TRD_CMS,0)*COALESCE(T2.PERFM_RATI2,0) AS PB交易佣金_年累计
+	,COALESCE(T_NIAN.MARG_SPR_INCM,0)*COALESCE(T2.PERFM_RATI2,0) AS 保证金利差收入_年累计
+	,@V_BIN_DATE
+ FROM #T_PUB_SER_RELA T2
+ LEFT JOIN #TEMP_T1 T_NIAN 
+ 	ON T2.OCCUR_DT=T_NIAN.OCCUR_DT 
+ 		AND T2.HS_CUST_ID=T_NIAN.CUST_ID
+ LEFT JOIN DM.T_EVT_ODI_INCM_M_D T1
+ 	ON  T1.occur_dt=T2.occur_dt 
+ 		AND T1.CUST_ID=T2.HS_CUST_ID   
+ WHERE T2.OCCUR_DT=@V_BIN_DATE
+       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T2.HS_CUST_ID AND YEAR=T2.YEAR AND MTH=T2.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
+	   AND T2.HS_CUST_ID NOT IN ('448999999',
+				'440000001',
+				'999900000001',
+				'440000011',
+				'440000015')--20180314 排除"总部专用账户"
+;
+
+END
