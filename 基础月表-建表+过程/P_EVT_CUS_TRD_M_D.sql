@@ -23,6 +23,27 @@ BEGIN
 --PART0 删除当月数据
   DELETE FROM DM.T_EVT_CUS_TRD_M_D WHERE YEAR=SUBSTR(@V_BIN_DATE||'',1,4) AND MTH=SUBSTR(@V_BIN_DATE||'',5,2);
 
+
+	select
+		t1.YEAR as 年
+		,t2.MTH as 月
+		,t1.DT as 日期
+		,t1.TRD_DT as 交易日期
+		,t2.NATRE_DAY_MTHBEG as 自然日_月初
+		,t2.NATRE_DAY_MTHEND as 自然日_月末
+		,t2.TRD_DAY_MTHBEG as 交易日_月初
+		,t2.TRD_DAY_MTHEND as 交易日_月末
+		,t2.NATRE_DAY_YEARBGN as 自然日_年初
+		,t2.TRD_DAY_YEARBGN as 交易日_年初
+		,t2.NATRE_DAYS_MTH as 自然天数_月
+		,t2.TRD_DAYS_MTH as 交易天数_月
+		,t2.NATRE_DAYS_YEAR as 自然天数_年
+		,t2.TRD_DAYS_YEAR as 交易天数_年
+	INTO #TEMP_RQ
+	from DM.T_PUB_DATE t1
+	left join DM.T_PUB_DATE_M t2 on t1.YEAR=t2.YEAR and t1.MTH<=t2.MTH	
+	where t1.YEAR=substr(@V_BIN_DATE||'',1,4) and t2.MTH=substr(@V_BIN_DATE||'',5,2) and t1.IF_TRD_DAY_FLAG=1;
+
 insert into DM.T_EVT_CUS_TRD_M_D 
 (
 	 CUST_ID            
@@ -199,29 +220,9 @@ select
 	,sum(COALESCE(t1.APPTBUYB_BUYB_AMT,0)) as 约定购回购回金额_年累计
 	,sum(COALESCE(t1.APPTBUYB_TRD_AMT,0)) as 约定购回交易金额_年累计
 	,@V_BIN_DATE
- 
-from			  
-(
-	select
-		t1.YEAR as 年
-		,t2.MTH as 月
-		,t1.DT as 日期
-		,t1.TRD_DT as 交易日期
-		,t2.NATRE_DAY_MTHBEG as 自然日_月初
-		,t2.NATRE_DAY_MTHEND as 自然日_月末
-		,t2.TRD_DAY_MTHBEG as 交易日_月初
-		,t2.TRD_DAY_MTHEND as 交易日_月末
-		,t2.NATRE_DAY_YEARBGN as 自然日_年初
-		,t2.TRD_DAY_YEARBGN as 交易日_年初
-		,t2.NATRE_DAYS_MTH as 自然天数_月
-		,t2.TRD_DAYS_MTH as 交易天数_月
-		,t2.NATRE_DAYS_YEAR as 自然天数_年
-		,t2.TRD_DAYS_YEAR as 交易天数_年
-	from DM.T_PUB_DATE t1
-	left join DM.T_PUB_DATE_M t2 on t1.YEAR=t2.YEAR and t1.MTH<=t2.MTH	
-	where t1.YEAR=substr(@V_BIN_DATE||'',1,4) and t2.MTH=substr(@V_BIN_DATE||'',5,2) and t1.IF_TRD_DAY_FLAG=1
-) t_rq
-left join DM.T_EVT_CUS_TRD_D_D t1 on t_rq.日期=t1.OCCUR_DT
+from DM.T_EVT_CUS_TRD_D_D T1 
+LEFT JOIN #TEMP_RQ t_rq 
+	ON  t_rq.日期=T1.OCCUR_DT
 group by
 	t_rq.年
 	,t_rq.月
@@ -236,24 +237,24 @@ group by
 
 UPDATE DM.T_EVT_CUS_TRD_M_D 
 	SET 
-		EQT_CLAS_KEPP_PERCN  		= 	T2.EQT_CLAS_KEPP_PERCN 							--权益类持仓占比		
-	   ,SCDY_TRD_FREQ_MTD    		= 	T2.SCDY_TRD_FREQ								--二级交易次数_月累计		
-	   ,SCDY_TRD_FREQ_YTD    		= 	T2.SCDY_TRD_FREQ_TY								--二级交易次数_年累计		
-	   ,RCT_TRD_DT_GT        		= 	T2.RCT_TRD_DT_GT								--最近交易日期_累计		
-	   ,RCT_TRD_DT_M         		= 	T2.RCT_TRD_DT_M									--最近交易日期_本月		
-	   ,Y_RCT_STK_TRD_QTY    		= 	T2.Y_RCT_STK_TRD_QTY							--近12月股票交易量		
-	   ,TRD_FREQ_MTD         		= 	T2.TRD_FREQ										--交易次数_月累计		
-	   ,TRD_FREQ_YTD         		= 	T2.TRD_FREQ_TY									--交易次数_年累计		
-	   ,REPQ_TRD_QTY_MTD     		= 	T2.REPQ_TRD_QTY									--报价回购交易量_月累计		
-	   ,REPQ_TRD_QTY_YTD     		= 	T2.REPQ_TRD_QTY_TY								--报价回购交易量_年累计		
-	   ,BGDL_QTY_MTD         		= 	T2.BGDL_QTY										--大宗交易量_月累计		
-	   ,BGDL_QTY_YTD         		= 	T2.BGDL_QTY_TY									--大宗交易量_年累计		
-	   ,PB_TRD_QTY_MTD       		= 	T2.PB_TRD_QTY									--PB交易量_月累计			
-	   ,MAIN_CPTL_ACCT       		= 	T2.MAIN_CPTL_ACCT								--主资金账号			
-	   ,S_REPUR_TRD_QTY_MDA  		= 	T2.S_REPUR_TRD_QTY/@V_ACCU_MDAYS				--正回购交易量_月日均		
-	   ,R_REPUR_TRD_QTY_MDA  		= 	T2.S_REPUR_TRD_QTY_TY/@V_ACCU_MDAYS				--逆回购交易量_月日均		
-	   ,S_REPUR_TRD_QTY_YDA  		= 	T2.S_REPUR_TRD_QTY/@V_ACCU_YDAYS				--正回购交易量_年日均		
-	   ,R_REPUR_TRD_QTY_YDA  		= 	T2.S_REPUR_TRD_QTY/@V_ACCU_YDAYS				--逆回购交易量_年日均  
+		EQT_CLAS_KEPP_PERCN  		= 	COALESCE(T2.EQT_CLAS_KEPP_PERCN,0) 							--权益类持仓占比		
+	   ,SCDY_TRD_FREQ_MTD    		= 	COALESCE(T2.SCDY_TRD_FREQ,0)								--二级交易次数_月累计		
+	   ,SCDY_TRD_FREQ_YTD    		= 	COALESCE(T2.SCDY_TRD_FREQ_TY,0)								--二级交易次数_年累计		
+	   ,RCT_TRD_DT_GT        		= 	COALESCE(T2.RCT_TRD_DT_GT,0)								--最近交易日期_累计		
+	   ,RCT_TRD_DT_M         		= 	COALESCE(T2.RCT_TRD_DT_M,0)									--最近交易日期_本月		
+	   ,Y_RCT_STK_TRD_QTY    		= 	COALESCE(T2.Y_RCT_STK_TRD_QTY,0)							--近12月股票交易量		
+	   ,TRD_FREQ_MTD         		= 	COALESCE(T2.TRD_FREQ,0)										--交易次数_月累计		
+	   ,TRD_FREQ_YTD         		= 	COALESCE(T2.TRD_FREQ_TY,0)									--交易次数_年累计		
+	   ,REPQ_TRD_QTY_MTD     		= 	COALESCE(T2.REPQ_TRD_QTY,0)									--报价回购交易量_月累计		
+	   ,REPQ_TRD_QTY_YTD     		= 	COALESCE(T2.REPQ_TRD_QTY_TY,0)								--报价回购交易量_年累计		
+	   ,BGDL_QTY_MTD         		= 	COALESCE(T2.BGDL_QTY,0)										--大宗交易量_月累计		
+	   ,BGDL_QTY_YTD         		= 	COALESCE(T2.BGDL_QTY_TY,0)									--大宗交易量_年累计		
+	   ,PB_TRD_QTY_MTD       		= 	COALESCE(T2.PB_TRD_QTY,0)									--PB交易量_月累计			
+	   ,MAIN_CPTL_ACCT       		= 	COALESCE(T2.MAIN_CPTL_ACCT,0)								--主资金账号			
+	   ,S_REPUR_TRD_QTY_MDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY/@V_ACCU_MDAYS,0)				--正回购交易量_月日均		
+	   ,R_REPUR_TRD_QTY_MDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY_TY/@V_ACCU_MDAYS,0)				--逆回购交易量_月日均		
+	   ,S_REPUR_TRD_QTY_YDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY/@V_ACCU_YDAYS,0)				--正回购交易量_年日均		
+	   ,R_REPUR_TRD_QTY_YDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY/@V_ACCU_YDAYS,0)				--逆回购交易量_年日均  
 	 FROM DM.T_EVT_CUS_TRD_M_D T1
 	 LEFT JOIN DM.T_EVT_CUS_ODI_TRD_M_D T2
 	 	ON T1.YEAR = T2.YEAR 
@@ -262,8 +263,9 @@ UPDATE DM.T_EVT_CUS_TRD_M_D
 
 -- 补充场内委托事实表字段
 SELECT 
-     A.OCCUR_DT
-    ,A.CUST_ID
+     SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4) as YEAR
+    ,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4) as MTH
+    ,A.CUST_ID 	as CUST_ID
     ,SUM(CASE WHEN A.SECU_TYPE IN ('10','18','24') THEN A.MTCH_VOL ELSE 0 END ) AS SB_TRD_QTY_MTD
     ,SUM(CASE WHEN A.SECU_TYPE IN ('12','13','14') THEN A.MTCH_VOL ELSE 0 END ) AS BOND_TRD_QTY_MTD
     --SUM(CASE WHEN SECU_TYPE = '19' THEN MTCH_VOL END ) AS 场内开基交易量
@@ -271,11 +273,14 @@ INTO #TEMP_A
 FROM DM.T_EVT_ITC_ORDR_TRD_D_D A
 WHERE A.OCCUR_DT BETWEEN @V_BEGIN_TRAD_DATE AND @V_BIN_DATE
  	AND A.MKT_TYPE IN  ( '01','02','03','04','05','0G','0S')
-GROUP BY A.OCCUR_DT,A.CUST_ID;
+GROUP BY SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4)
+		,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4)
+		,A.CUST_ID;
 
 SELECT 
-     A.OCCUR_DT
-    ,A.CUST_ID
+     SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4) as YEAR
+    ,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4) as MTH
+    ,A.CUST_ID   as CUST_ID
     ,SUM(CASE WHEN A.SECU_TYPE IN ('10','18','24') THEN A.MTCH_VOL ELSE 0 END ) AS SB_TRD_QTY_YTD
     ,SUM(CASE WHEN A.SECU_TYPE IN ('12','13','14') THEN A.MTCH_VOL ELSE 0 END ) AS BOND_TRD_QTY_YTD
     --SUM(CASE WHEN SECU_TYPE = '19' THEN MTCH_VOL END ) AS 场内开基交易量
@@ -283,14 +288,16 @@ INTO #TEMP_B
 FROM DM.T_EVT_ITC_ORDR_TRD_D_D A
 WHERE A.OCCUR_DT BETWEEN @V_YEAR_START_DATE AND @V_BIN_DATE
  	AND A.MKT_TYPE IN  ( '01','02','03','04','05','0G','0S')
-GROUP BY A.OCCUR_DT,A.CUST_ID;
+GROUP BY SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4)
+		,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4)
+		,A.CUST_ID;
 
 UPDATE DM.T_EVT_CUS_TRD_M_D 
 	SET 
-	   SB_TRD_QTY_MTD       		= 		T2.SB_TRD_QTY_MTD				--三板交易量_月累计		
-	  ,SB_TRD_QTY_YTD       		= 		T3.SB_TRD_QTY_YTD				--三板交易量_年累计		
-	  ,BOND_TRD_QTY_MTD     		= 		T2.BOND_TRD_QTY_MTD				--债券交易量_月累计		
-	  ,BOND_TRD_QTY_YTD     		= 		T3.BOND_TRD_QTY_YTD				--债券交易量_年累计		
+	   SB_TRD_QTY_MTD       		= 		COALESCE(T2.SB_TRD_QTY_MTD,0)				--三板交易量_月累计		
+	  ,SB_TRD_QTY_YTD       		= 		COALESCE(T3.SB_TRD_QTY_YTD,0)				--三板交易量_年累计		
+	  ,BOND_TRD_QTY_MTD     		= 		COALESCE(T2.BOND_TRD_QTY_MTD,0)				--债券交易量_月累计		
+	  ,BOND_TRD_QTY_YTD     		= 		COALESCE(T3.BOND_TRD_QTY_YTD,0)				--债券交易量_年累计		
 	  ,ITC_CRRC_FUND_TRD_QTY_MTD	= 		0								--场内货币基金交易量_月累计		
 	  ,ITC_CRRC_FUND_TRD_QTY_YTD	= 		0								--场内货币基金交易量_年累计		
 	  ,S_REPUR_NET_CMS_MTD  		= 		0								--正回购净佣金_月累计		
@@ -301,10 +308,12 @@ UPDATE DM.T_EVT_CUS_TRD_M_D
 	  ,ITC_CRRC_FUND_NET_CMS_YTD	= 		0								--场内货币基金净佣金_年累计		
 	 FROM DM.T_EVT_CUS_TRD_M_D T1
 	 LEFT JOIN #TEMP_A T2
-	 	ON T1.OCCUR_DT = T2.OCCUR_DT
+	 	ON T1.YEAR = T2.YEAR
+	 		AND T1.MTH = T2.MTH
 	 		AND T1.CUST_ID = T2.CUST_ID
 	 LEFT JOIN #TEMP_B T3
-	 	ON T1.OCCUR_DT = T2.OCCUR_DT
+	 	ON T1.YEAR = T2.YEAR
+	 		AND T1.MTH = T2.MTH
 	 		AND T1.CUST_ID = T2.CUST_ID;
 
 END
