@@ -941,9 +941,15 @@ BEGIN
     SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND IF_TRD_DAY_FLAG=1);
     SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR  );
     SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE );
+    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE);
+    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
  
 
@@ -1000,15 +1006,15 @@ select
 	,t_rq.自然日_月初
 	,t_rq.年||t_rq.月 as 年月
 	,t_rq.年||t_rq.月||t1.CUST_ID as 年月客户编码		
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.GUAR_SECU_MVAL,0) else 0 end) 			as 担保证券市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.APPTBUYB_BAL,0) else 0 end)		 		as 约定购回余额_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SH_GUAR_SECU_MVAL,0) else 0 end) 		as 上海担保证券市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SZ_GUAR_SECU_MVAL,0) else 0 end) 		as 深圳担保证券市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL,0) else 0 end) 	as 上海限售股担保证券市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL,0) else 0 end) 	as 深圳限售股担保证券市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL,0) else 0 end) 	as 自营融出方余额_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL,0) else 0 end) 	as 资管融出方余额_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SM_LOAN_FINAC_OUT_BAL,0) else 0 end) 	as 小额贷融出余额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.GUAR_SECU_MVAL,0) else 0 end) 			as 担保证券市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.APPTBUYB_BAL,0) else 0 end)		 		as 约定购回余额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SH_GUAR_SECU_MVAL,0) else 0 end) 		as 上海担保证券市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SZ_GUAR_SECU_MVAL,0) else 0 end) 		as 深圳担保证券市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL,0) else 0 end) 	as 上海限售股担保证券市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL,0) else 0 end) 	as 深圳限售股担保证券市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL,0) else 0 end) 	as 自营融出方余额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL,0) else 0 end) 	as 资管融出方余额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SM_LOAN_FINAC_OUT_BAL,0) else 0 end) 	as 小额贷融出余额_期末
 
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.GUAR_SECU_MVAL,0) else 0 end)/t_rq.自然天数_月 			as 担保证券市值_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.APPTBUYB_BAL,0) else 0 end)/t_rq.自然天数_月 			as 约定购回余额_月日均
@@ -1049,7 +1055,8 @@ from
 		,@V_BIN_TRD_DAYS_YEAR       as 交易天数_年
 	from DM.T_PUB_DATE t1 
 	where t1.YEAR=@V_BIN_YEAR
-	  AND T1.DT<=@V_BIN_DATE
+	  AND T1.DT<= CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       ELSE @V_BIN_DATE END  
 ) t_rq
 left join DM.T_AST_APPTBUYB t1 on t_rq.交易日期=t1.OCCUR_DT
 group by
@@ -1312,6 +1319,7 @@ from
 		,@V_BIN_MTH as 月
 		,t1.DT as 日期
 		,t1.TRD_DT as 交易日期
+        ,IF_TRD_DAY_FLAG
 		,@V_BIN_NATRE_DAY_MTHBEG    as 自然日_月初
 		,@V_BIN_NATRE_DAY_MTHEND    as 自然日_月末
 		,@V_BIN_TRD_DAY_MTHBEG      as 交易日_月初
@@ -1324,10 +1332,12 @@ from
 		,@V_BIN_TRD_DAYS_YEAR       as 交易天数_年
 	from DM.T_PUB_DATE t1 
 	where t1.YEAR=@V_BIN_YEAR
-	  AND T1.DT<=@V_BIN_DATE
+	  AND T1.DT<= CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       ELSE @V_BIN_DATE END  
+      and IF_TRD_DAY_FLAG=1
 ) t_rq
 --资产变动不填充
-left join DM.T_AST_CPTL_CHG t1 on t_rq.交易日期=t1.OCCUR_DT	
+left join DM.T_AST_CPTL_CHG t1 on t_rq.日期=t1.OCCUR_DT	
 group by
 	t_rq.年
 	,t_rq.月		
@@ -1432,9 +1442,15 @@ BEGIN
     SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND IF_TRD_DAY_FLAG=1);
     SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR  );
     SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE );
+    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE);
+    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
 	
 --PART0 删除当月数据
@@ -1461,7 +1477,8 @@ BEGIN
 	,FEE_LIAB_FINAL
 	,OTH_LIAB_FINAL
 	,TOT_AST_FINAL
-	,A_SHR_MVAL_FINAL
+	,a_shr_mval_final
+	
 	,TOT_LIAB_MDA
 	,NET_AST_MDA
 	,CRED_MARG_MDA
@@ -1472,7 +1489,8 @@ BEGIN
 	,FEE_LIAB_MDA
 	,OTH_LIAB_MDA
 	,TOT_AST_MDA
-	,A_SHR_MVAL_MDA
+	,a_shr_mval_mda
+	
 	,TOT_LIAB_YDA
 	,NET_AST_YDA
 	,CRED_MARG_YDA
@@ -1483,7 +1501,8 @@ BEGIN
 	,FEE_LIAB_YDA
 	,OTH_LIAB_YDA
 	,TOT_AST_YDA
-	,A_SHR_MVAL_YDA
+	,a_shr_mval_yda
+	
 	,LOAD_DT
 	)
 select
@@ -1496,17 +1515,18 @@ select
 	,t_rq.自然日_月初
 	,t_rq.年||t_rq.月 as 年月
 	,t_rq.年||t_rq.月||t1.CUST_ID as 年月客户编号
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.TOT_LIAB,0) else 0 end) 		as 总负债_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.NET_AST,0) else 0 end) 		as 净资产_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.CRED_MARG,0) else 0 end) 	as 信用保证金_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.GUAR_SECU_MVAL,0) else 0 end) as 担保证券市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.FIN_LIAB,0) else 0 end) 		as 融资负债_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.CRDT_STK_LIAB,0) else 0 end) as 融券负债_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.INTR_LIAB,0) else 0 end) 	as 利息负债_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.FEE_LIAB,0) else 0 end) 		as 费用负债_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OTH_LIAB,0) else 0 end) 		as 其他负债_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.TOT_AST,0) else 0 end) 		as 总资产_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.A_SHR_MVAL,0) else 0 end) 
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.TOT_LIAB,0) else 0 end) 		as 总负债_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.NET_AST,0) else 0 end) 		as 净资产_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.CRED_MARG,0) else 0 end) 	as 信用保证金_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.GUAR_SECU_MVAL,0) else 0 end) as 担保证券市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.FIN_LIAB,0) else 0 end) 		as 融资负债_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.CRDT_STK_LIAB,0) else 0 end) as 融券负债_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.INTR_LIAB,0) else 0 end) 	as 利息负债_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.FEE_LIAB,0) else 0 end) 		as 费用负债_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OTH_LIAB,0) else 0 end) 		as 其他负债_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.TOT_AST,0) else 0 end) 		as 总资产_期末
+	
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.a_shr_mval,0) else 0 end) 		as A股市值_期末
 
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.TOT_LIAB,0) else 0 end)/t_rq.自然天数_月 		as 总负债_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.NET_AST,0) else 0 end)/t_rq.自然天数_月 		as 净资产_月日均
@@ -1518,7 +1538,9 @@ select
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.FEE_LIAB,0) else 0 end)/t_rq.自然天数_月		as 费用负债_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.OTH_LIAB,0) else 0 end)/t_rq.自然天数_月 		as 其他负债_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.TOT_AST,0) else 0 end)/t_rq.自然天数_月 		as 总资产_月日均
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.A_SHR_MVAL,0) else 0 end)/t_rq.自然天数_月 
+	
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.a_shr_mval,0) else 0 end)/t_rq.自然天数_月 		as A股市值_月日均
+	
 
 	,sum(COALESCE(t1.TOT_LIAB,0))/t_rq.自然天数_年 			as 总负债_年日均
 	,sum(COALESCE(t1.NET_AST,0))/t_rq.自然天数_年 			as 净资产_年日均
@@ -1530,7 +1552,8 @@ select
 	,sum(COALESCE(t1.FEE_LIAB,0))/t_rq.自然天数_年 	as 费用负债_年日均
 	,sum(COALESCE(t1.OTH_LIAB,0))/t_rq.自然天数_年 	as 其他负债_年日均
 	,sum(COALESCE(t1.TOT_AST,0))/t_rq.自然天数_年 	as 总资产_年日均
-	,sum(COALESCE(t1.A_SHR_MVAL,0))/t_rq.自然天数_年
+	
+	,sum(COALESCE(t1.a_shr_mval,0))/t_rq.自然天数_年 	as A股市值_年日均
     ,@V_BIN_DATE
 
 from
@@ -1552,7 +1575,8 @@ from
 		,@V_BIN_TRD_DAYS_YEAR       as 交易天数_年
 	from DM.T_PUB_DATE t1 
 	where t1.YEAR=@V_BIN_YEAR
-	  AND T1.DT<=@V_BIN_DATE
+	  AND T1.DT<= CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       ELSE @V_BIN_DATE END  
 ) t_rq
 left join DM.T_AST_CREDIT t1 on t_rq.交易日期=t1.OCCUR_DT
 group by
@@ -1877,7 +1901,7 @@ END
 GO
 GRANT EXECUTE ON dm.P_AST_D_BRH TO query_dev
 GO
-CREATE PROCEDURE dm.P_AST_D_EMP(IN @V_DATE INT)
+CREATE PROCEDURE dm.P_AST_D_EMP(IN @V_BIN_DATE INT)
 BEGIN
 
   /******************************************************************
@@ -1887,7 +1911,15 @@ BEGIN
   简介：员工维度的客户资产表
   *********************************************************************
   修订记录： 修订日期       版本号    修订人             修改内容简要说明
+             20180520                 RENGZ              根据股票质押合同责权修正总资产 
+		
   *********************************************************************/
+  
+    DECLARE @V_BIN_YEAR  VARCHAR(4);		-- 年份
+  	DECLARE @V_BIN_MTH   VARCHAR(2);	    -- 月份
+	SET @V_BIN_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
+	SET @V_BIN_MTH  = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+  
 
 	CREATE TABLE #TMP_T_AST_D_EMP(
 	    OCCUR_DT             numeric(8,0)  NOT NULL,
@@ -1953,12 +1985,12 @@ BEGIN
 		,CUST_ID
 	)			
 	SELECT 
-		 @V_DATE AS OCCUR_DT			--发生日期
+		 @V_BIN_DATE AS OCCUR_DT			--发生日期
 		,A.AFATWO_YGH AS EMP_ID			--员工编码
 		,A.ZJZH AS MAIN_CPTL_ACCT		--资金账号
 		,A.KHBH_HS AS CUST_ID 			--客户编号
 	FROM DBA.T_DDW_SERV_RELATION_D A
-	WHERE A.RQ=@V_DATE
+	WHERE A.RQ=@V_BIN_DATE
 		AND A.ZJZH IS NOT NULL
   	GROUP BY A.AFATWO_YGH
   		   ,A.ZJZH
@@ -1985,21 +2017,31 @@ BEGIN
     	,SUM(A.JXBL12) AS PERFM_RATIO_12
   	INTO #TMP_PERF_DISTR
   	FROM  DBA.T_DDW_SERV_RELATION_D A
-  	WHERE A.RQ=@V_DATE
+  	WHERE A.RQ=@V_BIN_DATE
   		AND A.ZJZH IS NOT NULL
   	GROUP BY A.AFATWO_YGH
   	          ,A.ZJZH
   	          ,A.KHBH_HS;
 
+   --股票质押担保证券市值（按股票质押责权，合同责权与两融责权）
+  select A.CUST_ID,
+         sum(a.guar_secu_mval * coalesce(b.jxbl, c.jxbl9, 0)) as gpzy_dbzq_sz
+  into #gpzy_dbzq_sz_htzq
+  from dm.T_AST_STKPLG              a
+  left join dba.t_gzhs_zq           b on a.ctr_no = b.cntr_id and b.nianyue = (select max(nianyue)
+																				from dba.t_gzhs_zq
+																				where nianyue <= @V_BIN_YEAR || @V_BIN_MTH)
+  LEFT JOIN dba.t_ddw_serv_relation_d         c on a.cust_id=c.khbh_hs and c.rq= @V_BIN_DATE and c.jxbl9>0 and b.cntr_id is null       --按日数据用日责权
+  where a.occur_dt = @V_BIN_DATE
+  group by A.CUST_ID;
 
-
-
+  
 
 	--更新分配后的各项指标
 	UPDATE #TMP_T_AST_D_EMP
 		SET 
-				 TOT_AST             	= 	COALESCE(B1.TOT_AST             ,0)		*    C.PERFM_RATIO_1		--总资产
-				,SCDY_MVAL           	= 	COALESCE(B1.SCDY_MVAL           ,0)		*    C.PERFM_RATIO_1		--二级市值
+				
+				 SCDY_MVAL           	= 	COALESCE(B1.SCDY_MVAL           ,0)		*    C.PERFM_RATIO_1		--二级市值
 				,STKF_MVAL           	= 	COALESCE(B1.STKF_MVAL           ,0)		*    C.PERFM_RATIO_1		--股基市值
 				,A_SHR_MVAL          	= 	COALESCE(B1.A_SHR_MVAL          ,0)		*    C.PERFM_RATIO_1		--A股市值
 				,NOTS_MVAL           	= 	COALESCE(B1.NOTS_MVAL           ,0)		*    C.PERFM_RATIO_1		--限售股市值
@@ -2048,6 +2090,33 @@ BEGIN
 				,CREDIT_TOT_LIAB     	= 	COALESCE(B2.CREDIT_TOT_LIAB     ,0)		*    C.PERFM_RATIO_9		--融资融券总负债
 				,APPTBUYB_GUAR_SECMV 	= 	COALESCE(B4.APPTBUYB_GUAR_SECMV ,0)		*    C.PERFM_RATIO_4		--约定购回担保证券市值
 				,CREDIT_GUAR_SECMV   	= 	COALESCE(B2.CREDIT_GUAR_SECMV   ,0)		*    C.PERFM_RATIO_9		--融资融券担保证券市值
+				
+			    ,TOT_AST             	= 	COALESCE(B1.STKF_MVAL           ,0)		*    C.PERFM_RATIO_1	    --股基市值
+										+	COALESCE(B1.NOTS_MVAL           ,0)		*    C.PERFM_RATIO_1		--限售股市值
+										+	COALESCE(B1.BOND_MVAL           ,0)		*    C.PERFM_RATIO_1		--债券市值				 
+										+	COALESCE(B1.REPO_MVAL           ,0)		*    C.PERFM_RATIO_1		--回购市值
+										+	COALESCE(B1.PSTK_OPTN_MVAL      ,0)		*    C.PERFM_RATIO_1		--个股期权市值
+										+	COALESCE(B1.OTH_AST_MVAL        ,0)		*    C.PERFM_RATIO_1		--其他资产市值
+										+	COALESCE(B1.APPTBUYB_PLG_MVAL   ,0)		*    C.PERFM_RATIO_1		--约定购回质押市值
+										+	COALESCE(B1.CPTL_BAL            ,0)		*    C.PERFM_RATIO_1		--资金余额
+										+	COALESCE(B1.NO_ARVD_CPTL        ,0)		*    C.PERFM_RATIO_1		--未到账资金
+										+	COALESCE(B1.STKPLG_LIAB         ,0)		*    C.PERFM_RATIO_1		--股票质押负债（含利息，对冲掉未到账资金中股票质押负债的负资产，多加了利息）
+										-	COALESCE(B3.STKPLG_GUAR_SECMV   ,0)		*    C.PERFM_RATIO_1        -- 减去股票质押担保证券市值（在股基市值、限售股市值中已经体现，减去做对冲)
+									
+ 									    +	COALESCE(B1.PO_FUND_MVAL        ,0)		*    C.PERFM_RATIO_4		--公募基金市值
+ 									    +	COALESCE(B1.BANK_CHRM_MVAL      ,0)		*    C.PERFM_RATIO_4		--银行理财市值
+ 									    +	COALESCE(B1.SECU_CHRM_MVAL      ,0)		*    C.PERFM_RATIO_4		--证券理财市值
+ 									    +	COALESCE(B1.OTH_PROD_MVAL       ,0)		*    C.PERFM_RATIO_4		--其他产品市值
+ 									   
+  									    +	COALESCE(B1.FUND_SPACCT_MVAL    ,0)		*    C.PERFM_RATIO_5		--基金专户市值
+ 									    +	COALESCE(B1.IMGT_PD_MVAL        ,0)		*    C.PERFM_RATIO_6		--资管产品市值
+ 									    +	COALESCE(B1.PTE_FUND_MVAL       ,0)		*    C.PERFM_RATIO_7		--私募基金市值
+ 									    +	COALESCE(B2.CREDIT_TOT_AST      ,0)		*    C.PERFM_RATIO_9		--融资融券总资产
+										
+ 									    +	COALESCE(B6.gpzy_dbzq_sz        ,0)			                        --加回修正后的股票质押证券市值								
+				    
+		 
+				
 		FROM #TMP_T_AST_D_EMP A
 		--普通资产
 		LEFT JOIN (
@@ -2087,9 +2156,10 @@ BEGIN
 					,T.STKT_FUND_MVAL				AS      STKT_FUND_MVAL       	--股票型基金市值
 					,T.OTH_AST_MVAL					AS      OTH_AST_MVAL         	--其他资产市值
 					,T.PROD_TOT_MVAL				AS      PROD_TOT_MVAL        	--产品总市值
-					--,0								AS      JQL9_MVAL            	--金麒麟9市值
+                    ,T.STKPLG_LIAB                  AS      STKPLG_LIAB             --股票质押负债
+					--,0								AS      JQL9_MVAL           --金麒麟9市值
 				FROM DM.T_AST_ODI T
-				WHERE T.OCCUR_DT = @V_DATE
+				WHERE T.OCCUR_DT = @V_BIN_DATE
 			) B1 ON A.MAIN_CPTL_ACCT=B1.MAIN_CPTL_ACCT
 		--融资融券资产
 		LEFT JOIN (
@@ -2107,7 +2177,7 @@ BEGIN
 					,T.TOT_LIAB						AS      CREDIT_TOT_LIAB      	--融资融券总负债
 					,T.GUAR_SECU_MVAL				AS      CREDIT_GUAR_SECMV    	--融资融券担保证券市值
 				FROM DM.T_AST_CREDIT T
-				WHERE T.OCCUR_DT = @V_DATE
+				WHERE T.OCCUR_DT = @V_BIN_DATE
 			) B2 ON A.CUST_ID=B2.CUST_ID
 		--股票质押资产(股票质押资产的客户编号可能对应多个合同编号，因此基于客户维度汇总所有合同的指标金额)
 		LEFT JOIN (
@@ -2116,7 +2186,7 @@ BEGIN
 					,SUM(T.GUAR_SECU_MVAL)			AS      STKPLG_GUAR_SECMV    	--股票质押担保证券市值
 					,SUM(T.STKPLG_FIN_BAL)			AS      STKPLG_FIN_BAL       	--股票质押融资余额	
 				FROM DM.T_AST_STKPLG T
-				WHERE T.OCCUR_DT = @V_DATE
+				WHERE T.OCCUR_DT = @V_BIN_DATE
 				GROUP BY T.CUST_ID
 			) B3 ON A.CUST_ID=B3.CUST_ID
 		--约定购回资产
@@ -2126,7 +2196,7 @@ BEGIN
 					,T.APPTBUYB_BAL					AS      APPTBUYB_BAL         	--约定购回余额
 					,T.GUAR_SECU_MVAL				AS      APPTBUYB_GUAR_SECMV  	--约定购回担保证券市值
 				FROM DM.T_AST_APPTBUYB T
-				WHERE T.OCCUR_DT = @V_DATE
+				WHERE T.OCCUR_DT = @V_BIN_DATE
 			) B4 ON A.CUST_ID=B4.CUST_ID
 		--金麒麟9市值
 		LEFT JOIN (
@@ -2134,17 +2204,21 @@ BEGIN
 					 T.MAIN_CPTL_ACCT	  			AS 		MAIN_CPTL_ACCT		    --资金账号		 
 					,SUM(T.OTC_RETAIN_AMT)	        AS      JQL9_MVAL            	--金麒麟市值
 				FROM DM.T_EVT_PROD_TRD_D_D T
-				WHERE T.OCCUR_DT = @V_DATE
+				WHERE T.OCCUR_DT = @V_BIN_DATE
                 GROUP BY T.MAIN_CPTL_ACCT
 			) B5 ON B5.MAIN_CPTL_ACCT = A.MAIN_CPTL_ACCT
+        --股票质押责权修正(修正)
+	    LEFT JOIN #gpzy_dbzq_sz_htzq    B6 ON  A.CUST_ID=B6.CUST_ID -- AND A.OCCUR_DT=B6.OCCUR_DT
 	  	LEFT JOIN #TMP_PERF_DISTR C
 	        ON C.MAIN_CPTL_ACCT = A.MAIN_CPTL_ACCT
 	          AND C.CUST_ID = A.CUST_ID
 	          AND C.EMP_ID = A.EMP_ID
-		WHERE A.OCCUR_DT = @V_DATE;
+		WHERE A.OCCUR_DT = @V_BIN_DATE;
+	
+	
 	
 	--将临时表的按员工维度汇总各项指标金额并插入到目标表
-	DELETE FROM DM.T_AST_D_EMP WHERE OCCUR_DT = @V_DATE;
+	DELETE FROM DM.T_AST_D_EMP WHERE OCCUR_DT = @V_BIN_DATE;
 	INSERT INTO DM.T_AST_D_EMP (
 			 OCCUR_DT            		--发生日期	
 			,EMP_ID              		--员工编号	
@@ -2253,7 +2327,7 @@ BEGIN
 			,SUM(APPTBUYB_GUAR_SECMV) 		AS      APPTBUYB_GUAR_SECMV      --约定购回担保证券市值 	
 			,SUM(CREDIT_GUAR_SECMV)   		AS      CREDIT_GUAR_SECMV        --融资融券担保证券市值 	
 		FROM #TMP_T_AST_D_EMP T 
-		WHERE T.OCCUR_DT = @V_DATE
+		WHERE T.OCCUR_DT = @V_BIN_DATE
 	    GROUP BY T.OCCUR_DT,T.EMP_ID;
 	COMMIT;
 END
@@ -2362,12 +2436,12 @@ BEGIN
  	INTO #TEMP_T1
  	FROM DM.T_AST_APPTBUYB_M_D T1
  	WHERE T1.OCCUR_DT=@V_BIN_DATE 
- 	      AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
-		   AND T1.CUST_ID NOT IN ('448999999',
+ 	      AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH) ;--20180207 ZQ:有责权关系的客户必须要有资金账户
+		  /* AND T1.CUST_ID NOT IN ('448999999',
 					'440000001',
 					'999900000001',
 					'440000011',
-					'440000015');--20180314 排除"总部专用账户"
+					'440000015')*/  --20180314 排除"总部专用账户"  20180525 不剔除
 
 	INSERT INTO DM.T_AST_EMPCUS_APPTBUYB_M_D 
 	(
@@ -2553,12 +2627,12 @@ BEGIN
 	INTO #TEMP_T1
 	FROM DM.T_AST_CPTL_CHG_M_D T1
 	WHERE T1.OCCUR_DT=@V_BIN_DATE
-       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
-	   AND T1.CUST_ID NOT IN ('448999999',
+       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH);--20180207 ZQ:有责权关系的客户必须要有资金账户
+	  /* AND T1.CUST_ID NOT IN ('448999999',
 				'440000001',
 				'999900000001',
 				'440000011',
-				'440000015');--20180314 排除"总部专用账户"
+				'440000015')*/ --20180314 排除"总部专用账户"
 
 
 	INSERT INTO DM.T_AST_EMPCUS_CPTL_CHG_M_D 
@@ -2735,14 +2809,17 @@ BEGIN
 	,t1.OTH_LIAB_YDA as 其他负债_年日均
 	,t1.TOT_AST_YDA as 总资产_年日均
 	,t1.LOAD_DT as 清洗日期
+    ,A_SHR_MVAL_FINAL AS A股市值 
+    ,A_SHR_MVAL_MDA   AS A股市值_月日均
+    ,A_SHR_MVAL_YDA   AS A股市值_年日均
 	INTO #TEMP_T1
 	 from DM.T_AST_CREDIT_M_D t1
-	 WHERE T1.OCCUR_DT=@V_BIN_DATE
-	 AND T1.CUST_ID NOT IN ('448999999',
+	 WHERE T1.OCCUR_DT=@V_BIN_DATE;
+	 /*AND T1.CUST_ID NOT IN ('448999999',
 				'440000001',
 				'999900000001',
 				'440000011',
-				'440000015');--20180314 排除"总部专用账户"
+				'440000015')*/ --20180314 排除"总部专用账户"   ---20180525 不排除
 
 	INSERT INTO DM.T_AST_EMPCUS_CREDIT_M_D 
 	(
@@ -2788,6 +2865,9 @@ BEGIN
 	  ,OTH_LIAB_YDA          --其他负债_年日均
 	  ,TOT_AST_YDA           --总资产_年日均
 	  ,LOAD_DT               --清洗日期
+      ,A_SHR_MVAL_FINAL      --A股市值 
+      ,A_SHR_MVAL_MDA        --A股市值_月日均
+     ,A_SHR_MVAL_YDA         --A股市值_年日均
 	)
 	select
 	 t2.YEAR
@@ -2835,6 +2915,9 @@ BEGIN
 	,COALESCE(t1.其他负债_年日均,0)*COALESCE(t2.PERFM_RATI9,0) as 其他负债_年日均
 	,COALESCE(t1.总资产_年日均,0)*COALESCE(t2.PERFM_RATI9,0) as 总资产_年日均
 	,@V_BIN_DATE
+	,COALESCE(t1.A股市值       ,0)*COALESCE(t2.PERFM_RATI9,0) as A股市值 
+	,COALESCE(t1.A股市值_月日均,0)*COALESCE(t2.PERFM_RATI9,0) as A股市值_月日均
+	,COALESCE(t1.A股市值_年日均,0)*COALESCE(t2.PERFM_RATI9,0) as A股市值_年日均
 FROM #T_PUB_SER_RELA T2
 LEFT JOIN #TEMP_T1 T1
 		ON T1.occur_dt=t2.occur_dt 
@@ -2934,6 +3017,8 @@ BEGIN
 		year_mth_cust_id                       ,
 		AFA_SEC_EMPID                          ,
 		wh_org_id_emp                          ,
+        WH_ORG_ID_CUST                         ,
+        LOAD_DT                                ,
 		year_mth_psn_jno                       ,
 		scdy_mval_final                        ,
 		stkf_mval_final                        ,
@@ -3083,13 +3168,15 @@ BEGIN
 	select 
 	 t2.YEAR 			as 年
 	,t2.MTH 			as 月
-	,T2.OCCUR_DT
+	,T2.OCCUR_DT        as 日期 
 	,t2.HS_CUST_ID 		as 客户编码
 	,t2.YEAR||t2.MTH 	as 年月
 	,t2.YEAR||t2.MTH||t2.HS_CUST_ID as 年月客户编码
 
-	,t2.AFA_SEC_EMPID as AFA二期员工号
-	,t2.WH_ORG_ID_EMP as 仓库机构编码_员工
+	,t2.AFA_SEC_EMPID  as AFA二期员工号
+	,t2.WH_ORG_ID_EMP  as 仓库机构编码_员工
+    ,T2.WH_ORG_ID_CUST AS 仓库机构编码_客户
+    ,T2.OCCUR_DT      
 	,t2.YEAR||t2.MTH||t2.AFA_SEC_EMPID as 年月员工号
 
 	,COALESCE(t2.PERFM_RATI1,0)*COALESCE(t1.SCDY_MVAL_FINAL,0) as 二级市值_期末
@@ -3665,23 +3752,47 @@ BEGIN
   简介：营业部维度的客户资产表
   *********************************************************************
   修订记录： 修订日期       版本号    修订人             修改内容简要说明
+  					20180522										zq							修正月日均指标计算问题
   *********************************************************************/
-
   	DECLARE @V_YEAR VARCHAR(4);		-- 年份
   	DECLARE @V_MONTH VARCHAR(2);	-- 月份
  	DECLARE @V_BEGIN_TRAD_DATE INT;	-- 本月开始交易日
  	DECLARE @V_YEAR_START_DATE INT; -- 本年开始交易日
- 	DECLARE @V_ACCU_MDAYS INT;		-- 月累计天数
- 	DECLARE @V_ACCU_YDAYS INT;		-- 年累计天数
+ 	
+  DECLARE @V_BIN_NATRE_DAY_MTHBEG  INT ;    --自然日_月初
+  DECLARE @V_BIN_NATRE_DAY_MTHEND  INT ;    --自然日_月末
+  DECLARE @V_BIN_TRD_DAY_MTHBEG    INT ;    --交易日_月初
+  DECLARE @V_BIN_TRD_DAY_MTHEND    INT ;    --交易日_月末
+  DECLARE @V_BIN_NATRE_DAY_YEARBGN INT ;    --自然日_年初
+  DECLARE @V_BIN_TRD_DAY_YEARBGN   INT ;    --交易日_年初
+  DECLARE @V_BIN_NATRE_DAYS_MTH    INT ;    --自然天数_月
+  DECLARE @V_BIN_TRD_DAYS_MTH      INT ;    --交易天数_月
+  DECLARE @V_BIN_NATRE_DAYS_YEAR   INT ;    --自然天数_年
+  DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年
   
 	COMMIT;
 	
 	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_DATE),1,4);
 	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_DATE),5,2);
 	SET @V_BEGIN_TRAD_DATE = (SELECT MIN(RQ) FROM DBA.T_DDW_D_RQ WHERE SFJRBZ='1' AND NIAN=@V_YEAR AND YUE=@V_MONTH);
-    SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
-    SET @V_ACCU_MDAYS=(SELECT TM_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
-    SET @V_ACCU_YDAYS=(SELECT TY_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
+  SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
+  
+  SET @V_BIN_NATRE_DAY_MTHBEG  =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_NATRE_DAY_MTHEND  =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_TRD_DAY_MTHBEG    =(SELECT MIN(DT)	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR  );
+  SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+                     									
+  SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+
+  SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
 
 	DELETE FROM DM.T_AST_M_BRH WHERE YEAR=@V_YEAR AND MTH=@V_MONTH;
 
@@ -3691,120 +3802,122 @@ BEGIN
 		,@V_MONTH 									AS    MTH 						--月
 		,BRH_ID										AS    BRH_ID                	--营业部编码	
 		,@V_DATE 									AS 	  OCCUR_DT 					--发生日期
-		,SUM(TOT_AST)/@V_ACCU_MDAYS					AS    TOT_AST_MDA				--总资产_月日均			
-		,SUM(SCDY_MVAL)/@V_ACCU_MDAYS				AS    SCDY_MVAL_MDA				--二级市值_月日均			
-		,SUM(STKF_MVAL)/@V_ACCU_MDAYS				AS    STKF_MVAL_MDA				--股基市值_月日均			
-		,SUM(A_SHR_MVAL)/@V_ACCU_MDAYS				AS    A_SHR_MVAL_MDA			--A股市值_月日均				
-		,SUM(NOTS_MVAL)/@V_ACCU_MDAYS				AS    NOTS_MVAL_MDA				--限售股市值_月日均			
-		,SUM(OFFUND_MVAL)/@V_ACCU_MDAYS				AS    OFFUND_MVAL_MDA			--场内基金市值_月日均				
-		,SUM(OPFUND_MVAL)/@V_ACCU_MDAYS				AS    OPFUND_MVAL_MDA			--场外基金市值_月日均				
-		,SUM(SB_MVAL)/@V_ACCU_MDAYS					AS    SB_MVAL_MDA				--三板市值_月日均			
-		,SUM(IMGT_PD_MVAL)/@V_ACCU_MDAYS			AS    IMGT_PD_MVAL_MDA			--资管产品市值_月日均				
-		,SUM(BANK_CHRM_MVAL)/@V_ACCU_MDAYS			AS    BANK_CHRM_MVAL_MDA		--银行理财市值_月日均					
-		,SUM(SECU_CHRM_MVAL)/@V_ACCU_MDAYS			AS    SECU_CHRM_MVAL_MDA		--证券理财市值_月日均					
-		,SUM(PSTK_OPTN_MVAL)/@V_ACCU_MDAYS			AS    PSTK_OPTN_MVAL_MDA		--个股期权市值_月日均					
-		,SUM(B_SHR_MVAL)/@V_ACCU_MDAYS				AS    B_SHR_MVAL_MDA			--B股市值_月日均				
-		,SUM(OUTMARK_MVAL)/@V_ACCU_MDAYS			AS    OUTMARK_MVAL_MDA			--体外市值_月日均				
-		,SUM(CPTL_BAL)/@V_ACCU_MDAYS				AS    CPTL_BAL_MDA				--资金余额_月日均			
-		,SUM(NO_ARVD_CPTL)/@V_ACCU_MDAYS			AS    NO_ARVD_CPTL_MDA			--未到账资金_月日均				
-		,SUM(PTE_FUND_MVAL)/@V_ACCU_MDAYS			AS    PTE_FUND_MVAL_MDA			--私募基金市值_月日均				
-		,SUM(CPTL_BAL_RMB)/@V_ACCU_MDAYS			AS    CPTL_BAL_RMB_MDA			--资金余额人民币_月日均				
-		,SUM(CPTL_BAL_HKD)/@V_ACCU_MDAYS			AS    CPTL_BAL_HKD_MDA			--资金余额港币_月日均				
-		,SUM(CPTL_BAL_USD)/@V_ACCU_MDAYS			AS    CPTL_BAL_USD_MDA			--资金余额美元_月日均				
-		,SUM(FUND_SPACCT_MVAL)/@V_ACCU_MDAYS		AS    FUND_SPACCT_MVAL_MDA		--基金专户市值_月日均					
-		,SUM(HGT_MVAL)/@V_ACCU_MDAYS				AS    HGT_MVAL_MDA				--沪港通市值_月日均			
-		,SUM(SGT_MVAL)/@V_ACCU_MDAYS				AS    SGT_MVAL_MDA				--深港通市值_月日均			
-		,SUM(TOT_AST_CONTAIN_NOTS)/@V_ACCU_MDAYS	AS    TOT_AST_CONTAIN_NOTS_MDA	--总资产_含限售股_月日均						
-		,SUM(BOND_MVAL)/@V_ACCU_MDAYS				AS    BOND_MVAL_MDA				--债券市值_月日均			
-		,SUM(REPO_MVAL)/@V_ACCU_MDAYS				AS    REPO_MVAL_MDA				--回购市值_月日均			
-		,SUM(TREA_REPO_MVAL)/@V_ACCU_MDAYS			AS    TREA_REPO_MVAL_MDA		--国债回购市值_月日均					
-		,SUM(REPQ_MVAL)/@V_ACCU_MDAYS				AS    REPQ_MVAL_MDA				--报价回购市值_月日均			
-		,SUM(PO_FUND_MVAL)/@V_ACCU_MDAYS			AS    PO_FUND_MVAL_MDA			--公募基金市值_月日均				
-		,SUM(APPTBUYB_PLG_MVAL)/@V_ACCU_MDAYS		AS    APPTBUYB_PLG_MVAL_MDA		--约定购回质押市值_月日均					
-		,SUM(OTH_PROD_MVAL)/@V_ACCU_MDAYS			AS    OTH_PROD_MVAL_MDA			--其他产品市值_月日均				
-		,SUM(STKT_FUND_MVAL)/@V_ACCU_MDAYS			AS    STKT_FUND_MVAL_MDA		--股票型基金市值_月日均					
-		,SUM(OTH_AST_MVAL)/@V_ACCU_MDAYS			AS    OTH_AST_MVAL_MDA			--其他资产市值_月日均				
-		,SUM(CREDIT_MARG)/@V_ACCU_MDAYS				AS    CREDIT_MARG_MDA			--融资融券保证金_月日均				
-		,SUM(CREDIT_NET_AST)/@V_ACCU_MDAYS			AS    CREDIT_NET_AST_MDA		--融资融券净资产_月日均					
-		,SUM(PROD_TOT_MVAL)/@V_ACCU_MDAYS			AS    PROD_TOT_MVAL_MDA			--产品总市值_月日均				
-		,SUM(JQL9_MVAL)/@V_ACCU_MDAYS				AS    JQL9_MVAL_MDA				--金麒麟9市值_月日均			
-		,SUM(STKPLG_GUAR_SECMV)/@V_ACCU_MDAYS		AS    STKPLG_GUAR_SECMV_MDA		--股票质押担保证券市值_月日均					
-		,SUM(STKPLG_FIN_BAL)/@V_ACCU_MDAYS			AS    STKPLG_FIN_BAL_MDA		--股票质押融资余额_月日均					
-		,SUM(APPTBUYB_BAL)/@V_ACCU_MDAYS			AS    APPTBUYB_BAL_MDA			--约定购回余额_月日均				
-		,SUM(CRED_MARG)/@V_ACCU_MDAYS				AS    CRED_MARG_MDA				--信用保证金_月日均			
-		,SUM(INTR_LIAB)/@V_ACCU_MDAYS				AS    INTR_LIAB_MDA				--利息负债_月日均			
-		,SUM(FEE_LIAB)/@V_ACCU_MDAYS				AS    FEE_LIAB_MDA				--费用负债_月日均			
-		,SUM(OTHLIAB)/@V_ACCU_MDAYS					AS    OTHLIAB_MDA				--其他负债_月日均			
-		,SUM(FIN_LIAB)/@V_ACCU_MDAYS				AS    FIN_LIAB_MDA				--融资负债_月日均			
-		,SUM(CRDT_STK_LIAB)/@V_ACCU_MDAYS			AS    CRDT_STK_LIAB_MDA			--融券负债_月日均				
-		,SUM(CREDIT_TOT_AST)/@V_ACCU_MDAYS			AS    CREDIT_TOT_AST_MDA		--融资融券总资产_月日均					
-		,SUM(CREDIT_TOT_LIAB)/@V_ACCU_MDAYS			AS    CREDIT_TOT_LIAB_MDA		--融资融券总负债_月日均					
-		,SUM(APPTBUYB_GUAR_SECMV)/@V_ACCU_MDAYS		AS    APPTBUYB_GUAR_SECMV_MDA	--约定购回担保证券市值_月日均						
-		,SUM(CREDIT_GUAR_SECMV)/@V_ACCU_MDAYS		AS    CREDIT_GUAR_SECMV_MDA		--融资融券担保证券市值_月日均					
+		,SUM(TOT_AST)/@V_BIN_NATRE_DAYS_MTH					AS    TOT_AST_MDA				--总资产_月日均			
+		,SUM(SCDY_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    SCDY_MVAL_MDA				--二级市值_月日均			
+		,SUM(STKF_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    STKF_MVAL_MDA				--股基市值_月日均			
+		,SUM(A_SHR_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    A_SHR_MVAL_MDA			--A股市值_月日均				
+		,SUM(NOTS_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    NOTS_MVAL_MDA				--限售股市值_月日均			
+		,SUM(OFFUND_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    OFFUND_MVAL_MDA			--场内基金市值_月日均				
+		,SUM(OPFUND_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    OPFUND_MVAL_MDA			--场外基金市值_月日均				
+		,SUM(SB_MVAL)/@V_BIN_NATRE_DAYS_MTH					AS    SB_MVAL_MDA				--三板市值_月日均			
+		,SUM(IMGT_PD_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    IMGT_PD_MVAL_MDA			--资管产品市值_月日均				
+		,SUM(BANK_CHRM_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    BANK_CHRM_MVAL_MDA		--银行理财市值_月日均					
+		,SUM(SECU_CHRM_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    SECU_CHRM_MVAL_MDA		--证券理财市值_月日均					
+		,SUM(PSTK_OPTN_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PSTK_OPTN_MVAL_MDA		--个股期权市值_月日均					
+		,SUM(B_SHR_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    B_SHR_MVAL_MDA			--B股市值_月日均				
+		,SUM(OUTMARK_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    OUTMARK_MVAL_MDA			--体外市值_月日均				
+		,SUM(CPTL_BAL)/@V_BIN_NATRE_DAYS_MTH				AS    CPTL_BAL_MDA				--资金余额_月日均			
+		,SUM(NO_ARVD_CPTL)/@V_BIN_NATRE_DAYS_MTH			AS    NO_ARVD_CPTL_MDA			--未到账资金_月日均				
+		,SUM(PTE_FUND_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PTE_FUND_MVAL_MDA			--私募基金市值_月日均				
+		,SUM(CPTL_BAL_RMB)/@V_BIN_NATRE_DAYS_MTH			AS    CPTL_BAL_RMB_MDA			--资金余额人民币_月日均				
+		,SUM(CPTL_BAL_HKD)/@V_BIN_NATRE_DAYS_MTH			AS    CPTL_BAL_HKD_MDA			--资金余额港币_月日均				
+		,SUM(CPTL_BAL_USD)/@V_BIN_NATRE_DAYS_MTH			AS    CPTL_BAL_USD_MDA			--资金余额美元_月日均				
+		,SUM(FUND_SPACCT_MVAL)/@V_BIN_NATRE_DAYS_MTH		AS    FUND_SPACCT_MVAL_MDA		--基金专户市值_月日均					
+		,SUM(HGT_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    HGT_MVAL_MDA				--沪港通市值_月日均			
+		,SUM(SGT_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    SGT_MVAL_MDA				--深港通市值_月日均			
+		,SUM(TOT_AST_CONTAIN_NOTS)/@V_BIN_NATRE_DAYS_MTH	AS    TOT_AST_CONTAIN_NOTS_MDA	--总资产_含限售股_月日均						
+		,SUM(BOND_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    BOND_MVAL_MDA				--债券市值_月日均			
+		,SUM(REPO_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    REPO_MVAL_MDA				--回购市值_月日均			
+		,SUM(TREA_REPO_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    TREA_REPO_MVAL_MDA		--国债回购市值_月日均					
+		,SUM(REPQ_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    REPQ_MVAL_MDA				--报价回购市值_月日均			
+		,SUM(PO_FUND_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PO_FUND_MVAL_MDA			--公募基金市值_月日均				
+		,SUM(APPTBUYB_PLG_MVAL)/@V_BIN_NATRE_DAYS_MTH		AS    APPTBUYB_PLG_MVAL_MDA		--约定购回质押市值_月日均					
+		,SUM(OTH_PROD_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    OTH_PROD_MVAL_MDA			--其他产品市值_月日均				
+		,SUM(STKT_FUND_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    STKT_FUND_MVAL_MDA		--股票型基金市值_月日均					
+		,SUM(OTH_AST_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    OTH_AST_MVAL_MDA			--其他资产市值_月日均				
+		,SUM(CREDIT_MARG)/@V_BIN_NATRE_DAYS_MTH				AS    CREDIT_MARG_MDA			--融资融券保证金_月日均				
+		,SUM(CREDIT_NET_AST)/@V_BIN_NATRE_DAYS_MTH			AS    CREDIT_NET_AST_MDA		--融资融券净资产_月日均					
+		,SUM(PROD_TOT_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PROD_TOT_MVAL_MDA			--产品总市值_月日均				
+		,SUM(JQL9_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    JQL9_MVAL_MDA				--金麒麟9市值_月日均			
+		,SUM(STKPLG_GUAR_SECMV)/@V_BIN_NATRE_DAYS_MTH		AS    STKPLG_GUAR_SECMV_MDA		--股票质押担保证券市值_月日均					
+		,SUM(STKPLG_FIN_BAL)/@V_BIN_NATRE_DAYS_MTH			AS    STKPLG_FIN_BAL_MDA		--股票质押融资余额_月日均					
+		,SUM(APPTBUYB_BAL)/@V_BIN_NATRE_DAYS_MTH			AS    APPTBUYB_BAL_MDA			--约定购回余额_月日均				
+		,SUM(CRED_MARG)/@V_BIN_NATRE_DAYS_MTH				AS    CRED_MARG_MDA				--信用保证金_月日均			
+		,SUM(INTR_LIAB)/@V_BIN_NATRE_DAYS_MTH				AS    INTR_LIAB_MDA				--利息负债_月日均			
+		,SUM(FEE_LIAB)/@V_BIN_NATRE_DAYS_MTH				AS    FEE_LIAB_MDA				--费用负债_月日均			
+		,SUM(OTHLIAB)/@V_BIN_NATRE_DAYS_MTH					AS    OTHLIAB_MDA				--其他负债_月日均			
+		,SUM(FIN_LIAB)/@V_BIN_NATRE_DAYS_MTH				AS    FIN_LIAB_MDA				--融资负债_月日均			
+		,SUM(CRDT_STK_LIAB)/@V_BIN_NATRE_DAYS_MTH			AS    CRDT_STK_LIAB_MDA			--融券负债_月日均				
+		,SUM(CREDIT_TOT_AST)/@V_BIN_NATRE_DAYS_MTH			AS    CREDIT_TOT_AST_MDA		--融资融券总资产_月日均					
+		,SUM(CREDIT_TOT_LIAB)/@V_BIN_NATRE_DAYS_MTH			AS    CREDIT_TOT_LIAB_MDA		--融资融券总负债_月日均					
+		,SUM(APPTBUYB_GUAR_SECMV)/@V_BIN_NATRE_DAYS_MTH		AS    APPTBUYB_GUAR_SECMV_MDA	--约定购回担保证券市值_月日均						
+		,SUM(CREDIT_GUAR_SECMV)/@V_BIN_NATRE_DAYS_MTH		AS    CREDIT_GUAR_SECMV_MDA		--融资融券担保证券市值_月日均					
 	INTO #T_AST_M_BRH_MTH
-	FROM DM.T_AST_D_BRH T 
-	WHERE T.OCCUR_DT BETWEEN @V_BEGIN_TRAD_DATE AND @V_DATE
-	   GROUP BY T.BRH_ID;
+	FROM DM.T_AST_D_BRH T1 
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_MTHBEG AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.BRH_ID;
 
 		SELECT 
 		 @V_YEAR									AS    YEAR   					--年
 		,@V_MONTH 									AS    MTH 						--月
 		,BRH_ID										AS    BRH_ID                	--营业部编码	
 		,@V_DATE 									AS 	  OCCUR_DT 					--发生日期
-		,SUM(TOT_AST)/@V_ACCU_YDAYS					AS    TOT_AST_YDA				--总资产_月日均			
-		,SUM(SCDY_MVAL)/@V_ACCU_YDAYS				AS    SCDY_MVAL_YDA				--二级市值_月日均			
-		,SUM(STKF_MVAL)/@V_ACCU_YDAYS				AS    STKF_MVAL_YDA				--股基市值_月日均			
-		,SUM(A_SHR_MVAL)/@V_ACCU_YDAYS				AS    A_SHR_MVAL_YDA			--A股市值_月日均				
-		,SUM(NOTS_MVAL)/@V_ACCU_YDAYS				AS    NOTS_MVAL_YDA				--限售股市值_月日均			
-		,SUM(OFFUND_MVAL)/@V_ACCU_YDAYS				AS    OFFUND_MVAL_YDA			--场内基金市值_月日均				
-		,SUM(OPFUND_MVAL)/@V_ACCU_YDAYS				AS    OPFUND_MVAL_YDA			--场外基金市值_月日均				
-		,SUM(SB_MVAL)/@V_ACCU_YDAYS					AS    SB_MVAL_YDA				--三板市值_月日均			
-		,SUM(IMGT_PD_MVAL)/@V_ACCU_YDAYS			AS    IMGT_PD_MVAL_YDA			--资管产品市值_月日均				
-		,SUM(BANK_CHRM_MVAL)/@V_ACCU_YDAYS			AS    BANK_CHRM_MVAL_YDA		--银行理财市值_月日均					
-		,SUM(SECU_CHRM_MVAL)/@V_ACCU_YDAYS			AS    SECU_CHRM_MVAL_YDA		--证券理财市值_月日均					
-		,SUM(PSTK_OPTN_MVAL)/@V_ACCU_YDAYS			AS    PSTK_OPTN_MVAL_YDA		--个股期权市值_月日均					
-		,SUM(B_SHR_MVAL)/@V_ACCU_YDAYS				AS    B_SHR_MVAL_YDA			--B股市值_月日均				
-		,SUM(OUTMARK_MVAL)/@V_ACCU_YDAYS			AS    OUTMARK_MVAL_YDA			--体外市值_月日均				
-		,SUM(CPTL_BAL)/@V_ACCU_YDAYS				AS    CPTL_BAL_YDA				--资金余额_月日均			
-		,SUM(NO_ARVD_CPTL)/@V_ACCU_YDAYS			AS    NO_ARVD_CPTL_YDA			--未到账资金_月日均				
-		,SUM(PTE_FUND_MVAL)/@V_ACCU_YDAYS			AS    PTE_FUND_MVAL_YDA			--私募基金市值_月日均				
-		,SUM(CPTL_BAL_RMB)/@V_ACCU_YDAYS			AS    CPTL_BAL_RMB_YDA			--资金余额人民币_月日均				
-		,SUM(CPTL_BAL_HKD)/@V_ACCU_YDAYS			AS    CPTL_BAL_HKD_YDA			--资金余额港币_月日均				
-		,SUM(CPTL_BAL_USD)/@V_ACCU_YDAYS			AS    CPTL_BAL_USD_YDA			--资金余额美元_月日均				
-		,SUM(FUND_SPACCT_MVAL)/@V_ACCU_YDAYS		AS    FUND_SPACCT_MVAL_YDA		--基金专户市值_月日均					
-		,SUM(HGT_MVAL)/@V_ACCU_YDAYS				AS    HGT_MVAL_YDA				--沪港通市值_月日均			
-		,SUM(SGT_MVAL)/@V_ACCU_YDAYS				AS    SGT_MVAL_YDA				--深港通市值_月日均			
-		,SUM(TOT_AST_CONTAIN_NOTS)/@V_ACCU_YDAYS	AS    TOT_AST_CONTAIN_NOTS_YDA	--总资产_含限售股_月日均						
-		,SUM(BOND_MVAL)/@V_ACCU_YDAYS				AS    BOND_MVAL_YDA				--债券市值_月日均			
-		,SUM(REPO_MVAL)/@V_ACCU_YDAYS				AS    REPO_MVAL_YDA				--回购市值_月日均			
-		,SUM(TREA_REPO_MVAL)/@V_ACCU_YDAYS			AS    TREA_REPO_MVAL_YDA		--国债回购市值_月日均					
-		,SUM(REPQ_MVAL)/@V_ACCU_YDAYS				AS    REPQ_MVAL_YDA				--报价回购市值_月日均			
-		,SUM(PO_FUND_MVAL)/@V_ACCU_YDAYS			AS    PO_FUND_MVAL_YDA			--公募基金市值_月日均				
-		,SUM(APPTBUYB_PLG_MVAL)/@V_ACCU_YDAYS		AS    APPTBUYB_PLG_MVAL_YDA		--约定购回质押市值_月日均					
-		,SUM(OTH_PROD_MVAL)/@V_ACCU_YDAYS			AS    OTH_PROD_MVAL_YDA			--其他产品市值_月日均				
-		,SUM(STKT_FUND_MVAL)/@V_ACCU_YDAYS			AS    STKT_FUND_MVAL_YDA		--股票型基金市值_月日均					
-		,SUM(OTH_AST_MVAL)/@V_ACCU_YDAYS			AS    OTH_AST_MVAL_YDA			--其他资产市值_月日均				
-		,SUM(CREDIT_MARG)/@V_ACCU_YDAYS				AS    CREDIT_MARG_YDA			--融资融券保证金_月日均				
-		,SUM(CREDIT_NET_AST)/@V_ACCU_YDAYS			AS    CREDIT_NET_AST_YDA		--融资融券净资产_月日均					
-		,SUM(PROD_TOT_MVAL)/@V_ACCU_YDAYS			AS    PROD_TOT_MVAL_YDA			--产品总市值_月日均				
-		,SUM(JQL9_MVAL)/@V_ACCU_YDAYS				AS    JQL9_MVAL_YDA				--金麒麟9市值_月日均			
-		,SUM(STKPLG_GUAR_SECMV)/@V_ACCU_YDAYS		AS    STKPLG_GUAR_SECMV_YDA		--股票质押担保证券市值_月日均					
-		,SUM(STKPLG_FIN_BAL)/@V_ACCU_YDAYS			AS    STKPLG_FIN_BAL_YDA		--股票质押融资余额_月日均					
-		,SUM(APPTBUYB_BAL)/@V_ACCU_YDAYS			AS    APPTBUYB_BAL_YDA			--约定购回余额_月日均				
-		,SUM(CRED_MARG)/@V_ACCU_YDAYS				AS    CRED_MARG_YDA				--信用保证金_月日均			
-		,SUM(INTR_LIAB)/@V_ACCU_YDAYS				AS    INTR_LIAB_YDA				--利息负债_月日均			
-		,SUM(FEE_LIAB)/@V_ACCU_YDAYS				AS    FEE_LIAB_YDA				--费用负债_月日均			
-		,SUM(OTHLIAB)/@V_ACCU_YDAYS					AS    OTHLIAB_YDA				--其他负债_月日均			
-		,SUM(FIN_LIAB)/@V_ACCU_YDAYS				AS    FIN_LIAB_YDA				--融资负债_月日均			
-		,SUM(CRDT_STK_LIAB)/@V_ACCU_YDAYS			AS    CRDT_STK_LIAB_YDA			--融券负债_月日均				
-		,SUM(CREDIT_TOT_AST)/@V_ACCU_YDAYS			AS    CREDIT_TOT_AST_YDA		--融资融券总资产_月日均					
-		,SUM(CREDIT_TOT_LIAB)/@V_ACCU_YDAYS			AS    CREDIT_TOT_LIAB_YDA		--融资融券总负债_月日均					
-		,SUM(APPTBUYB_GUAR_SECMV)/@V_ACCU_YDAYS		AS    APPTBUYB_GUAR_SECMV_YDA	--约定购回担保证券市值_月日均						
-		,SUM(CREDIT_GUAR_SECMV)/@V_ACCU_YDAYS		AS    CREDIT_GUAR_SECMV_YDA		--融资融券担保证券市值_月日均					
+		,SUM(TOT_AST)/@V_BIN_NATRE_DAYS_YEAR					AS    TOT_AST_YDA				--总资产_月日均			
+		,SUM(SCDY_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    SCDY_MVAL_YDA				--二级市值_月日均			
+		,SUM(STKF_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    STKF_MVAL_YDA				--股基市值_月日均			
+		,SUM(A_SHR_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    A_SHR_MVAL_YDA			--A股市值_月日均				
+		,SUM(NOTS_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    NOTS_MVAL_YDA				--限售股市值_月日均			
+		,SUM(OFFUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    OFFUND_MVAL_YDA			--场内基金市值_月日均				
+		,SUM(OPFUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    OPFUND_MVAL_YDA			--场外基金市值_月日均				
+		,SUM(SB_MVAL)/@V_BIN_NATRE_DAYS_YEAR					AS    SB_MVAL_YDA				--三板市值_月日均			
+		,SUM(IMGT_PD_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    IMGT_PD_MVAL_YDA			--资管产品市值_月日均				
+		,SUM(BANK_CHRM_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    BANK_CHRM_MVAL_YDA		--银行理财市值_月日均					
+		,SUM(SECU_CHRM_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    SECU_CHRM_MVAL_YDA		--证券理财市值_月日均					
+		,SUM(PSTK_OPTN_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PSTK_OPTN_MVAL_YDA		--个股期权市值_月日均					
+		,SUM(B_SHR_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    B_SHR_MVAL_YDA			--B股市值_月日均				
+		,SUM(OUTMARK_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    OUTMARK_MVAL_YDA			--体外市值_月日均				
+		,SUM(CPTL_BAL)/@V_BIN_NATRE_DAYS_YEAR				AS    CPTL_BAL_YDA				--资金余额_月日均			
+		,SUM(NO_ARVD_CPTL)/@V_BIN_NATRE_DAYS_YEAR			AS    NO_ARVD_CPTL_YDA			--未到账资金_月日均				
+		,SUM(PTE_FUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PTE_FUND_MVAL_YDA			--私募基金市值_月日均				
+		,SUM(CPTL_BAL_RMB)/@V_BIN_NATRE_DAYS_YEAR			AS    CPTL_BAL_RMB_YDA			--资金余额人民币_月日均				
+		,SUM(CPTL_BAL_HKD)/@V_BIN_NATRE_DAYS_YEAR			AS    CPTL_BAL_HKD_YDA			--资金余额港币_月日均				
+		,SUM(CPTL_BAL_USD)/@V_BIN_NATRE_DAYS_YEAR			AS    CPTL_BAL_USD_YDA			--资金余额美元_月日均				
+		,SUM(FUND_SPACCT_MVAL)/@V_BIN_NATRE_DAYS_YEAR		AS    FUND_SPACCT_MVAL_YDA		--基金专户市值_月日均					
+		,SUM(HGT_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    HGT_MVAL_YDA				--沪港通市值_月日均			
+		,SUM(SGT_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    SGT_MVAL_YDA				--深港通市值_月日均			
+		,SUM(TOT_AST_CONTAIN_NOTS)/@V_BIN_NATRE_DAYS_YEAR	AS    TOT_AST_CONTAIN_NOTS_YDA	--总资产_含限售股_月日均						
+		,SUM(BOND_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    BOND_MVAL_YDA				--债券市值_月日均			
+		,SUM(REPO_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    REPO_MVAL_YDA				--回购市值_月日均			
+		,SUM(TREA_REPO_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    TREA_REPO_MVAL_YDA		--国债回购市值_月日均					
+		,SUM(REPQ_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    REPQ_MVAL_YDA				--报价回购市值_月日均			
+		,SUM(PO_FUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PO_FUND_MVAL_YDA			--公募基金市值_月日均				
+		,SUM(APPTBUYB_PLG_MVAL)/@V_BIN_NATRE_DAYS_YEAR		AS    APPTBUYB_PLG_MVAL_YDA		--约定购回质押市值_月日均					
+		,SUM(OTH_PROD_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    OTH_PROD_MVAL_YDA			--其他产品市值_月日均				
+		,SUM(STKT_FUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    STKT_FUND_MVAL_YDA		--股票型基金市值_月日均					
+		,SUM(OTH_AST_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    OTH_AST_MVAL_YDA			--其他资产市值_月日均				
+		,SUM(CREDIT_MARG)/@V_BIN_NATRE_DAYS_YEAR				AS    CREDIT_MARG_YDA			--融资融券保证金_月日均				
+		,SUM(CREDIT_NET_AST)/@V_BIN_NATRE_DAYS_YEAR			AS    CREDIT_NET_AST_YDA		--融资融券净资产_月日均					
+		,SUM(PROD_TOT_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PROD_TOT_MVAL_YDA			--产品总市值_月日均				
+		,SUM(JQL9_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    JQL9_MVAL_YDA				--金麒麟9市值_月日均			
+		,SUM(STKPLG_GUAR_SECMV)/@V_BIN_NATRE_DAYS_YEAR		AS    STKPLG_GUAR_SECMV_YDA		--股票质押担保证券市值_月日均					
+		,SUM(STKPLG_FIN_BAL)/@V_BIN_NATRE_DAYS_YEAR			AS    STKPLG_FIN_BAL_YDA		--股票质押融资余额_月日均					
+		,SUM(APPTBUYB_BAL)/@V_BIN_NATRE_DAYS_YEAR			AS    APPTBUYB_BAL_YDA			--约定购回余额_月日均				
+		,SUM(CRED_MARG)/@V_BIN_NATRE_DAYS_YEAR				AS    CRED_MARG_YDA				--信用保证金_月日均			
+		,SUM(INTR_LIAB)/@V_BIN_NATRE_DAYS_YEAR				AS    INTR_LIAB_YDA				--利息负债_月日均			
+		,SUM(FEE_LIAB)/@V_BIN_NATRE_DAYS_YEAR				AS    FEE_LIAB_YDA				--费用负债_月日均			
+		,SUM(OTHLIAB)/@V_BIN_NATRE_DAYS_YEAR					AS    OTHLIAB_YDA				--其他负债_月日均			
+		,SUM(FIN_LIAB)/@V_BIN_NATRE_DAYS_YEAR				AS    FIN_LIAB_YDA				--融资负债_月日均			
+		,SUM(CRDT_STK_LIAB)/@V_BIN_NATRE_DAYS_YEAR			AS    CRDT_STK_LIAB_YDA			--融券负债_月日均				
+		,SUM(CREDIT_TOT_AST)/@V_BIN_NATRE_DAYS_YEAR			AS    CREDIT_TOT_AST_YDA		--融资融券总资产_月日均					
+		,SUM(CREDIT_TOT_LIAB)/@V_BIN_NATRE_DAYS_YEAR			AS    CREDIT_TOT_LIAB_YDA		--融资融券总负债_月日均					
+		,SUM(APPTBUYB_GUAR_SECMV)/@V_BIN_NATRE_DAYS_YEAR		AS    APPTBUYB_GUAR_SECMV_YDA	--约定购回担保证券市值_月日均						
+		,SUM(CREDIT_GUAR_SECMV)/@V_BIN_NATRE_DAYS_YEAR		AS    CREDIT_GUAR_SECMV_YDA		--融资融券担保证券市值_月日均					
 	INTO #T_AST_M_BRH_YEAR
-	FROM DM.T_AST_D_BRH T 
-	WHERE T.OCCUR_DT BETWEEN @V_YEAR_START_DATE AND @V_DATE
-	   GROUP BY T.BRH_ID;
+	FROM DM.T_AST_D_BRH T1 
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_YEARBGN AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.BRH_ID;
 
 	--插入目标表
 	INSERT INTO DM.T_AST_M_BRH(
@@ -3912,111 +4025,112 @@ BEGIN
 		,CREDIT_GUAR_SECMV_YDA			--融资融券担保证券市值_年日均		
 	)		
 	SELECT 
-		 T1.YEAR						AS  YEAR					  --年
-		,T1.MTH							AS  MTH						  --月
-		,T1.BRH_ID                		AS  BRH_ID                	  --营业部编码		
-		,T1.OCCUR_DT					AS  OCCUR_DT				  --发生日期
-		,T1.TOT_AST_MDA	  	  			AS  TOT_AST_MDA               --总资产_月日均
+		 T2.YEAR						AS  YEAR					  --年
+		,T2.MTH							AS  MTH						  --月
+		,T2.BRH_ID                		AS  BRH_ID                	  --营业部编码		
+		,T2.OCCUR_DT					AS  OCCUR_DT				  --发生日期
+		,COALESCE(T1.TOT_AST_MDA,0)	  	  			AS  TOT_AST_MDA               --总资产_月日均
 		,T2.TOT_AST_YDA	  	  			AS  TOT_AST_YDA               --总资产_年日均
-		,T1.SCDY_MVAL_MDA	  			AS  SCDY_MVAL_MDA             --二级市值_月日均
+		,COALESCE(T1.SCDY_MVAL_MDA,0)	  			AS  SCDY_MVAL_MDA             --二级市值_月日均
 		,T2.SCDY_MVAL_YDA	  			AS  SCDY_MVAL_YDA             --二级市值_年日均
-		,T1.STKF_MVAL_MDA	  			AS  STKF_MVAL_MDA             --股基市值_月日均
+		,COALESCE(T1.STKF_MVAL_MDA,0)	  			AS  STKF_MVAL_MDA             --股基市值_月日均
 		,T2.STKF_MVAL_YDA	  			AS  STKF_MVAL_YDA             --股基市值_年日均
-		,T1.A_SHR_MVAL_MDA	  			AS  A_SHR_MVAL_MDA            --A股市值_月日均
+		,COALESCE(T1.A_SHR_MVAL_MDA,0)	  			AS  A_SHR_MVAL_MDA            --A股市值_月日均
 		,T2.A_SHR_MVAL_YDA	  			AS  A_SHR_MVAL_YDA            --A股市值_年日均
-		,T1.NOTS_MVAL_MDA	  			AS  NOTS_MVAL_MDA             --限售股市值_月日均
+		,COALESCE(T1.NOTS_MVAL_MDA,0)	  			AS  NOTS_MVAL_MDA             --限售股市值_月日均
 		,T2.NOTS_MVAL_YDA	  			AS  NOTS_MVAL_YDA             --限售股市值_年日均
-		,T1.OFFUND_MVAL_MDA	  			AS  OFFUND_MVAL_MDA           --场内基金市值_月日均
+		,COALESCE(T1.OFFUND_MVAL_MDA,0)	  			AS  OFFUND_MVAL_MDA           --场内基金市值_月日均
 		,T2.OFFUND_MVAL_YDA	  			AS  OFFUND_MVAL_YDA           --场内基金市值_年日均
-		,T1.OPFUND_MVAL_MDA	  			AS  OPFUND_MVAL_MDA           --场外基金市值_月日均
+		,COALESCE(T1.OPFUND_MVAL_MDA,0)	  			AS  OPFUND_MVAL_MDA           --场外基金市值_月日均
 		,T2.OPFUND_MVAL_YDA	  			AS  OPFUND_MVAL_YDA           --场外基金市值_年日均
-		,T1.SB_MVAL_MDA	  	  			AS  SB_MVAL_MDA               --三板市值_月日均
+		,COALESCE(T1.SB_MVAL_MDA,0)	  	  			AS  SB_MVAL_MDA               --三板市值_月日均
 		,T2.SB_MVAL_YDA	  	  			AS  SB_MVAL_YDA               --三板市值_年日均
-		,T1.IMGT_PD_MVAL_MDA	  		AS  IMGT_PD_MVAL_MDA          --资管产品市值_月日均
+		,COALESCE(T1.IMGT_PD_MVAL_MDA,0)	  		AS  IMGT_PD_MVAL_MDA          --资管产品市值_月日均
 		,T2.IMGT_PD_MVAL_YDA	  		AS  IMGT_PD_MVAL_YDA          --资管产品市值_年日均
 		,T2.BANK_CHRM_MVAL_YDA	  		AS  BANK_CHRM_MVAL_YDA        --银行理财市值_年日均
-		,T1.BANK_CHRM_MVAL_MDA	  		AS  BANK_CHRM_MVAL_MDA        --银行理财市值_月日均
-		,T1.SECU_CHRM_MVAL_MDA	  		AS  SECU_CHRM_MVAL_MDA        --证券理财市值_月日均
+		,COALESCE(T1.BANK_CHRM_MVAL_MDA,0)	  		AS  BANK_CHRM_MVAL_MDA        --银行理财市值_月日均
+		,COALESCE(T1.SECU_CHRM_MVAL_MDA,0)	  		AS  SECU_CHRM_MVAL_MDA        --证券理财市值_月日均
 		,T2.SECU_CHRM_MVAL_YDA	  		AS  SECU_CHRM_MVAL_YDA        --证券理财市值_年日均
-		,T1.PSTK_OPTN_MVAL_MDA	  		AS  PSTK_OPTN_MVAL_MDA        --个股期权市值_月日均
+		,COALESCE(T1.PSTK_OPTN_MVAL_MDA,0)	  		AS  PSTK_OPTN_MVAL_MDA        --个股期权市值_月日均
 		,T2.PSTK_OPTN_MVAL_YDA	  		AS  PSTK_OPTN_MVAL_YDA        --个股期权市值_年日均
-		,T1.B_SHR_MVAL_MDA	  			AS  B_SHR_MVAL_MDA            --B股市值_月日均
+		,COALESCE(T1.B_SHR_MVAL_MDA,0)	  			AS  B_SHR_MVAL_MDA            --B股市值_月日均
 		,T2.B_SHR_MVAL_YDA	  			AS  B_SHR_MVAL_YDA            --B股市值_年日均
-		,T1.OUTMARK_MVAL_MDA	  		AS  OUTMARK_MVAL_MDA          --体外市值_月日均
+		,COALESCE(T1.OUTMARK_MVAL_MDA,0)	  		AS  OUTMARK_MVAL_MDA          --体外市值_月日均
 		,T2.OUTMARK_MVAL_YDA	  		AS  OUTMARK_MVAL_YDA          --体外市值_年日均
-		,T1.CPTL_BAL_MDA	  			AS  CPTL_BAL_MDA              --资金余额_月日均
+		,COALESCE(T1.CPTL_BAL_MDA,0)	  			AS  CPTL_BAL_MDA              --资金余额_月日均
 		,T2.CPTL_BAL_YDA	  			AS  CPTL_BAL_YDA              --资金余额_年日均
-		,T1.NO_ARVD_CPTL_MDA	  		AS  NO_ARVD_CPTL_MDA          --未到账资金_月日均
+		,COALESCE(T1.NO_ARVD_CPTL_MDA,0)	  		AS  NO_ARVD_CPTL_MDA          --未到账资金_月日均
 		,T2.NO_ARVD_CPTL_YDA	  		AS  NO_ARVD_CPTL_YDA          --未到账资金_年日均
-		,T1.PTE_FUND_MVAL_MDA	  		AS  PTE_FUND_MVAL_MDA         --私募基金市值_月日均
+		,COALESCE(T1.PTE_FUND_MVAL_MDA,0)	  		AS  PTE_FUND_MVAL_MDA         --私募基金市值_月日均
 		,T2.PTE_FUND_MVAL_YDA	  		AS  PTE_FUND_MVAL_YDA         --私募基金市值_年日均
-		,T1.CPTL_BAL_RMB_MDA	  		AS  CPTL_BAL_RMB_MDA          --资金余额人民币_月日均
+		,COALESCE(T1.CPTL_BAL_RMB_MDA,0)	  		AS  CPTL_BAL_RMB_MDA          --资金余额人民币_月日均
 		,T2.CPTL_BAL_RMB_YDA	  		AS  CPTL_BAL_RMB_YDA          --资金余额人民币_年日均
-		,T1.CPTL_BAL_HKD_MDA	  		AS  CPTL_BAL_HKD_MDA          --资金余额港币_月日均
+		,COALESCE(T1.CPTL_BAL_HKD_MDA,0)	  		AS  CPTL_BAL_HKD_MDA          --资金余额港币_月日均
 		,T2.CPTL_BAL_HKD_YDA	  		AS  CPTL_BAL_HKD_YDA          --资金余额港币_年日均
-		,T1.CPTL_BAL_USD_MDA	  		AS  CPTL_BAL_USD_MDA          --资金余额美元_月日均
+		,COALESCE(T1.CPTL_BAL_USD_MDA,0)	  		AS  CPTL_BAL_USD_MDA          --资金余额美元_月日均
 		,T2.CPTL_BAL_USD_YDA	  		AS  CPTL_BAL_USD_YDA          --资金余额美元_年日均
-		,T1.FUND_SPACCT_MVAL_MDA	  	AS  FUND_SPACCT_MVAL_MDA      --基金专户市值_月日均
+		,COALESCE(T1.FUND_SPACCT_MVAL_MDA,0)	  	AS  FUND_SPACCT_MVAL_MDA      --基金专户市值_月日均
 		,T2.FUND_SPACCT_MVAL_YDA	  	AS  FUND_SPACCT_MVAL_YDA      --基金专户市值_年日均
-		,T1.HGT_MVAL_MDA	  			AS  HGT_MVAL_MDA              --沪港通市值_月日均
+		,COALESCE(T1.HGT_MVAL_MDA,0)	  			AS  HGT_MVAL_MDA              --沪港通市值_月日均
 		,T2.HGT_MVAL_YDA	  			AS  HGT_MVAL_YDA              --沪港通市值_年日均
-		,T1.SGT_MVAL_MDA	  			AS  SGT_MVAL_MDA              --深港通市值_月日均
+		,COALESCE(T1.SGT_MVAL_MDA,0)	  			AS  SGT_MVAL_MDA              --深港通市值_月日均
 		,T2.SGT_MVAL_YDA	  			AS  SGT_MVAL_YDA              --深港通市值_年日均
-		,T1.TOT_AST_CONTAIN_NOTS_MDA	AS  TOT_AST_CONTAIN_NOTS_MDA  --总资产_含限售股_月日均
+		,COALESCE(T1.TOT_AST_CONTAIN_NOTS_MDA,0)	AS  TOT_AST_CONTAIN_NOTS_MDA  --总资产_含限售股_月日均
 		,T2.TOT_AST_CONTAIN_NOTS_YDA	AS  TOT_AST_CONTAIN_NOTS_YDA  --总资产_含限售股_年日均
-		,T1.BOND_MVAL_MDA	  			AS  BOND_MVAL_MDA             --债券市值_月日均
+		,COALESCE(T1.BOND_MVAL_MDA,0)	  			AS  BOND_MVAL_MDA             --债券市值_月日均
 		,T2.BOND_MVAL_YDA	  			AS  BOND_MVAL_YDA             --债券市值_年日均
-		,T1.REPO_MVAL_MDA	  			AS  REPO_MVAL_MDA             --回购市值_月日均
+		,COALESCE(T1.REPO_MVAL_MDA,0)	  			AS  REPO_MVAL_MDA             --回购市值_月日均
 		,T2.REPO_MVAL_YDA	  			AS  REPO_MVAL_YDA             --回购市值_年日均
-		,T1.TREA_REPO_MVAL_MDA	  		AS  TREA_REPO_MVAL_MDA        --国债回购市值_月日均
+		,COALESCE(T1.TREA_REPO_MVAL_MDA,0)	  		AS  TREA_REPO_MVAL_MDA        --国债回购市值_月日均
 		,T2.TREA_REPO_MVAL_YDA	  		AS  TREA_REPO_MVAL_YDA        --国债回购市值_年日均
-		,T1.REPQ_MVAL_MDA	  			AS  REPQ_MVAL_MDA             --报价回购市值_月日均
+		,COALESCE(T1.REPQ_MVAL_MDA,0)	  			AS  REPQ_MVAL_MDA             --报价回购市值_月日均
 		,T2.REPQ_MVAL_YDA	  			AS  REPQ_MVAL_YDA             --报价回购市值_年日均
-		,T1.PO_FUND_MVAL_MDA	  		AS  PO_FUND_MVAL_MDA          --公募基金市值_月日均
+		,COALESCE(T1.PO_FUND_MVAL_MDA,0)	  		AS  PO_FUND_MVAL_MDA          --公募基金市值_月日均
 		,T2.PO_FUND_MVAL_YDA	  		AS  PO_FUND_MVAL_YDA          --公募基金市值_年日均
-		,T1.APPTBUYB_PLG_MVAL_MDA	  	AS  APPTBUYB_PLG_MVAL_MDA     --约定购回质押市值_月日均
+		,COALESCE(T1.APPTBUYB_PLG_MVAL_MDA,0)	  	AS  APPTBUYB_PLG_MVAL_MDA     --约定购回质押市值_月日均
 		,T2.APPTBUYB_PLG_MVAL_YDA	  	AS  APPTBUYB_PLG_MVAL_YDA     --约定购回质押市值_月日均
-		,T1.OTH_PROD_MVAL_MDA	  		AS  OTH_PROD_MVAL_MDA         --其他产品市值_月日均
-		,T1.STKT_FUND_MVAL_MDA	  		AS  STKT_FUND_MVAL_MDA        --股票型基金市值_月日均
-		,T1.OTH_AST_MVAL_MDA	  		AS  OTH_AST_MVAL_MDA          --其他资产市值_月日均
+		,COALESCE(T1.OTH_PROD_MVAL_MDA,0)	  		AS  OTH_PROD_MVAL_MDA         --其他产品市值_月日均
+		,COALESCE(T1.STKT_FUND_MVAL_MDA,0)	  		AS  STKT_FUND_MVAL_MDA        --股票型基金市值_月日均
+		,COALESCE(T1.OTH_AST_MVAL_MDA,0)	  		AS  OTH_AST_MVAL_MDA          --其他资产市值_月日均
 		,T2.OTH_PROD_MVAL_YDA	  		AS  OTH_PROD_MVAL_YDA         --其他产品市值_年日均
 		,T2.APPTBUYB_BAL_YDA	  		AS  APPTBUYB_BAL_YDA          --约定购回余额_月日均
-		,T1.CREDIT_MARG_MDA	  			AS  CREDIT_MARG_MDA           --融资融券保证金_月日均
+		,COALESCE(T1.CREDIT_MARG_MDA,0)	  			AS  CREDIT_MARG_MDA           --融资融券保证金_月日均
 		,T2.CREDIT_MARG_YDA	  			AS  CREDIT_MARG_YDA           --融资融券保证金_年日均
-		,T1.CREDIT_NET_AST_MDA	  		AS  CREDIT_NET_AST_MDA        --融资融券净资产_月日均
+		,COALESCE(T1.CREDIT_NET_AST_MDA,0)	  		AS  CREDIT_NET_AST_MDA        --融资融券净资产_月日均
 		,T2.CREDIT_NET_AST_YDA	  		AS  CREDIT_NET_AST_YDA        --融资融券净资产_年日均
-		,T1.PROD_TOT_MVAL_MDA	  		AS  PROD_TOT_MVAL_MDA         --产品总市值_月日均
+		,COALESCE(T1.PROD_TOT_MVAL_MDA,0)	  		AS  PROD_TOT_MVAL_MDA         --产品总市值_月日均
 		,T2.PROD_TOT_MVAL_YDA	  		AS  PROD_TOT_MVAL_YDA         --产品总市值_年日均
-		,T1.JQL9_MVAL_MDA	  			AS  JQL9_MVAL_MDA             --金麒麟9市值_月日均
+		,COALESCE(T1.JQL9_MVAL_MDA,0)	  			AS  JQL9_MVAL_MDA             --金麒麟9市值_月日均
 		,T2.JQL9_MVAL_YDA	  			AS  JQL9_MVAL_YDA             --金麒麟9市值_年日均
-		,T1.STKPLG_GUAR_SECMV_MDA	  	AS  STKPLG_GUAR_SECMV_MDA     --股票质押担保证券市值_月日均
+		,COALESCE(T1.STKPLG_GUAR_SECMV_MDA,0)	  	AS  STKPLG_GUAR_SECMV_MDA     --股票质押担保证券市值_月日均
 		,T2.STKPLG_GUAR_SECMV_YDA	  	AS  STKPLG_GUAR_SECMV_YDA     --股票质押担保证券市值_年日均
-		,T1.STKPLG_FIN_BAL_MDA	  		AS  STKPLG_FIN_BAL_MDA        --股票质押融资余额_月日均
+		,COALESCE(T1.STKPLG_FIN_BAL_MDA,0)	  		AS  STKPLG_FIN_BAL_MDA        --股票质押融资余额_月日均
 		,T2.STKPLG_FIN_BAL_YDA	  		AS  STKPLG_FIN_BAL_YDA        --股票质押融资余额_年日均
-		,T1.APPTBUYB_BAL_MDA	  		AS  APPTBUYB_BAL_MDA          --约定购回余额_月日均
-		,T1.CRED_MARG_MDA	  			AS  CRED_MARG_MDA             --信用保证金_月日均
+		,COALESCE(T1.APPTBUYB_BAL_MDA,0)	  		AS  APPTBUYB_BAL_MDA          --约定购回余额_月日均
+		,COALESCE(T1.CRED_MARG_MDA,0)	  			AS  CRED_MARG_MDA             --信用保证金_月日均
 		,T2.CRED_MARG_YDA	  			AS  CRED_MARG_YDA             --信用保证金_年日均
-		,T1.INTR_LIAB_MDA	  			AS  INTR_LIAB_MDA             --利息负债_月日均
+		,COALESCE(T1.INTR_LIAB_MDA,0)	  			AS  INTR_LIAB_MDA             --利息负债_月日均
 		,T2.INTR_LIAB_YDA	  			AS  INTR_LIAB_YDA             --利息负债_年日均
-		,T1.FEE_LIAB_MDA	  			AS  FEE_LIAB_MDA              --费用负债_月日均
+		,COALESCE(T1.FEE_LIAB_MDA,0)	  			AS  FEE_LIAB_MDA              --费用负债_月日均
 		,T2.FEE_LIAB_YDA	  			AS  FEE_LIAB_YDA              --费用负债_年日均
-		,T1.OTHLIAB_MDA	  				AS  OTHLIAB_MDA               --其他负债_月日均
+		,COALESCE(T1.OTHLIAB_MDA,0)	  				AS  OTHLIAB_MDA               --其他负债_月日均
 		,T2.OTHLIAB_YDA	  				AS  OTHLIAB_YDA               --其他负债_年日均
-		,T1.FIN_LIAB_MDA	  			AS  FIN_LIAB_MDA              --融资负债_月日均
+		,COALESCE(T1.FIN_LIAB_MDA,0)	  			AS  FIN_LIAB_MDA              --融资负债_月日均
 		,T2.CRDT_STK_LIAB_YDA	  		AS  CRDT_STK_LIAB_YDA         --融券负债_年日均
-		,T1.CRDT_STK_LIAB_MDA	  		AS  CRDT_STK_LIAB_MDA         --融券负债_月日均
+		,COALESCE(T1.CRDT_STK_LIAB_MDA,0)	  		AS  CRDT_STK_LIAB_MDA         --融券负债_月日均
 		,T2.FIN_LIAB_YDA	  			AS  FIN_LIAB_YDA              --融资负债_年日均
-		,T1.CREDIT_TOT_AST_MDA	  		AS  CREDIT_TOT_AST_MDA        --融资融券总资产_月日均
+		,COALESCE(T1.CREDIT_TOT_AST_MDA,0)	  		AS  CREDIT_TOT_AST_MDA        --融资融券总资产_月日均
 		,T2.CREDIT_TOT_AST_YDA	  		AS  CREDIT_TOT_AST_YDA        --融资融券总资产_年日均
-		,T1.CREDIT_TOT_LIAB_MDA	  		AS  CREDIT_TOT_LIAB_MDA       --融资融券总负债_月日均
+		,COALESCE(T1.CREDIT_TOT_LIAB_MDA,0)	  		AS  CREDIT_TOT_LIAB_MDA       --融资融券总负债_月日均
 		,T2.CREDIT_TOT_LIAB_YDA	  		AS  CREDIT_TOT_LIAB_YDA       --融资融券总负债_年日均
-		,T1.APPTBUYB_GUAR_SECMV_MDA	  	AS  APPTBUYB_GUAR_SECMV_MDA   --约定购回担保证券市值_月日均
+		,COALESCE(T1.APPTBUYB_GUAR_SECMV_MDA,0)	  	AS  APPTBUYB_GUAR_SECMV_MDA   --约定购回担保证券市值_月日均
 		,T2.APPTBUYB_GUAR_SECMV_YDA	  	AS  APPTBUYB_GUAR_SECMV_YDA   --约定购回担保证券市值_年日均
-		,T1.CREDIT_GUAR_SECMV_MDA	  	AS  CREDIT_GUAR_SECMV_MDA     --融资融券担保证券市值_月日均
+		,COALESCE(T1.CREDIT_GUAR_SECMV_MDA,0)	  	AS  CREDIT_GUAR_SECMV_MDA     --融资融券担保证券市值_月日均
 		,T2.CREDIT_GUAR_SECMV_YDA	  	AS  CREDIT_GUAR_SECMV_YDA     --融资融券担保证券市值_年日均
-	FROM #T_AST_M_BRH_MTH T1,#T_AST_M_BRH_YEAR T2
-	WHERE T1.BRH_ID = T2.BRH_ID 
-		AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #T_AST_M_BRH_YEAR T2
+	LEFT JOIN #T_AST_M_BRH_MTH T1
+		ON T1.BRH_ID = T2.BRH_ID 
+			AND T1.OCCUR_DT = T2.OCCUR_DT;
 	COMMIT;
 END
 GO
@@ -4032,23 +4146,49 @@ BEGIN
   简介：员工维度的客户资产表
   *********************************************************************
   修订记录： 修订日期       版本号    修订人             修改内容简要说明
+  					20180522										zq							修正月日均指标计算问题
   *********************************************************************/
 
   	DECLARE @V_YEAR VARCHAR(4);		-- 年份
   	DECLARE @V_MONTH VARCHAR(2);	-- 月份
  	DECLARE @V_BEGIN_TRAD_DATE INT;	-- 本月开始交易日
  	DECLARE @V_YEAR_START_DATE INT; -- 本年开始交易日
- 	DECLARE @V_ACCU_MDAYS INT;		-- 月累计天数
- 	DECLARE @V_ACCU_YDAYS INT;		-- 年累计天数
+ 	
+  DECLARE @V_BIN_NATRE_DAY_MTHBEG  INT ;    --自然日_月初
+  DECLARE @V_BIN_NATRE_DAY_MTHEND  INT ;    --自然日_月末
+  DECLARE @V_BIN_TRD_DAY_MTHBEG    INT ;    --交易日_月初
+  DECLARE @V_BIN_TRD_DAY_MTHEND    INT ;    --交易日_月末
+  DECLARE @V_BIN_NATRE_DAY_YEARBGN INT ;    --自然日_年初
+  DECLARE @V_BIN_TRD_DAY_YEARBGN   INT ;    --交易日_年初
+  DECLARE @V_BIN_NATRE_DAYS_MTH    INT ;    --自然天数_月
+  DECLARE @V_BIN_TRD_DAYS_MTH      INT ;    --交易天数_月
+  DECLARE @V_BIN_NATRE_DAYS_YEAR   INT ;    --自然天数_年
+  DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年
   
 	COMMIT;
 	
 	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_DATE),1,4);
 	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_DATE),5,2);
 	SET @V_BEGIN_TRAD_DATE = (SELECT MIN(RQ) FROM DBA.T_DDW_D_RQ WHERE SFJRBZ='1' AND NIAN=@V_YEAR AND YUE=@V_MONTH);
-    SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
-    SET @V_ACCU_MDAYS=(SELECT TM_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
-    SET @V_ACCU_YDAYS=(SELECT TY_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
+  SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
+  
+  SET @V_BIN_NATRE_DAY_MTHBEG  =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_NATRE_DAY_MTHEND  =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_TRD_DAY_MTHBEG    =(SELECT MIN(DT)	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR  );
+  SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+                     									
+  SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+
+  SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
+
 
 	DELETE FROM DM.T_AST_M_EMP WHERE YEAR=@V_YEAR AND MTH=@V_MONTH;
 
@@ -4058,120 +4198,122 @@ BEGIN
 		,@V_MONTH 									AS    MTH 						--月
 		,EMP_ID										AS    EMP_ID                	--员工编码	
 		,@V_DATE 									AS 	  OCCUR_DT 					--发生日期
-		,SUM(TOT_AST)/@V_ACCU_MDAYS					AS    TOT_AST_MDA				--总资产_月日均			
-		,SUM(SCDY_MVAL)/@V_ACCU_MDAYS				AS    SCDY_MVAL_MDA				--二级市值_月日均			
-		,SUM(STKF_MVAL)/@V_ACCU_MDAYS				AS    STKF_MVAL_MDA				--股基市值_月日均			
-		,SUM(A_SHR_MVAL)/@V_ACCU_MDAYS				AS    A_SHR_MVAL_MDA			--A股市值_月日均				
-		,SUM(NOTS_MVAL)/@V_ACCU_MDAYS				AS    NOTS_MVAL_MDA				--限售股市值_月日均			
-		,SUM(OFFUND_MVAL)/@V_ACCU_MDAYS				AS    OFFUND_MVAL_MDA			--场内基金市值_月日均				
-		,SUM(OPFUND_MVAL)/@V_ACCU_MDAYS				AS    OPFUND_MVAL_MDA			--场外基金市值_月日均				
-		,SUM(SB_MVAL)/@V_ACCU_MDAYS					AS    SB_MVAL_MDA				--三板市值_月日均			
-		,SUM(IMGT_PD_MVAL)/@V_ACCU_MDAYS			AS    IMGT_PD_MVAL_MDA			--资管产品市值_月日均				
-		,SUM(BANK_CHRM_MVAL)/@V_ACCU_MDAYS			AS    BANK_CHRM_MVAL_MDA		--银行理财市值_月日均					
-		,SUM(SECU_CHRM_MVAL)/@V_ACCU_MDAYS			AS    SECU_CHRM_MVAL_MDA		--证券理财市值_月日均					
-		,SUM(PSTK_OPTN_MVAL)/@V_ACCU_MDAYS			AS    PSTK_OPTN_MVAL_MDA		--个股期权市值_月日均					
-		,SUM(B_SHR_MVAL)/@V_ACCU_MDAYS				AS    B_SHR_MVAL_MDA			--B股市值_月日均				
-		,SUM(OUTMARK_MVAL)/@V_ACCU_MDAYS			AS    OUTMARK_MVAL_MDA			--体外市值_月日均				
-		,SUM(CPTL_BAL)/@V_ACCU_MDAYS				AS    CPTL_BAL_MDA				--资金余额_月日均			
-		,SUM(NO_ARVD_CPTL)/@V_ACCU_MDAYS			AS    NO_ARVD_CPTL_MDA			--未到账资金_月日均				
-		,SUM(PTE_FUND_MVAL)/@V_ACCU_MDAYS			AS    PTE_FUND_MVAL_MDA			--私募基金市值_月日均				
-		,SUM(CPTL_BAL_RMB)/@V_ACCU_MDAYS			AS    CPTL_BAL_RMB_MDA			--资金余额人民币_月日均				
-		,SUM(CPTL_BAL_HKD)/@V_ACCU_MDAYS			AS    CPTL_BAL_HKD_MDA			--资金余额港币_月日均				
-		,SUM(CPTL_BAL_USD)/@V_ACCU_MDAYS			AS    CPTL_BAL_USD_MDA			--资金余额美元_月日均				
-		,SUM(FUND_SPACCT_MVAL)/@V_ACCU_MDAYS		AS    FUND_SPACCT_MVAL_MDA		--基金专户市值_月日均					
-		,SUM(HGT_MVAL)/@V_ACCU_MDAYS				AS    HGT_MVAL_MDA				--沪港通市值_月日均			
-		,SUM(SGT_MVAL)/@V_ACCU_MDAYS				AS    SGT_MVAL_MDA				--深港通市值_月日均			
-		,SUM(TOT_AST_CONTAIN_NOTS)/@V_ACCU_MDAYS	AS    TOT_AST_CONTAIN_NOTS_MDA	--总资产_含限售股_月日均						
-		,SUM(BOND_MVAL)/@V_ACCU_MDAYS				AS    BOND_MVAL_MDA				--债券市值_月日均			
-		,SUM(REPO_MVAL)/@V_ACCU_MDAYS				AS    REPO_MVAL_MDA				--回购市值_月日均			
-		,SUM(TREA_REPO_MVAL)/@V_ACCU_MDAYS			AS    TREA_REPO_MVAL_MDA		--国债回购市值_月日均					
-		,SUM(REPQ_MVAL)/@V_ACCU_MDAYS				AS    REPQ_MVAL_MDA				--报价回购市值_月日均			
-		,SUM(PO_FUND_MVAL)/@V_ACCU_MDAYS			AS    PO_FUND_MVAL_MDA			--公募基金市值_月日均				
-		,SUM(APPTBUYB_PLG_MVAL)/@V_ACCU_MDAYS		AS    APPTBUYB_PLG_MVAL_MDA		--约定购回质押市值_月日均					
-		,SUM(OTH_PROD_MVAL)/@V_ACCU_MDAYS			AS    OTH_PROD_MVAL_MDA			--其他产品市值_月日均				
-		,SUM(STKT_FUND_MVAL)/@V_ACCU_MDAYS			AS    STKT_FUND_MVAL_MDA		--股票型基金市值_月日均					
-		,SUM(OTH_AST_MVAL)/@V_ACCU_MDAYS			AS    OTH_AST_MVAL_MDA			--其他资产市值_月日均				
-		,SUM(CREDIT_MARG)/@V_ACCU_MDAYS				AS    CREDIT_MARG_MDA			--融资融券保证金_月日均				
-		,SUM(CREDIT_NET_AST)/@V_ACCU_MDAYS			AS    CREDIT_NET_AST_MDA		--融资融券净资产_月日均					
-		,SUM(PROD_TOT_MVAL)/@V_ACCU_MDAYS			AS    PROD_TOT_MVAL_MDA			--产品总市值_月日均				
-		,SUM(JQL9_MVAL)/@V_ACCU_MDAYS				AS    JQL9_MVAL_MDA				--金麒麟9市值_月日均			
-		,SUM(STKPLG_GUAR_SECMV)/@V_ACCU_MDAYS		AS    STKPLG_GUAR_SECMV_MDA		--股票质押担保证券市值_月日均					
-		,SUM(STKPLG_FIN_BAL)/@V_ACCU_MDAYS			AS    STKPLG_FIN_BAL_MDA		--股票质押融资余额_月日均					
-		,SUM(APPTBUYB_BAL)/@V_ACCU_MDAYS			AS    APPTBUYB_BAL_MDA			--约定购回余额_月日均				
-		,SUM(CRED_MARG)/@V_ACCU_MDAYS				AS    CRED_MARG_MDA				--信用保证金_月日均			
-		,SUM(INTR_LIAB)/@V_ACCU_MDAYS				AS    INTR_LIAB_MDA				--利息负债_月日均			
-		,SUM(FEE_LIAB)/@V_ACCU_MDAYS				AS    FEE_LIAB_MDA				--费用负债_月日均			
-		,SUM(OTHLIAB)/@V_ACCU_MDAYS					AS    OTHLIAB_MDA				--其他负债_月日均			
-		,SUM(FIN_LIAB)/@V_ACCU_MDAYS				AS    FIN_LIAB_MDA				--融资负债_月日均			
-		,SUM(CRDT_STK_LIAB)/@V_ACCU_MDAYS			AS    CRDT_STK_LIAB_MDA			--融券负债_月日均				
-		,SUM(CREDIT_TOT_AST)/@V_ACCU_MDAYS			AS    CREDIT_TOT_AST_MDA		--融资融券总资产_月日均					
-		,SUM(CREDIT_TOT_LIAB)/@V_ACCU_MDAYS			AS    CREDIT_TOT_LIAB_MDA		--融资融券总负债_月日均					
-		,SUM(APPTBUYB_GUAR_SECMV)/@V_ACCU_MDAYS		AS    APPTBUYB_GUAR_SECMV_MDA	--约定购回担保证券市值_月日均						
-		,SUM(CREDIT_GUAR_SECMV)/@V_ACCU_MDAYS		AS    CREDIT_GUAR_SECMV_MDA		--融资融券担保证券市值_月日均					
+		,SUM(TOT_AST)/@V_BIN_NATRE_DAYS_MTH					AS    TOT_AST_MDA				--总资产_月日均			
+		,SUM(SCDY_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    SCDY_MVAL_MDA				--二级市值_月日均			
+		,SUM(STKF_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    STKF_MVAL_MDA				--股基市值_月日均			
+		,SUM(A_SHR_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    A_SHR_MVAL_MDA			--A股市值_月日均				
+		,SUM(NOTS_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    NOTS_MVAL_MDA				--限售股市值_月日均			
+		,SUM(OFFUND_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    OFFUND_MVAL_MDA			--场内基金市值_月日均				
+		,SUM(OPFUND_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    OPFUND_MVAL_MDA			--场外基金市值_月日均				
+		,SUM(SB_MVAL)/@V_BIN_NATRE_DAYS_MTH					AS    SB_MVAL_MDA				--三板市值_月日均			
+		,SUM(IMGT_PD_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    IMGT_PD_MVAL_MDA			--资管产品市值_月日均				
+		,SUM(BANK_CHRM_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    BANK_CHRM_MVAL_MDA		--银行理财市值_月日均					
+		,SUM(SECU_CHRM_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    SECU_CHRM_MVAL_MDA		--证券理财市值_月日均					
+		,SUM(PSTK_OPTN_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PSTK_OPTN_MVAL_MDA		--个股期权市值_月日均					
+		,SUM(B_SHR_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    B_SHR_MVAL_MDA			--B股市值_月日均				
+		,SUM(OUTMARK_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    OUTMARK_MVAL_MDA			--体外市值_月日均				
+		,SUM(CPTL_BAL)/@V_BIN_NATRE_DAYS_MTH				AS    CPTL_BAL_MDA				--资金余额_月日均			
+		,SUM(NO_ARVD_CPTL)/@V_BIN_NATRE_DAYS_MTH			AS    NO_ARVD_CPTL_MDA			--未到账资金_月日均				
+		,SUM(PTE_FUND_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PTE_FUND_MVAL_MDA			--私募基金市值_月日均				
+		,SUM(CPTL_BAL_RMB)/@V_BIN_NATRE_DAYS_MTH			AS    CPTL_BAL_RMB_MDA			--资金余额人民币_月日均				
+		,SUM(CPTL_BAL_HKD)/@V_BIN_NATRE_DAYS_MTH			AS    CPTL_BAL_HKD_MDA			--资金余额港币_月日均				
+		,SUM(CPTL_BAL_USD)/@V_BIN_NATRE_DAYS_MTH			AS    CPTL_BAL_USD_MDA			--资金余额美元_月日均				
+		,SUM(FUND_SPACCT_MVAL)/@V_BIN_NATRE_DAYS_MTH		AS    FUND_SPACCT_MVAL_MDA		--基金专户市值_月日均					
+		,SUM(HGT_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    HGT_MVAL_MDA				--沪港通市值_月日均			
+		,SUM(SGT_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    SGT_MVAL_MDA				--深港通市值_月日均			
+		,SUM(TOT_AST_CONTAIN_NOTS)/@V_BIN_NATRE_DAYS_MTH	AS    TOT_AST_CONTAIN_NOTS_MDA	--总资产_含限售股_月日均						
+		,SUM(BOND_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    BOND_MVAL_MDA				--债券市值_月日均			
+		,SUM(REPO_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    REPO_MVAL_MDA				--回购市值_月日均			
+		,SUM(TREA_REPO_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    TREA_REPO_MVAL_MDA		--国债回购市值_月日均					
+		,SUM(REPQ_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    REPQ_MVAL_MDA				--报价回购市值_月日均			
+		,SUM(PO_FUND_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PO_FUND_MVAL_MDA			--公募基金市值_月日均				
+		,SUM(APPTBUYB_PLG_MVAL)/@V_BIN_NATRE_DAYS_MTH		AS    APPTBUYB_PLG_MVAL_MDA		--约定购回质押市值_月日均					
+		,SUM(OTH_PROD_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    OTH_PROD_MVAL_MDA			--其他产品市值_月日均				
+		,SUM(STKT_FUND_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    STKT_FUND_MVAL_MDA		--股票型基金市值_月日均					
+		,SUM(OTH_AST_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    OTH_AST_MVAL_MDA			--其他资产市值_月日均				
+		,SUM(CREDIT_MARG)/@V_BIN_NATRE_DAYS_MTH				AS    CREDIT_MARG_MDA			--融资融券保证金_月日均				
+		,SUM(CREDIT_NET_AST)/@V_BIN_NATRE_DAYS_MTH			AS    CREDIT_NET_AST_MDA		--融资融券净资产_月日均					
+		,SUM(PROD_TOT_MVAL)/@V_BIN_NATRE_DAYS_MTH			AS    PROD_TOT_MVAL_MDA			--产品总市值_月日均				
+		,SUM(JQL9_MVAL)/@V_BIN_NATRE_DAYS_MTH				AS    JQL9_MVAL_MDA				--金麒麟9市值_月日均			
+		,SUM(STKPLG_GUAR_SECMV)/@V_BIN_NATRE_DAYS_MTH		AS    STKPLG_GUAR_SECMV_MDA		--股票质押担保证券市值_月日均					
+		,SUM(STKPLG_FIN_BAL)/@V_BIN_NATRE_DAYS_MTH			AS    STKPLG_FIN_BAL_MDA		--股票质押融资余额_月日均					
+		,SUM(APPTBUYB_BAL)/@V_BIN_NATRE_DAYS_MTH			AS    APPTBUYB_BAL_MDA			--约定购回余额_月日均				
+		,SUM(CRED_MARG)/@V_BIN_NATRE_DAYS_MTH				AS    CRED_MARG_MDA				--信用保证金_月日均			
+		,SUM(INTR_LIAB)/@V_BIN_NATRE_DAYS_MTH				AS    INTR_LIAB_MDA				--利息负债_月日均			
+		,SUM(FEE_LIAB)/@V_BIN_NATRE_DAYS_MTH				AS    FEE_LIAB_MDA				--费用负债_月日均			
+		,SUM(OTHLIAB)/@V_BIN_NATRE_DAYS_MTH					AS    OTHLIAB_MDA				--其他负债_月日均			
+		,SUM(FIN_LIAB)/@V_BIN_NATRE_DAYS_MTH				AS    FIN_LIAB_MDA				--融资负债_月日均			
+		,SUM(CRDT_STK_LIAB)/@V_BIN_NATRE_DAYS_MTH			AS    CRDT_STK_LIAB_MDA			--融券负债_月日均				
+		,SUM(CREDIT_TOT_AST)/@V_BIN_NATRE_DAYS_MTH			AS    CREDIT_TOT_AST_MDA		--融资融券总资产_月日均					
+		,SUM(CREDIT_TOT_LIAB)/@V_BIN_NATRE_DAYS_MTH			AS    CREDIT_TOT_LIAB_MDA		--融资融券总负债_月日均					
+		,SUM(APPTBUYB_GUAR_SECMV)/@V_BIN_NATRE_DAYS_MTH		AS    APPTBUYB_GUAR_SECMV_MDA	--约定购回担保证券市值_月日均						
+		,SUM(CREDIT_GUAR_SECMV)/@V_BIN_NATRE_DAYS_MTH		AS    CREDIT_GUAR_SECMV_MDA		--融资融券担保证券市值_月日均					
 	INTO #T_AST_M_EMP_MTH
-	FROM DM.T_AST_D_EMP T 
-	WHERE T.OCCUR_DT BETWEEN @V_BEGIN_TRAD_DATE AND @V_DATE
-	   GROUP BY T.EMP_ID;
+	FROM DM.T_AST_D_EMP T1
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_MTHBEG AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.EMP_ID;
 
 		SELECT 
 		 @V_YEAR									AS    YEAR   					--年
 		,@V_MONTH 									AS    MTH 						--月
 		,EMP_ID										AS    EMP_ID                	--员工编码	
 		,@V_DATE 									AS 	  OCCUR_DT 					--发生日期
-		,SUM(TOT_AST)/@V_ACCU_YDAYS					AS    TOT_AST_YDA				--总资产_月日均			
-		,SUM(SCDY_MVAL)/@V_ACCU_YDAYS				AS    SCDY_MVAL_YDA				--二级市值_月日均			
-		,SUM(STKF_MVAL)/@V_ACCU_YDAYS				AS    STKF_MVAL_YDA				--股基市值_月日均			
-		,SUM(A_SHR_MVAL)/@V_ACCU_YDAYS				AS    A_SHR_MVAL_YDA			--A股市值_月日均				
-		,SUM(NOTS_MVAL)/@V_ACCU_YDAYS				AS    NOTS_MVAL_YDA				--限售股市值_月日均			
-		,SUM(OFFUND_MVAL)/@V_ACCU_YDAYS				AS    OFFUND_MVAL_YDA			--场内基金市值_月日均				
-		,SUM(OPFUND_MVAL)/@V_ACCU_YDAYS				AS    OPFUND_MVAL_YDA			--场外基金市值_月日均				
-		,SUM(SB_MVAL)/@V_ACCU_YDAYS					AS    SB_MVAL_YDA				--三板市值_月日均			
-		,SUM(IMGT_PD_MVAL)/@V_ACCU_YDAYS			AS    IMGT_PD_MVAL_YDA			--资管产品市值_月日均				
-		,SUM(BANK_CHRM_MVAL)/@V_ACCU_YDAYS			AS    BANK_CHRM_MVAL_YDA		--银行理财市值_月日均					
-		,SUM(SECU_CHRM_MVAL)/@V_ACCU_YDAYS			AS    SECU_CHRM_MVAL_YDA		--证券理财市值_月日均					
-		,SUM(PSTK_OPTN_MVAL)/@V_ACCU_YDAYS			AS    PSTK_OPTN_MVAL_YDA		--个股期权市值_月日均					
-		,SUM(B_SHR_MVAL)/@V_ACCU_YDAYS				AS    B_SHR_MVAL_YDA			--B股市值_月日均				
-		,SUM(OUTMARK_MVAL)/@V_ACCU_YDAYS			AS    OUTMARK_MVAL_YDA			--体外市值_月日均				
-		,SUM(CPTL_BAL)/@V_ACCU_YDAYS				AS    CPTL_BAL_YDA				--资金余额_月日均			
-		,SUM(NO_ARVD_CPTL)/@V_ACCU_YDAYS			AS    NO_ARVD_CPTL_YDA			--未到账资金_月日均				
-		,SUM(PTE_FUND_MVAL)/@V_ACCU_YDAYS			AS    PTE_FUND_MVAL_YDA			--私募基金市值_月日均				
-		,SUM(CPTL_BAL_RMB)/@V_ACCU_YDAYS			AS    CPTL_BAL_RMB_YDA			--资金余额人民币_月日均				
-		,SUM(CPTL_BAL_HKD)/@V_ACCU_YDAYS			AS    CPTL_BAL_HKD_YDA			--资金余额港币_月日均				
-		,SUM(CPTL_BAL_USD)/@V_ACCU_YDAYS			AS    CPTL_BAL_USD_YDA			--资金余额美元_月日均				
-		,SUM(FUND_SPACCT_MVAL)/@V_ACCU_YDAYS		AS    FUND_SPACCT_MVAL_YDA		--基金专户市值_月日均					
-		,SUM(HGT_MVAL)/@V_ACCU_YDAYS				AS    HGT_MVAL_YDA				--沪港通市值_月日均			
-		,SUM(SGT_MVAL)/@V_ACCU_YDAYS				AS    SGT_MVAL_YDA				--深港通市值_月日均			
-		,SUM(TOT_AST_CONTAIN_NOTS)/@V_ACCU_YDAYS	AS    TOT_AST_CONTAIN_NOTS_YDA	--总资产_含限售股_月日均						
-		,SUM(BOND_MVAL)/@V_ACCU_YDAYS				AS    BOND_MVAL_YDA				--债券市值_月日均			
-		,SUM(REPO_MVAL)/@V_ACCU_YDAYS				AS    REPO_MVAL_YDA				--回购市值_月日均			
-		,SUM(TREA_REPO_MVAL)/@V_ACCU_YDAYS			AS    TREA_REPO_MVAL_YDA		--国债回购市值_月日均					
-		,SUM(REPQ_MVAL)/@V_ACCU_YDAYS				AS    REPQ_MVAL_YDA				--报价回购市值_月日均			
-		,SUM(PO_FUND_MVAL)/@V_ACCU_YDAYS			AS    PO_FUND_MVAL_YDA			--公募基金市值_月日均				
-		,SUM(APPTBUYB_PLG_MVAL)/@V_ACCU_YDAYS		AS    APPTBUYB_PLG_MVAL_YDA		--约定购回质押市值_月日均					
-		,SUM(OTH_PROD_MVAL)/@V_ACCU_YDAYS			AS    OTH_PROD_MVAL_YDA			--其他产品市值_月日均				
-		,SUM(STKT_FUND_MVAL)/@V_ACCU_YDAYS			AS    STKT_FUND_MVAL_YDA		--股票型基金市值_月日均					
-		,SUM(OTH_AST_MVAL)/@V_ACCU_YDAYS			AS    OTH_AST_MVAL_YDA			--其他资产市值_月日均				
-		,SUM(CREDIT_MARG)/@V_ACCU_YDAYS				AS    CREDIT_MARG_YDA			--融资融券保证金_月日均				
-		,SUM(CREDIT_NET_AST)/@V_ACCU_YDAYS			AS    CREDIT_NET_AST_YDA		--融资融券净资产_月日均					
-		,SUM(PROD_TOT_MVAL)/@V_ACCU_YDAYS			AS    PROD_TOT_MVAL_YDA			--产品总市值_月日均				
-		,SUM(JQL9_MVAL)/@V_ACCU_YDAYS				AS    JQL9_MVAL_YDA				--金麒麟9市值_月日均			
-		,SUM(STKPLG_GUAR_SECMV)/@V_ACCU_YDAYS		AS    STKPLG_GUAR_SECMV_YDA		--股票质押担保证券市值_月日均					
-		,SUM(STKPLG_FIN_BAL)/@V_ACCU_YDAYS			AS    STKPLG_FIN_BAL_YDA		--股票质押融资余额_月日均					
-		,SUM(APPTBUYB_BAL)/@V_ACCU_YDAYS			AS    APPTBUYB_BAL_YDA			--约定购回余额_月日均				
-		,SUM(CRED_MARG)/@V_ACCU_YDAYS				AS    CRED_MARG_YDA				--信用保证金_月日均			
-		,SUM(INTR_LIAB)/@V_ACCU_YDAYS				AS    INTR_LIAB_YDA				--利息负债_月日均			
-		,SUM(FEE_LIAB)/@V_ACCU_YDAYS				AS    FEE_LIAB_YDA				--费用负债_月日均			
-		,SUM(OTHLIAB)/@V_ACCU_YDAYS					AS    OTHLIAB_YDA				--其他负债_月日均			
-		,SUM(FIN_LIAB)/@V_ACCU_YDAYS				AS    FIN_LIAB_YDA				--融资负债_月日均			
-		,SUM(CRDT_STK_LIAB)/@V_ACCU_YDAYS			AS    CRDT_STK_LIAB_YDA			--融券负债_月日均				
-		,SUM(CREDIT_TOT_AST)/@V_ACCU_YDAYS			AS    CREDIT_TOT_AST_YDA		--融资融券总资产_月日均					
-		,SUM(CREDIT_TOT_LIAB)/@V_ACCU_YDAYS			AS    CREDIT_TOT_LIAB_YDA		--融资融券总负债_月日均					
-		,SUM(APPTBUYB_GUAR_SECMV)/@V_ACCU_YDAYS		AS    APPTBUYB_GUAR_SECMV_YDA	--约定购回担保证券市值_月日均						
-		,SUM(CREDIT_GUAR_SECMV)/@V_ACCU_YDAYS		AS    CREDIT_GUAR_SECMV_YDA		--融资融券担保证券市值_月日均					
+		,SUM(TOT_AST)/@V_BIN_NATRE_DAYS_YEAR					AS    TOT_AST_YDA				--总资产_年日均			
+		,SUM(SCDY_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    SCDY_MVAL_YDA				--二级市值_年日均			
+		,SUM(STKF_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    STKF_MVAL_YDA				--股基市值_年日均			
+		,SUM(A_SHR_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    A_SHR_MVAL_YDA			--A股市值_年日均				
+		,SUM(NOTS_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    NOTS_MVAL_YDA				--限售股市值_年日均			
+		,SUM(OFFUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    OFFUND_MVAL_YDA			--场内基金市值_年日均				
+		,SUM(OPFUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    OPFUND_MVAL_YDA			--场外基金市值_年日均				
+		,SUM(SB_MVAL)/@V_BIN_NATRE_DAYS_YEAR					AS    SB_MVAL_YDA				--三板市值_年日均			
+		,SUM(IMGT_PD_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    IMGT_PD_MVAL_YDA			--资管产品市值_年日均				
+		,SUM(BANK_CHRM_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    BANK_CHRM_MVAL_YDA		--银行理财市值_年日均					
+		,SUM(SECU_CHRM_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    SECU_CHRM_MVAL_YDA		--证券理财市值_年日均					
+		,SUM(PSTK_OPTN_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PSTK_OPTN_MVAL_YDA		--个股期权市值_年日均					
+		,SUM(B_SHR_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    B_SHR_MVAL_YDA			--B股市值_年日均				
+		,SUM(OUTMARK_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    OUTMARK_MVAL_YDA			--体外市值_年日均				
+		,SUM(CPTL_BAL)/@V_BIN_NATRE_DAYS_YEAR				AS    CPTL_BAL_YDA				--资金余额_年日均			
+		,SUM(NO_ARVD_CPTL)/@V_BIN_NATRE_DAYS_YEAR			AS    NO_ARVD_CPTL_YDA			--未到账资金_年日均				
+		,SUM(PTE_FUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PTE_FUND_MVAL_YDA			--私募基金市值_年日均				
+		,SUM(CPTL_BAL_RMB)/@V_BIN_NATRE_DAYS_YEAR			AS    CPTL_BAL_RMB_YDA			--资金余额人民币_年日均				
+		,SUM(CPTL_BAL_HKD)/@V_BIN_NATRE_DAYS_YEAR			AS    CPTL_BAL_HKD_YDA			--资金余额港币_年日均				
+		,SUM(CPTL_BAL_USD)/@V_BIN_NATRE_DAYS_YEAR			AS    CPTL_BAL_USD_YDA			--资金余额美元_年日均				
+		,SUM(FUND_SPACCT_MVAL)/@V_BIN_NATRE_DAYS_YEAR		AS    FUND_SPACCT_MVAL_YDA		--基金专户市值_年日均					
+		,SUM(HGT_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    HGT_MVAL_YDA				--沪港通市值_年日均			
+		,SUM(SGT_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    SGT_MVAL_YDA				--深港通市值_年日均			
+		,SUM(TOT_AST_CONTAIN_NOTS)/@V_BIN_NATRE_DAYS_YEAR	AS    TOT_AST_CONTAIN_NOTS_YDA	--总资产_含限售股_年日均						
+		,SUM(BOND_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    BOND_MVAL_YDA				--债券市值_年日均			
+		,SUM(REPO_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    REPO_MVAL_YDA				--回购市值_年日均			
+		,SUM(TREA_REPO_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    TREA_REPO_MVAL_YDA		--国债回购市值_年日均					
+		,SUM(REPQ_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    REPQ_MVAL_YDA				--报价回购市值_年日均			
+		,SUM(PO_FUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PO_FUND_MVAL_YDA			--公募基金市值_年日均				
+		,SUM(APPTBUYB_PLG_MVAL)/@V_BIN_NATRE_DAYS_YEAR		AS    APPTBUYB_PLG_MVAL_YDA		--约定购回质押市值_年日均					
+		,SUM(OTH_PROD_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    OTH_PROD_MVAL_YDA			--其他产品市值_年日均				
+		,SUM(STKT_FUND_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    STKT_FUND_MVAL_YDA		--股票型基金市值_年日均					
+		,SUM(OTH_AST_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    OTH_AST_MVAL_YDA			--其他资产市值_年日均				
+		,SUM(CREDIT_MARG)/@V_BIN_NATRE_DAYS_YEAR				AS    CREDIT_MARG_YDA			--融资融券保证金_年日均				
+		,SUM(CREDIT_NET_AST)/@V_BIN_NATRE_DAYS_YEAR			AS    CREDIT_NET_AST_YDA		--融资融券净资产_年日均					
+		,SUM(PROD_TOT_MVAL)/@V_BIN_NATRE_DAYS_YEAR			AS    PROD_TOT_MVAL_YDA			--产品总市值_年日均				
+		,SUM(JQL9_MVAL)/@V_BIN_NATRE_DAYS_YEAR				AS    JQL9_MVAL_YDA				--金麒麟9市值_年日均			
+		,SUM(STKPLG_GUAR_SECMV)/@V_BIN_NATRE_DAYS_YEAR		AS    STKPLG_GUAR_SECMV_YDA		--股票质押担保证券市值_年日均					
+		,SUM(STKPLG_FIN_BAL)/@V_BIN_NATRE_DAYS_YEAR			AS    STKPLG_FIN_BAL_YDA		--股票质押融资余额_年日均					
+		,SUM(APPTBUYB_BAL)/@V_BIN_NATRE_DAYS_YEAR			AS    APPTBUYB_BAL_YDA			--约定购回余额_年日均				
+		,SUM(CRED_MARG)/@V_BIN_NATRE_DAYS_YEAR				AS    CRED_MARG_YDA				--信用保证金_年日均			
+		,SUM(INTR_LIAB)/@V_BIN_NATRE_DAYS_YEAR				AS    INTR_LIAB_YDA				--利息负债_年日均			
+		,SUM(FEE_LIAB)/@V_BIN_NATRE_DAYS_YEAR				AS    FEE_LIAB_YDA				--费用负债_年日均			
+		,SUM(OTHLIAB)/@V_BIN_NATRE_DAYS_YEAR					AS    OTHLIAB_YDA				--其他负债_年日均			
+		,SUM(FIN_LIAB)/@V_BIN_NATRE_DAYS_YEAR				AS    FIN_LIAB_YDA				--融资负债_年日均			
+		,SUM(CRDT_STK_LIAB)/@V_BIN_NATRE_DAYS_YEAR			AS    CRDT_STK_LIAB_YDA			--融券负债_年日均				
+		,SUM(CREDIT_TOT_AST)/@V_BIN_NATRE_DAYS_YEAR			AS    CREDIT_TOT_AST_YDA		--融资融券总资产_年日均					
+		,SUM(CREDIT_TOT_LIAB)/@V_BIN_NATRE_DAYS_YEAR			AS    CREDIT_TOT_LIAB_YDA		--融资融券总负债_年日均					
+		,SUM(APPTBUYB_GUAR_SECMV)/@V_BIN_NATRE_DAYS_YEAR		AS    APPTBUYB_GUAR_SECMV_YDA	--约定购回担保证券市值_年日均						
+		,SUM(CREDIT_GUAR_SECMV)/@V_BIN_NATRE_DAYS_YEAR		AS    CREDIT_GUAR_SECMV_YDA		--融资融券担保证券市值_年日均					
 	INTO #T_AST_M_EMP_YEAR
-	FROM DM.T_AST_D_EMP T 
-	WHERE T.OCCUR_DT BETWEEN @V_YEAR_START_DATE AND @V_DATE
-	   GROUP BY T.EMP_ID;
+	FROM DM.T_AST_D_EMP T1
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_YEARBGN AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.EMP_ID;
 
 	--插入目标表
 	INSERT INTO DM.T_AST_M_EMP(
@@ -4279,111 +4421,111 @@ BEGIN
 		,CREDIT_GUAR_SECMV_YDA			--融资融券担保证券市值_年日均		
 	)		
 	SELECT 
-		T1.YEAR							AS  YEAR					  --年
-		,T1.MTH							AS  MTH						  --月
-		,T1.EMP_ID						AS  EMP_ID					  --员工编号
-		,T1.OCCUR_DT					AS  OCCUR_DT				  --发生日期
-		,T1.TOT_AST_MDA	  	  			AS  TOT_AST_MDA               --总资产_月日均
+		T2.YEAR							AS  YEAR					  --年
+		,T2.MTH							AS  MTH						  --月
+		,T2.EMP_ID						AS  EMP_ID					  --员工编号
+		,T2.OCCUR_DT					AS  OCCUR_DT				  --发生日期
+		,COALESCE(T1.TOT_AST_MDA,0)	  	  			AS  TOT_AST_MDA               --总资产_月日均
 		,T2.TOT_AST_YDA	  	  			AS  TOT_AST_YDA               --总资产_年日均
-		,T1.SCDY_MVAL_MDA	  			AS  SCDY_MVAL_MDA             --二级市值_月日均
+		,COALESCE(T1.SCDY_MVAL_MDA,0)	  			AS  SCDY_MVAL_MDA             --二级市值_月日均
 		,T2.SCDY_MVAL_YDA	  			AS  SCDY_MVAL_YDA             --二级市值_年日均
-		,T1.STKF_MVAL_MDA	  			AS  STKF_MVAL_MDA             --股基市值_月日均
+		,COALESCE(T1.STKF_MVAL_MDA,0)	  			AS  STKF_MVAL_MDA             --股基市值_月日均
 		,T2.STKF_MVAL_YDA	  			AS  STKF_MVAL_YDA             --股基市值_年日均
-		,T1.A_SHR_MVAL_MDA	  			AS  A_SHR_MVAL_MDA            --A股市值_月日均
+		,COALESCE(T1.A_SHR_MVAL_MDA,0)	  			AS  A_SHR_MVAL_MDA            --A股市值_月日均
 		,T2.A_SHR_MVAL_YDA	  			AS  A_SHR_MVAL_YDA            --A股市值_年日均
-		,T1.NOTS_MVAL_MDA	  			AS  NOTS_MVAL_MDA             --限售股市值_月日均
+		,COALESCE(T1.NOTS_MVAL_MDA,0)	  			AS  NOTS_MVAL_MDA             --限售股市值_月日均
 		,T2.NOTS_MVAL_YDA	  			AS  NOTS_MVAL_YDA             --限售股市值_年日均
-		,T1.OFFUND_MVAL_MDA	  			AS  OFFUND_MVAL_MDA           --场内基金市值_月日均
+		,COALESCE(T1.OFFUND_MVAL_MDA,0)	  			AS  OFFUND_MVAL_MDA           --场内基金市值_月日均
 		,T2.OFFUND_MVAL_YDA	  			AS  OFFUND_MVAL_YDA           --场内基金市值_年日均
-		,T1.OPFUND_MVAL_MDA	  			AS  OPFUND_MVAL_MDA           --场外基金市值_月日均
+		,COALESCE(T1.OPFUND_MVAL_MDA,0)	  			AS  OPFUND_MVAL_MDA           --场外基金市值_月日均
 		,T2.OPFUND_MVAL_YDA	  			AS  OPFUND_MVAL_YDA           --场外基金市值_年日均
-		,T1.SB_MVAL_MDA	  	  			AS  SB_MVAL_MDA               --三板市值_月日均
+		,COALESCE(T1.SB_MVAL_MDA,0)	  	  			AS  SB_MVAL_MDA               --三板市值_月日均
 		,T2.SB_MVAL_YDA	  	  			AS  SB_MVAL_YDA               --三板市值_年日均
-		,T1.IMGT_PD_MVAL_MDA	  		AS  IMGT_PD_MVAL_MDA          --资管产品市值_月日均
+		,COALESCE(T1.IMGT_PD_MVAL_MDA,0)	  		AS  IMGT_PD_MVAL_MDA          --资管产品市值_月日均
 		,T2.IMGT_PD_MVAL_YDA	  		AS  IMGT_PD_MVAL_YDA          --资管产品市值_年日均
 		,T2.BANK_CHRM_MVAL_YDA	  		AS  BANK_CHRM_MVAL_YDA        --银行理财市值_年日均
-		,T1.BANK_CHRM_MVAL_MDA	  		AS  BANK_CHRM_MVAL_MDA        --银行理财市值_月日均
-		,T1.SECU_CHRM_MVAL_MDA	  		AS  SECU_CHRM_MVAL_MDA        --证券理财市值_月日均
+		,COALESCE(T1.BANK_CHRM_MVAL_MDA,0)	  		AS  BANK_CHRM_MVAL_MDA        --银行理财市值_月日均
+		,COALESCE(T1.SECU_CHRM_MVAL_MDA,0)	  		AS  SECU_CHRM_MVAL_MDA        --证券理财市值_月日均
 		,T2.SECU_CHRM_MVAL_YDA	  		AS  SECU_CHRM_MVAL_YDA        --证券理财市值_年日均
-		,T1.PSTK_OPTN_MVAL_MDA	  		AS  PSTK_OPTN_MVAL_MDA        --个股期权市值_月日均
+		,COALESCE(T1.PSTK_OPTN_MVAL_MDA,0)	  		AS  PSTK_OPTN_MVAL_MDA        --个股期权市值_月日均
 		,T2.PSTK_OPTN_MVAL_YDA	  		AS  PSTK_OPTN_MVAL_YDA        --个股期权市值_年日均
-		,T1.B_SHR_MVAL_MDA	  			AS  B_SHR_MVAL_MDA            --B股市值_月日均
+		,COALESCE(T1.B_SHR_MVAL_MDA,0)	  			AS  B_SHR_MVAL_MDA            --B股市值_月日均
 		,T2.B_SHR_MVAL_YDA	  			AS  B_SHR_MVAL_YDA            --B股市值_年日均
-		,T1.OUTMARK_MVAL_MDA	  		AS  OUTMARK_MVAL_MDA          --体外市值_月日均
+		,COALESCE(T1.OUTMARK_MVAL_MDA,0)	  		AS  OUTMARK_MVAL_MDA          --体外市值_月日均
 		,T2.OUTMARK_MVAL_YDA	  		AS  OUTMARK_MVAL_YDA          --体外市值_年日均
-		,T1.CPTL_BAL_MDA	  			AS  CPTL_BAL_MDA              --资金余额_月日均
+		,COALESCE(T1.CPTL_BAL_MDA,0)	  			AS  CPTL_BAL_MDA              --资金余额_月日均
 		,T2.CPTL_BAL_YDA	  			AS  CPTL_BAL_YDA              --资金余额_年日均
-		,T1.NO_ARVD_CPTL_MDA	  		AS  NO_ARVD_CPTL_MDA          --未到账资金_月日均
+		,COALESCE(T1.NO_ARVD_CPTL_MDA,0)	  		AS  NO_ARVD_CPTL_MDA          --未到账资金_月日均
 		,T2.NO_ARVD_CPTL_YDA	  		AS  NO_ARVD_CPTL_YDA          --未到账资金_年日均
-		,T1.PTE_FUND_MVAL_MDA	  		AS  PTE_FUND_MVAL_MDA         --私募基金市值_月日均
+		,COALESCE(T1.PTE_FUND_MVAL_MDA,0)	  		AS  PTE_FUND_MVAL_MDA         --私募基金市值_月日均
 		,T2.PTE_FUND_MVAL_YDA	  		AS  PTE_FUND_MVAL_YDA         --私募基金市值_年日均
-		,T1.CPTL_BAL_RMB_MDA	  		AS  CPTL_BAL_RMB_MDA          --资金余额人民币_月日均
+		,COALESCE(T1.CPTL_BAL_RMB_MDA,0)	  		AS  CPTL_BAL_RMB_MDA          --资金余额人民币_月日均
 		,T2.CPTL_BAL_RMB_YDA	  		AS  CPTL_BAL_RMB_YDA          --资金余额人民币_年日均
-		,T1.CPTL_BAL_HKD_MDA	  		AS  CPTL_BAL_HKD_MDA          --资金余额港币_月日均
+		,COALESCE(T1.CPTL_BAL_HKD_MDA,0)	  		AS  CPTL_BAL_HKD_MDA          --资金余额港币_月日均
 		,T2.CPTL_BAL_HKD_YDA	  		AS  CPTL_BAL_HKD_YDA          --资金余额港币_年日均
-		,T1.CPTL_BAL_USD_MDA	  		AS  CPTL_BAL_USD_MDA          --资金余额美元_月日均
+		,COALESCE(T1.CPTL_BAL_USD_MDA,0)	  		AS  CPTL_BAL_USD_MDA          --资金余额美元_月日均
 		,T2.CPTL_BAL_USD_YDA	  		AS  CPTL_BAL_USD_YDA          --资金余额美元_年日均
-		,T1.FUND_SPACCT_MVAL_MDA	  	AS  FUND_SPACCT_MVAL_MDA      --基金专户市值_月日均
+		,COALESCE(T1.FUND_SPACCT_MVAL_MDA,0)	  	AS  FUND_SPACCT_MVAL_MDA      --基金专户市值_月日均
 		,T2.FUND_SPACCT_MVAL_YDA	  	AS  FUND_SPACCT_MVAL_YDA      --基金专户市值_年日均
-		,T1.HGT_MVAL_MDA	  			AS  HGT_MVAL_MDA              --沪港通市值_月日均
+		,COALESCE(T1.HGT_MVAL_MDA,0)	  			AS  HGT_MVAL_MDA              --沪港通市值_月日均
 		,T2.HGT_MVAL_YDA	  			AS  HGT_MVAL_YDA              --沪港通市值_年日均
-		,T1.SGT_MVAL_MDA	  			AS  SGT_MVAL_MDA              --深港通市值_月日均
+		,COALESCE(T1.SGT_MVAL_MDA,0)	  			AS  SGT_MVAL_MDA              --深港通市值_月日均
 		,T2.SGT_MVAL_YDA	  			AS  SGT_MVAL_YDA              --深港通市值_年日均
-		,T1.TOT_AST_CONTAIN_NOTS_MDA	AS  TOT_AST_CONTAIN_NOTS_MDA  --总资产_含限售股_月日均
+		,COALESCE(T1.TOT_AST_CONTAIN_NOTS_MDA,0)	AS  TOT_AST_CONTAIN_NOTS_MDA  --总资产_含限售股_月日均
 		,T2.TOT_AST_CONTAIN_NOTS_YDA	AS  TOT_AST_CONTAIN_NOTS_YDA  --总资产_含限售股_年日均
-		,T1.BOND_MVAL_MDA	  			AS  BOND_MVAL_MDA             --债券市值_月日均
+		,COALESCE(T1.BOND_MVAL_MDA,0)	  			AS  BOND_MVAL_MDA             --债券市值_月日均
 		,T2.BOND_MVAL_YDA	  			AS  BOND_MVAL_YDA             --债券市值_年日均
-		,T1.REPO_MVAL_MDA	  			AS  REPO_MVAL_MDA             --回购市值_月日均
+		,COALESCE(T1.REPO_MVAL_MDA,0)	  			AS  REPO_MVAL_MDA             --回购市值_月日均
 		,T2.REPO_MVAL_YDA	  			AS  REPO_MVAL_YDA             --回购市值_年日均
-		,T1.TREA_REPO_MVAL_MDA	  		AS  TREA_REPO_MVAL_MDA        --国债回购市值_月日均
+		,COALESCE(T1.TREA_REPO_MVAL_MDA,0)	  		AS  TREA_REPO_MVAL_MDA        --国债回购市值_月日均
 		,T2.TREA_REPO_MVAL_YDA	  		AS  TREA_REPO_MVAL_YDA        --国债回购市值_年日均
-		,T1.REPQ_MVAL_MDA	  			AS  REPQ_MVAL_MDA             --报价回购市值_月日均
+		,COALESCE(T1.REPQ_MVAL_MDA,0)	  			AS  REPQ_MVAL_MDA             --报价回购市值_月日均
 		,T2.REPQ_MVAL_YDA	  			AS  REPQ_MVAL_YDA             --报价回购市值_年日均
-		,T1.PO_FUND_MVAL_MDA	  		AS  PO_FUND_MVAL_MDA          --公募基金市值_月日均
+		,COALESCE(T1.PO_FUND_MVAL_MDA,0)	  		AS  PO_FUND_MVAL_MDA          --公募基金市值_月日均
 		,T2.PO_FUND_MVAL_YDA	  		AS  PO_FUND_MVAL_YDA          --公募基金市值_年日均
-		,T1.APPTBUYB_PLG_MVAL_MDA	  	AS  APPTBUYB_PLG_MVAL_MDA     --约定购回质押市值_月日均
+		,COALESCE(T1.APPTBUYB_PLG_MVAL_MDA,0)	  	AS  APPTBUYB_PLG_MVAL_MDA     --约定购回质押市值_月日均
 		,T2.APPTBUYB_PLG_MVAL_YDA	  	AS  APPTBUYB_PLG_MVAL_YDA     --约定购回质押市值_月日均
-		,T1.OTH_PROD_MVAL_MDA	  		AS  OTH_PROD_MVAL_MDA         --其他产品市值_月日均
-		,T1.STKT_FUND_MVAL_MDA	  		AS  STKT_FUND_MVAL_MDA        --股票型基金市值_月日均
-		,T1.OTH_AST_MVAL_MDA	  		AS  OTH_AST_MVAL_MDA          --其他资产市值_月日均
+		,COALESCE(T1.OTH_PROD_MVAL_MDA,0)	  		AS  OTH_PROD_MVAL_MDA         --其他产品市值_月日均
+		,COALESCE(T1.STKT_FUND_MVAL_MDA,0)	  		AS  STKT_FUND_MVAL_MDA        --股票型基金市值_月日均
+		,COALESCE(T1.OTH_AST_MVAL_MDA,0)	  		AS  OTH_AST_MVAL_MDA          --其他资产市值_月日均
 		,T2.OTH_PROD_MVAL_YDA	  		AS  OTH_PROD_MVAL_YDA         --其他产品市值_年日均
 		,T2.APPTBUYB_BAL_YDA	  		AS  APPTBUYB_BAL_YDA          --约定购回余额_月日均
-		,T1.CREDIT_MARG_MDA	  			AS  CREDIT_MARG_MDA           --融资融券保证金_月日均
+		,COALESCE(T1.CREDIT_MARG_MDA,0)	  			AS  CREDIT_MARG_MDA           --融资融券保证金_月日均
 		,T2.CREDIT_MARG_YDA	  			AS  CREDIT_MARG_YDA           --融资融券保证金_年日均
-		,T1.CREDIT_NET_AST_MDA	  		AS  CREDIT_NET_AST_MDA        --融资融券净资产_月日均
+		,COALESCE(T1.CREDIT_NET_AST_MDA,0)	  		AS  CREDIT_NET_AST_MDA        --融资融券净资产_月日均
 		,T2.CREDIT_NET_AST_YDA	  		AS  CREDIT_NET_AST_YDA        --融资融券净资产_年日均
-		,T1.PROD_TOT_MVAL_MDA	  		AS  PROD_TOT_MVAL_MDA         --产品总市值_月日均
+		,COALESCE(T1.PROD_TOT_MVAL_MDA,0)	  		AS  PROD_TOT_MVAL_MDA         --产品总市值_月日均
 		,T2.PROD_TOT_MVAL_YDA	  		AS  PROD_TOT_MVAL_YDA         --产品总市值_年日均
-		,T1.JQL9_MVAL_MDA	  			AS  JQL9_MVAL_MDA             --金麒麟9市值_月日均
+		,COALESCE(T1.JQL9_MVAL_MDA,0)	  			AS  JQL9_MVAL_MDA             --金麒麟9市值_月日均
 		,T2.JQL9_MVAL_YDA	  			AS  JQL9_MVAL_YDA             --金麒麟9市值_年日均
-		,T1.STKPLG_GUAR_SECMV_MDA	  	AS  STKPLG_GUAR_SECMV_MDA     --股票质押担保证券市值_月日均
+		,COALESCE(T1.STKPLG_GUAR_SECMV_MDA,0)	  	AS  STKPLG_GUAR_SECMV_MDA     --股票质押担保证券市值_月日均
 		,T2.STKPLG_GUAR_SECMV_YDA	  	AS  STKPLG_GUAR_SECMV_YDA     --股票质押担保证券市值_年日均
-		,T1.STKPLG_FIN_BAL_MDA	  		AS  STKPLG_FIN_BAL_MDA        --股票质押融资余额_月日均
+		,COALESCE(T1.STKPLG_FIN_BAL_MDA,0)	  		AS  STKPLG_FIN_BAL_MDA        --股票质押融资余额_月日均
 		,T2.STKPLG_FIN_BAL_YDA	  		AS  STKPLG_FIN_BAL_YDA        --股票质押融资余额_年日均
-		,T1.APPTBUYB_BAL_MDA	  		AS  APPTBUYB_BAL_MDA          --约定购回余额_月日均
-		,T1.CRED_MARG_MDA	  			AS  CRED_MARG_MDA             --信用保证金_月日均
+		,COALESCE(T1.APPTBUYB_BAL_MDA,0)	  		AS  APPTBUYB_BAL_MDA          --约定购回余额_月日均
+		,COALESCE(T1.CRED_MARG_MDA,0)	  			AS  CRED_MARG_MDA             --信用保证金_月日均
 		,T2.CRED_MARG_YDA	  			AS  CRED_MARG_YDA             --信用保证金_年日均
-		,T1.INTR_LIAB_MDA	  			AS  INTR_LIAB_MDA             --利息负债_月日均
+		,COALESCE(T1.INTR_LIAB_MDA,0)	  			AS  INTR_LIAB_MDA             --利息负债_月日均
 		,T2.INTR_LIAB_YDA	  			AS  INTR_LIAB_YDA             --利息负债_年日均
-		,T1.FEE_LIAB_MDA	  			AS  FEE_LIAB_MDA              --费用负债_月日均
+		,COALESCE(T1.FEE_LIAB_MDA,0)	  			AS  FEE_LIAB_MDA              --费用负债_月日均
 		,T2.FEE_LIAB_YDA	  			AS  FEE_LIAB_YDA              --费用负债_年日均
-		,T1.OTHLIAB_MDA	  				AS  OTHLIAB_MDA               --其他负债_月日均
+		,COALESCE(T1.OTHLIAB_MDA,0)	  				AS  OTHLIAB_MDA               --其他负债_月日均
 		,T2.OTHLIAB_YDA	  				AS  OTHLIAB_YDA               --其他负债_年日均
-		,T1.FIN_LIAB_MDA	  			AS  FIN_LIAB_MDA              --融资负债_月日均
+		,COALESCE(T1.FIN_LIAB_MDA,0)	  			AS  FIN_LIAB_MDA              --融资负债_月日均
 		,T2.CRDT_STK_LIAB_YDA	  		AS  CRDT_STK_LIAB_YDA         --融券负债_年日均
-		,T1.CRDT_STK_LIAB_MDA	  		AS  CRDT_STK_LIAB_MDA         --融券负债_月日均
+		,COALESCE(T1.CRDT_STK_LIAB_MDA,0)	  		AS  CRDT_STK_LIAB_MDA         --融券负债_月日均
 		,T2.FIN_LIAB_YDA	  			AS  FIN_LIAB_YDA              --融资负债_年日均
-		,T1.CREDIT_TOT_AST_MDA	  		AS  CREDIT_TOT_AST_MDA        --融资融券总资产_月日均
+		,COALESCE(T1.CREDIT_TOT_AST_MDA,0)	  		AS  CREDIT_TOT_AST_MDA        --融资融券总资产_月日均
 		,T2.CREDIT_TOT_AST_YDA	  		AS  CREDIT_TOT_AST_YDA        --融资融券总资产_年日均
-		,T1.CREDIT_TOT_LIAB_MDA	  		AS  CREDIT_TOT_LIAB_MDA       --融资融券总负债_月日均
+		,COALESCE(T1.CREDIT_TOT_LIAB_MDA,0)	  		AS  CREDIT_TOT_LIAB_MDA       --融资融券总负债_月日均
 		,T2.CREDIT_TOT_LIAB_YDA	  		AS  CREDIT_TOT_LIAB_YDA       --融资融券总负债_年日均
-		,T1.APPTBUYB_GUAR_SECMV_MDA	  	AS  APPTBUYB_GUAR_SECMV_MDA   --约定购回担保证券市值_月日均
+		,COALESCE(T1.APPTBUYB_GUAR_SECMV_MDA,0)	  	AS  APPTBUYB_GUAR_SECMV_MDA   --约定购回担保证券市值_月日均
 		,T2.APPTBUYB_GUAR_SECMV_YDA	  	AS  APPTBUYB_GUAR_SECMV_YDA   --约定购回担保证券市值_年日均
-		,T1.CREDIT_GUAR_SECMV_MDA	  	AS  CREDIT_GUAR_SECMV_MDA     --融资融券担保证券市值_月日均
+		,COALESCE(T1.CREDIT_GUAR_SECMV_MDA,0)	  	AS  CREDIT_GUAR_SECMV_MDA     --融资融券担保证券市值_月日均
 		,T2.CREDIT_GUAR_SECMV_YDA	  	AS  CREDIT_GUAR_SECMV_YDA     --融资融券担保证券市值_年日均
-	FROM #T_AST_M_EMP_MTH T1,#T_AST_M_EMP_YEAR T2
-	WHERE T1.EMP_ID = T2.EMP_ID 
-		AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #T_AST_M_EMP_YEAR T2
+	LEFT JOIN #T_AST_M_EMP_MTH T1 ON T1.EMP_ID = T2.EMP_ID ;
+	
 	COMMIT;
 END
 GO
@@ -4480,8 +4622,8 @@ begin
        ,gjsz        ---股票型基金市值
        ,rq as load_dt
     from dba.t_ddw_client_index_high_priority
-    where rq=@v_bin_date
-     and jgbh_hs not in  ('5','55','51','44','9999');  ---modify by rengz 20180212 剔除总部客户
+    where rq=@v_bin_date;
+     --and jgbh_hs not in  ('5','55','51','44','9999');  ---modify by rengz 20180212 剔除总部客户
   commit;
 
 ------------------------
@@ -4885,9 +5027,15 @@ BEGIN
     SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND IF_TRD_DAY_FLAG=1);
     SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR  );
     SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE );
+    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE);
+    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+
     SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
 	
 --PART0 删除当月数据
@@ -4943,6 +5091,8 @@ BEGIN
 	,OTH_PROD_MVAL_FINAL
 	,OTH_AST_MVAL_FINAL
 	,APPTBUYB_PLG_MVAL_FINAL
+	,stkplg_liab_final
+	
 	,SCDY_MVAL_MDA
 	,STKF_MVAL_MDA
 	,A_SHR_MVAL_MDA
@@ -4982,6 +5132,8 @@ BEGIN
 	,OTH_PROD_MVAL_MDA
 	,OTH_AST_MVAL_MDA
 	,APPTBUYB_PLG_MVAL_MDA
+	,stkplg_liab_mda
+	
 	,SCDY_MVAL_YDA
 	,STKF_MVAL_YDA
 	,A_SHR_MVAL_YDA
@@ -5021,6 +5173,8 @@ BEGIN
 	,OTH_PROD_MVAL_YDA
 	,OTH_AST_MVAL_YDA
 	,APPTBUYB_PLG_MVAL_YDA
+	,stkplg_liab_yda
+	
 	,LOAD_DT
 	)
 select
@@ -5034,47 +5188,49 @@ select
 	,t_rq.年||t_rq.月 as 年月
 	,t_rq.年||t_rq.月||t1.CUST_ID as 年月客户编号
 	
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SCDY_MVAL,0) else 0 end) as 二级市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.STKF_MVAL,0) else 0 end) as 股基市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.A_SHR_MVAL,0) else 0 end) as A股市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.NOTS_MVAL,0) else 0 end) as 限售股市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OFFUND_MVAL,0) else 0 end) as 场内基金市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OPFUND_MVAL,0) else 0 end) as 场外基金市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SB_MVAL,0) else 0 end) as 三板市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.IMGT_PD_MVAL,0) else 0 end) as 资管产品市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.BANK_CHRM_MVAL,0) else 0 end) as 银行理财市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SECU_CHRM_MVAL,0) else 0 end) as 证券理财市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.PSTK_OPTN_MVAL,0) else 0 end) as 个股期权市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.B_SHR_MVAL,0) else 0 end) as B股市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OUTMARK_MVAL,0) else 0 end) as 体外市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.CPTL_BAL,0) else 0 end) as 资金余额_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.NO_ARVD_CPTL,0) else 0 end) as 未到账资金_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.PO_FUND_MVAL,0) else 0 end) as 公募基金市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.PTE_FUND_MVAL,0) else 0 end) as 私募基金市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OVERSEA_TOT_AST,0) else 0 end) as 海外总资产_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.FUTR_TOT_AST,0) else 0 end) as 期货总资产_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.CPTL_BAL_RMB,0) else 0 end) as 资金余额人民币_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.CPTL_BAL_HKD,0) else 0 end) as 资金余额港币_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.CPTL_BAL_USD,0) else 0 end) as 资金余额美元_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.LOW_RISK_TOT_AST,0) else 0 end) as 低风险总资产_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.FUND_SPACCT_MVAL,0) else 0 end) as 基金专户市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.HGT_MVAL,0) else 0 end) as 沪港通市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.SGT_MVAL,0) else 0 end) as 深港通市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.NET_AST,0) else 0 end) as 净资产_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.TOT_AST_CONTAIN_NOTS,0) else 0 end) as 总资产_含限售股_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.TOT_AST_N_CONTAIN_NOTS,0) else 0 end) as 总资产_不含限售股_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.BOND_MVAL,0) else 0 end) as 债券市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.REPO_MVAL,0) else 0 end) as 回购市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.TREA_REPO_MVAL,0) else 0 end) as 国债回购市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.REPQ_MVAL,0) else 0 end) as 报价回购市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SCDY_MVAL,0) else 0 end) as 二级市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.STKF_MVAL,0) else 0 end) as 股基市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.A_SHR_MVAL,0) else 0 end) as A股市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.NOTS_MVAL,0) else 0 end) as 限售股市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OFFUND_MVAL,0) else 0 end) as 场内基金市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OPFUND_MVAL,0) else 0 end) as 场外基金市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SB_MVAL,0) else 0 end) as 三板市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.IMGT_PD_MVAL,0) else 0 end) as 资管产品市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.BANK_CHRM_MVAL,0) else 0 end) as 银行理财市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SECU_CHRM_MVAL,0) else 0 end) as 证券理财市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.PSTK_OPTN_MVAL,0) else 0 end) as 个股期权市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.B_SHR_MVAL,0) else 0 end) as B股市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OUTMARK_MVAL,0) else 0 end) as 体外市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.CPTL_BAL,0) else 0 end) as 资金余额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.NO_ARVD_CPTL,0) else 0 end) as 未到账资金_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.PO_FUND_MVAL,0) else 0 end) as 公募基金市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.PTE_FUND_MVAL,0) else 0 end) as 私募基金市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OVERSEA_TOT_AST,0) else 0 end) as 海外总资产_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.FUTR_TOT_AST,0) else 0 end) as 期货总资产_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.CPTL_BAL_RMB,0) else 0 end) as 资金余额人民币_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.CPTL_BAL_HKD,0) else 0 end) as 资金余额港币_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.CPTL_BAL_USD,0) else 0 end) as 资金余额美元_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.LOW_RISK_TOT_AST,0) else 0 end) as 低风险总资产_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.FUND_SPACCT_MVAL,0) else 0 end) as 基金专户市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.HGT_MVAL,0) else 0 end) as 沪港通市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.SGT_MVAL,0) else 0 end) as 深港通市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.NET_AST,0) else 0 end) as 净资产_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.TOT_AST_CONTAIN_NOTS,0) else 0 end) as 总资产_含限售股_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.TOT_AST_N_CONTAIN_NOTS,0) else 0 end) as 总资产_不含限售股_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.BOND_MVAL,0) else 0 end) as 债券市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.REPO_MVAL,0) else 0 end) as 回购市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.TREA_REPO_MVAL,0) else 0 end) as 国债回购市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.REPQ_MVAL,0) else 0 end) as 报价回购市值_期末
 
 	--20180201新增
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.FINAL_AST,0) else 0 end) as 总资产_期末        
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.STKT_FUND_MVAL,0) else 0 end) as 股票型基金市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.PROD_TOT_MVAL,0) else 0 end) as 产品总市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OTH_PROD_MVAL,0) else 0 end) as 其他产品市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OTH_AST_MVAL,0) else 0 end) as 其他资产市值_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.APPTBUYB_PLG_MVAL,0) else 0 end) as 约定购回质押市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.FINAL_AST,0) else 0 end) as 总资产_期末        
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.STKT_FUND_MVAL,0) else 0 end) as 股票型基金市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.PROD_TOT_MVAL,0) else 0 end) as 产品总市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OTH_PROD_MVAL,0) else 0 end) as 其他产品市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OTH_AST_MVAL,0) else 0 end) as 其他资产市值_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.APPTBUYB_PLG_MVAL,0) else 0 end) as 约定购回质押市值_期末
+	
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.stkplg_liab,0) else 0 end) as 股票质押负债_期末
 	
 	
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.SCDY_MVAL,0) else 0 end)/t_rq.自然天数_月 as 二级市值_月日均
@@ -5117,6 +5273,8 @@ select
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.OTH_PROD_MVAL,0) else 0 end)/t_rq.自然天数_月 as 其他产品市值_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.OTH_AST_MVAL,0) else 0 end)/t_rq.自然天数_月 as 其他资产市值_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.APPTBUYB_PLG_MVAL,0) else 0 end)/t_rq.自然天数_月 as 约定购回质押市值_月日均
+	
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.stkplg_liab,0) else 0 end)/t_rq.自然天数_月 as 股票质押负债_月日均
 
 	,sum(COALESCE(t1.SCDY_MVAL,0))/t_rq.自然天数_年 as 二级市值_年日均
 	,sum(COALESCE(t1.STKF_MVAL,0))/t_rq.自然天数_年 as 股基市值_年日均
@@ -5159,6 +5317,8 @@ select
 	,sum(COALESCE(t1.OTH_AST_MVAL,0))/t_rq.自然天数_年 as 其他资产市值_年日均
 	,sum(COALESCE(t1.APPTBUYB_PLG_MVAL,0))/t_rq.自然天数_年 as 约定购回质押市值_年日均
 	
+	,sum(COALESCE(t1.stkplg_liab,0))/t_rq.自然天数_年 as 股票质押负债_年日均
+	
     ,@V_BIN_DATE
 
 from
@@ -5180,7 +5340,8 @@ from
 		,@V_BIN_TRD_DAYS_YEAR       as 交易天数_年
 	from DM.T_PUB_DATE t1 
 	where t1.YEAR=@V_BIN_YEAR
-	  AND T1.DT<=@V_BIN_DATE
+	  AND T1.DT<= CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       ELSE @V_BIN_DATE END  
 ) t_rq
 left join DM.T_AST_ODI t1 on t_rq.交易日期=t1.OCCUR_DT
 group by
@@ -5192,6 +5353,8 @@ group by
 	,t1.CUST_ID
 
 ;
+
+commit;
 
 END
 GO
@@ -5434,9 +5597,15 @@ BEGIN
     SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND IF_TRD_DAY_FLAG=1);
     SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR  );
     SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE );
+    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE);
+    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
  
 --PART0 删除当月数据
@@ -5494,15 +5663,15 @@ SELECT
 	,T_RQ.自然日_月初
 	,T_RQ.年||T_RQ.月 AS 年月
 	,T_RQ.年||T_RQ.月||T1.CUST_ID AS 年月客户编码
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.GUAR_SECU_MVAL,0) ELSE 0 END) 			AS 担保证券市值_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.STKPLG_FIN_BAL,0) ELSE 0 END) 			AS 股票质押融资余额_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.SH_GUAR_SECU_MVAL,0) ELSE 0 END) 		AS 上海担保证券市值_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.SZ_GUAR_SECU_MVAL,0) ELSE 0 END) 		AS 深圳担保证券市值_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.SH_NOTS_GUAR_SECU_MVAL,0) ELSE 0 END) 	AS 上海限售股担保证券市值_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.SZ_NOTS_GUAR_SECU_MVAL,0) ELSE 0 END) 	AS 深圳限售股担保证券市值_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.PROP_FINAC_OUT_SIDE_BAL,0) ELSE 0 END) 	AS 自营融出方余额_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.ASSM_FINAC_OUT_SIDE_BAL,0) ELSE 0 END) 	AS 资管融出方余额_期末
-	,SUM(CASE WHEN T_RQ.日期=T_RQ.自然日_月末 THEN COALESCE(T1.SM_LOAN_FINAC_OUT_BAL,0) ELSE 0 END) 	AS 小额贷融出余额_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.GUAR_SECU_MVAL,0) ELSE 0 END) 			AS 担保证券市值_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.STKPLG_FIN_BAL,0) ELSE 0 END) 			AS 股票质押融资余额_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.SH_GUAR_SECU_MVAL,0) ELSE 0 END) 		AS 上海担保证券市值_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.SZ_GUAR_SECU_MVAL,0) ELSE 0 END) 		AS 深圳担保证券市值_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.SH_NOTS_GUAR_SECU_MVAL,0) ELSE 0 END) 	AS 上海限售股担保证券市值_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.SZ_NOTS_GUAR_SECU_MVAL,0) ELSE 0 END) 	AS 深圳限售股担保证券市值_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.PROP_FINAC_OUT_SIDE_BAL,0) ELSE 0 END) 	AS 自营融出方余额_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.ASSM_FINAC_OUT_SIDE_BAL,0) ELSE 0 END) 	AS 资管融出方余额_期末
+	,SUM(CASE WHEN T_RQ.日期=@V_BIN_DATE THEN COALESCE(T1.SM_LOAN_FINAC_OUT_BAL,0) ELSE 0 END) 	AS 小额贷融出余额_期末
 
 	,SUM(CASE WHEN T_RQ.日期>=T_RQ.自然日_月初 THEN COALESCE(T1.GUAR_SECU_MVAL,0) ELSE 0 END)/T_RQ.自然天数_月 			AS 担保证券市值_月日均
 	,SUM(CASE WHEN T_RQ.日期>=T_RQ.自然日_月初 THEN COALESCE(T1.STKPLG_FIN_BAL,0) ELSE 0 END)/T_RQ.自然天数_月 			AS 股票质押融资余额_月日均
@@ -5544,7 +5713,8 @@ FROM
 		,@V_BIN_TRD_DAYS_YEAR       as 交易天数_年
 	from DM.T_PUB_DATE t1 
 	where t1.YEAR=@V_BIN_YEAR
-	  AND T1.DT<=@V_BIN_DATE
+	  AND T1.DT<= CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       ELSE @V_BIN_DATE END  
 ) T_RQ
 LEFT JOIN DM.T_AST_STKPLG T1 ON T_RQ.交易日期=T1.OCCUR_DT
 GROUP BY
@@ -5556,6 +5726,1401 @@ GROUP BY
 	,T1.CTR_NO
 	,T1.CUST_ID
 ;
+COMMIT;
+
+END
+GO
+CREATE PROCEDURE dm.P_EVT_BRH_BIS_M(IN @V_BIN_DATE INT)
+
+BEGIN 
+  
+  /******************************************************************
+  程序功能: 创建员营业部业务数据月表:带权责
+  编写者: YHB
+  创建日期: 2018-03-26
+  简介：员工客户数月表
+  *********************************************************************
+  修订记录： 修订日期       版本号    修订人             修改内容简要说明
+             20180329                  dcy                新增资产段      
+             20180409                  dcy                新增普通交易28个字段			 
+  *********************************************************************/
+
+  	DECLARE @V_YEAR VARCHAR(4);		-- 年份
+  	DECLARE @V_MONTH VARCHAR(2);	-- 月份
+	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
+	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+
+--PART0 删除当月数据
+  DELETE FROM DM.T_EVT_BRH_BIS_M WHERE YEAR=@V_YEAR AND MTH=@V_MONTH;
+
+insert into DM.T_EVT_BRH_BIS_M
+	(
+	YEAR
+    ,MTH
+    ,YEAR_MTH
+    ,ORG_NO
+    ,CUST_STAT
+    ,IF_SPCA_ACC
+    ,IF_PROD_NEW_CUST
+    ,IF_MTH_NA
+    ,IF_YEAR_NA
+    ,IF_CREDIT_CUST
+    ,IF_CREDIT_MTH_NA
+    ,IF_CREDIT_YEAR_NA
+    ,IF_CREDIT_EFF_CUST
+    ,IF_CREDIT_MTH_NA_EFF_ACT
+    ,IF_CREDIT_YEAR_NA_EFF_ACT
+    ,AST_SGMTS
+    ,CUST_TYPE
+    ,CUST_NUM
+    ,EFF_CUST_NUM
+    ,CREDIT_CUST_NUM
+    ,CREDIT_EFF_CUST_NUM
+    ,ODIAST_SCDY_MVAL_FINAL
+    ,ODIAST_STKF_MVAL_FINAL
+    ,ODIAST_A_SHR_MVAL_FINAL
+    ,ODIAST_NOTS_MVAL_FINAL
+    ,ODIAST_OFFUND_MVAL_FINAL
+    ,ODIAST_OPFUND_MVAL_FINAL
+    ,ODIAST_SB_MVAL_FINAL
+    ,ODIAST_IMGT_PD_MVAL_FINAL
+    ,ODIAST_BANK_CHRM_MVAL_FINAL
+    ,ODIAST_SECU_CHRM_MVAL_FINAL
+    ,ODIAST_PSTK_OPTN_MVAL_FINAL
+    ,ODIAST_B_SHR_MVAL_FINAL
+    ,ODIAST_OUTMARK_MVAL_FINAL
+    ,ODIAST_CPTL_BAL_FINAL
+    ,ODIAST_NO_ARVD_CPTL_FINAL
+    ,ODIAST_PTE_FUND_MVAL_FINAL
+    ,ODIAST_OVERSEA_TOTAST_FINAL
+    ,ODIAST_FUTR_TOTAST_FINAL
+    ,ODIAST_CPTL_BAL_RMB_FINAL
+    ,ODIAST_CPTL_BAL_HKD_FINAL
+    ,ODIAST_CPTL_BAL_USD_FINAL
+    ,ODIAST_LOW_RISK_TOTAST_FINAL
+    ,ODIAST_FUND_SPACCT_MVAL_FINAL
+    ,ODIAST_HGT_MVAL_FINAL
+    ,ODIAST_SGT_MVAL_FINAL
+    ,ODIAST_NET_AST_FINAL
+    ,ODIAST_TOTAST_CONTAIN_NOTS_FINAL
+    ,ODIAST_TOTAST_N_CONTAIN_NOTS_FINAL
+    ,ODIAST_BOND_MVAL_FINAL
+    ,ODIAST_REPO_MVAL_FINAL
+    ,ODIAST_TREA_REPO_MVAL_FINAL
+    ,ODIAST_REPQ_MVAL_FINAL
+    ,ODIAST_SCDY_MVAL_MDA
+    ,ODIAST_STKF_MVAL_MDA
+    ,ODIAST_A_SHR_MVAL_MDA
+    ,ODIAST_NOTS_MVAL_MDA
+    ,ODIAST_OFFUND_MVAL_MDA
+    ,ODIAST_OPFUND_MVAL_MDA
+    ,ODIAST_SB_MVAL_MDA
+    ,ODIAST_IMGT_PD_MVAL_MDA
+    ,ODIAST_BANK_CHRM_MVAL_MDA
+    ,ODIAST_SECU_CHRM_MVAL_MDA
+    ,ODIAST_PSTK_OPTN_MVAL_MDA
+    ,ODIAST_B_SHR_MVAL_MDA
+    ,ODIAST_OUTMARK_MVAL_MDA
+    ,ODIAST_CPTL_BAL_MDA
+    ,ODIAST_NO_ARVD_CPTL_MDA
+    ,ODIAST_PTE_FUND_MVAL_MDA
+    ,ODIAST_OVERSEA_TOTAST_MDA
+    ,ODIAST_FUTR_TOTAST_MDA
+    ,ODIAST_CPTL_BAL_RMB_MDA
+    ,ODIAST_CPTL_BAL_HKD_MDA
+    ,ODIAST_CPTL_BAL_USD_MDA
+    ,ODIAST_LOW_RISK_TOTAST_MDA
+    ,ODIAST_FUND_SPACCT_MVAL_MDA
+    ,ODIAST_HGT_MVAL_MDA
+    ,ODIAST_SGT_MVAL_MDA
+    ,ODIAST_NET_AST_MDA
+    ,ODIAST_TOTAST_CONTAIN_NOTS_MDA
+    ,ODIAST_TOTAST_N_CONTAIN_NOTS_MDA
+    ,ODIAST_BOND_MVAL_MDA
+    ,ODIAST_REPO_MVAL_MDA
+    ,ODIAST_TREA_REPO_MVAL_MDA
+    ,ODIAST_REPQ_MVAL_MDA
+    ,ODIAST_SCDY_MVAL_YDA
+    ,ODIAST_STKF_MVAL_YDA
+    ,ODIAST_A_SHR_MVAL_YDA
+    ,ODIAST_NOTS_MVAL_YDA
+    ,ODIAST_OFFUND_MVAL_YDA
+    ,ODIAST_OPFUND_MVAL_YDA
+    ,ODIAST_SB_MVAL_YDA
+    ,ODIAST_IMGT_PD_MVAL_YDA
+    ,ODIAST_BANK_CHRM_MVAL_YDA
+    ,ODIAST_SECU_CHRM_MVAL_YDA
+    ,ODIAST_PSTK_OPTN_MVAL_YDA
+    ,ODIAST_B_SHR_MVAL_YDA
+    ,ODIAST_OUTMARK_MVAL_YDA
+    ,ODIAST_CPTL_BAL_YDA
+    ,ODIAST_NO_ARVD_CPTL_YDA
+    ,ODIAST_PTE_FUND_MVAL_YDA
+    ,ODIAST_OVERSEA_TOTAST_YDA
+    ,ODIAST_FUTR_TOTAST_YDA
+    ,ODIAST_CPTL_BAL_RMB_YDA
+    ,ODIAST_CPTL_BAL_HKD_YDA
+    ,ODIAST_CPTL_BAL_USD_YDA
+    ,ODIAST_LOW_RISK_TOTAST_YDA
+    ,ODIAST_FUND_SPACCT_MVAL_YDA
+    ,ODIAST_HGT_MVAL_YDA
+    ,ODIAST_SGT_MVAL_YDA
+    ,ODIAST_NET_AST_YDA
+    ,ODIAST_TOTAST_CONTAIN_NOTS_YDA
+    ,ODIAST_TOTAST_N_CONTAIN_NOTS_YDA
+    ,ODIAST_BOND_MVAL_YDA
+    ,ODIAST_REPO_MVAL_YDA
+    ,ODIAST_TREA_REPO_MVAL_YDA
+    ,ODIAST_REPQ_MVAL_YDA
+    ,ODIAST_PO_FUND_MVAL_FINAL
+    ,ODIAST_PO_FUND_MVAL_MDA
+    ,ODIAST_PO_FUND_MVAL_YDA
+    ,ODIAST_STKT_FUND_MVAL_FINAL
+    ,ODIAST_OTH_PROD_MVAL_FINAL
+    ,ODIAST_OTH_AST_MVAL_FINAL
+    ,ODIAST_APPTBUYB_PLG_MVAL_FINAL
+    ,ODIAST_STKT_FUND_MVAL_MDA
+    ,ODIAST_OTH_PROD_MVAL_MDA
+    ,ODIAST_OTH_AST_MVAL_MDA
+    ,ODIAST_APPTBUYB_PLG_MVAL_MDA
+    ,ODIAST_STKT_FUND_MVAL_YDA
+    ,ODIAST_OTH_PROD_MVAL_YDA
+    ,ODIAST_OTH_AST_MVAL_YDA
+    ,ODIAST_APPTBUYB_PLG_MVAL_YDA
+    ,ODIAST_CREDIT_NET_AST_FINAL
+    ,ODIAST_CREDIT_MARG_FINAL
+    ,ODIAST_CREDIT_BAL_FINAL
+    ,ODIAST_CREDIT_NET_AST_MDA
+    ,ODIAST_CREDIT_MARG_MDA
+    ,ODIAST_CREDIT_BAL_MDA
+    ,ODIAST_CREDIT_NET_AST_YDA
+    ,ODIAST_CREDIT_MARG_YDA
+    ,ODIAST_CREDIT_BAL_YDA
+    ,ODIAST_PROD_TOT_MVAL_FINAL
+    ,ODIAST_PROD_TOT_MVAL_MDA
+    ,ODIAST_PROD_TOT_MVAL_YDA
+    ,ODIAST_TOTAST_FINAL
+    ,ODIAST_TOTAST_MDA
+    ,ODIAST_TOTAST_YDA
+    ,ODIAST_STKPLG_GUAR_SECMV_FINAL_SCDY_DEDUCT
+    ,ODIAST_STKPLG_GUAR_SECMV_MDA_SCDY_DEDUCT
+    ,ODIAST_STKPLG_GUAR_SECMV_YDA_SCDY_DEDUCT
+    ,ODIAST_STKPLG_LIAB_FINAL
+    ,ODIAST_STKPLG_LIAB_MDA
+    ,ODIAST_STKPLG_LIAB_YDA
+    ,ODIAST_CREDIT_TOT_LIAB_FINAL
+    ,ODIAST_CREDIT_TOT_LIAB_MDA
+    ,ODIAST_CREDIT_TOT_LIAB_YDA
+    ,ODIAST_APPTBUYB_BAL_FINAL
+    ,ODIAST_APPTBUYB_BAL_MDA
+    ,ODIAST_APPTBUYB_BAL_YDA
+    ,ODIAST_CREDIT_TOTAST_FINAL
+    ,ODIAST_CREDIT_TOTAST_MDA
+    ,ODIAST_CREDIT_TOTAST_YDA
+    ,ODIAST_STKPLG_GUAR_SECMV_FINAL
+    ,ODIAST_STKPLG_GUAR_SECMV_MDA
+    ,ODIAST_STKPLG_GUAR_SECMV_YDA
+    ,CREDIT_TOT_LIAB_FINAL
+    ,CREDIT_NET_AST_FINAL
+    ,CREDIT_CRED_MARG_FINAL
+    ,CREDIT_GUAR_SECMV_FINAL
+    ,CREDIT_FIN_LIAB_FINAL
+    ,CREDIT_CRDT_STK_LIAB_FINAL
+    ,CREDIT_INTR_LIAB_FINAL
+    ,CREDIT_FEE_LIAB_FINAL
+    ,CREDIT_OTHLIAB_FINAL
+    ,CREDIT_TOTAST_FINAL
+    ,CREDIT_A_SHR_MVAL_FINAL
+    ,CREDIT_TOT_LIAB_MDA
+    ,CREDIT_NET_AST_MDA
+    ,CREDIT_CRED_MARG_MDA
+    ,CREDIT_GUAR_SECMV_MDA
+    ,CREDIT_FIN_LIAB_MDA
+    ,CREDIT_CRDT_STK_LIAB_MDA
+    ,CREDIT_INTR_LIAB_MDA
+    ,CREDIT_FEE_LIAB_MDA
+    ,CREDIT_OTHLIAB_MDA
+    ,CREDIT_TOTAST_MDA
+    ,CREDIT_A_SHR_MVAL_MDA
+    ,CREDIT_TOT_LIAB_YDA
+    ,CREDIT_NET_AST_YDA
+    ,CREDIT_CRED_MARG_YDA
+    ,CREDIT_GUAR_SECMV_YDA
+    ,CREDIT_FIN_LIAB_YDA
+    ,CREDIT_CRDT_STK_LIAB_YDA
+    ,CREDIT_INTR_LIAB_YDA
+    ,CREDIT_FEE_LIAB_YDA
+    ,CREDIT_OTHLIAB_YDA
+    ,CREDIT_TOTAST_YDA
+    ,CREDIT_A_SHR_MVAL_YDA
+    ,ASTCHG_ODI_CPTL_INFLOW_MTD
+    ,ASTCHG_ODI_CPTL_OUTFLOW_MTD
+    ,ASTCHG_ODI_MVAL_INFLOW_MTD
+    ,ASTCHG_ODI_MVAL_OUTFLOW_MTD
+    ,ASTCHG_CREDIT_CPTL_INFLOW_MTD
+    ,ASTCHG_CREDIT_CPTL_OUTFLOW_MTD
+    ,ASTCHG_ODI_ACC_CPTL_NET_INFLOW_MTD
+    ,ASTCHG_CREDIT_CPTL_NET_INFLOW_MTD
+    ,ASTCHG_ODI_CPTL_INFLOW_YTD
+    ,ASTCHG_ODI_CPTL_OUTFLOW_YTD
+    ,ASTCHG_ODI_MVAL_INFLOW_YTD
+    ,ASTCHG_ODI_MVAL_OUTFLOW_YTD
+    ,ASTCHG_CREDIT_CPTL_INFLOW_YTD
+    ,ASTCHG_CREDIT_CPTL_OUTFLOW_YTD
+    ,ASTCHG_ODI_ACC_CPTL_NET_INFLOW_YTD
+    ,ASTCHG_CREDIT_CPTL_NET_INFLOW_YTD
+    ,ODI_INCM_PB_TRD_CMS_MTD
+    ,ODI_INCM_MARG_SPR_INCM_MTD
+    ,ODI_INCM_PB_TRD_CMS_YTD
+    ,ODI_INCM_MARG_SPR_INCM_YTD
+    ,ODI_INCM_GROSS_CMS_MTD
+    ,ODI_INCM_TRAN_FEE_MTD
+    ,ODI_INCM_SCDY_TRAN_FEE_MTD
+    ,ODI_INCM_STP_TAX_MTD
+    ,ODI_INCM_HANDLE_FEE_MTD
+    ,ODI_INCM_SEC_RGLT_FEE_MTD
+    ,ODI_INCM_OTH_FEE_MTD
+    ,ODI_INCM_STKF_CMS_MTD
+    ,ODI_INCM_STKF_TRAN_FEE_MTD
+    ,ODI_INCM_STKF_NET_CMS_MTD
+    ,ODI_INCM_BOND_CMS_MTD
+    ,ODI_INCM_BOND_NET_CMS_MTD
+    ,ODI_INCM_REPQ_CMS_MTD
+    ,ODI_INCM_REPQ_NET_CMS_MTD
+    ,ODI_INCM_HGT_CMS_MTD
+    ,ODI_INCM_HGT_NET_CMS_MTD
+    ,ODI_INCM_HGT_TRAN_FEE_MTD
+    ,ODI_INCM_SGT_CMS_MTD
+    ,ODI_INCM_SGT_NET_CMS_MTD
+    ,ODI_INCM_SGT_TRAN_FEE_MTD
+    ,ODI_INCM_BGDL_CMS_MTD
+    ,ODI_INCM_NET_CMS_MTD
+    ,ODI_INCM_BGDL_NET_CMS_MTD
+    ,ODI_INCM_BGDL_TRAN_FEE_MTD
+    ,ODI_INCM_PSTK_OPTN_CMS_MTD
+    ,ODI_INCM_PSTK_OPTN_NET_CMS_MTD
+    ,ODI_INCM_SCDY_CMS_MTD
+    ,ODI_INCM_SCDY_NET_CMS_MTD
+    ,ODI_INCM_GROSS_CMS_YTD
+    ,ODI_INCM_TRAN_FEE_YTD
+    ,ODI_INCM_SCDY_TRAN_FEE_YTD
+    ,ODI_INCM_STP_TAX_YTD
+    ,ODI_INCM_HANDLE_FEE_YTD
+    ,ODI_INCM_SEC_RGLT_FEE_YTD
+    ,ODI_INCM_OTH_FEE_YTD
+    ,ODI_INCM_STKF_CMS_YTD
+    ,ODI_INCM_STKF_TRAN_FEE_YTD
+    ,ODI_INCM_STKF_NET_CMS_YTD
+    ,ODI_INCM_BOND_CMS_YTD
+    ,ODI_INCM_BOND_NET_CMS_YTD
+    ,ODI_INCM_REPQ_CMS_YTD
+    ,ODI_INCM_REPQ_NET_CMS_YTD
+    ,ODI_INCM_HGT_CMS_YTD
+    ,ODI_INCM_HGT_NET_CMS_YTD
+    ,ODI_INCM_HGT_TRAN_FEE_YTD
+    ,ODI_INCM_SGT_CMS_YTD
+    ,ODI_INCM_SGT_NET_CMS_YTD
+    ,ODI_INCM_SGT_TRAN_FEE_YTD
+    ,ODI_INCM_BGDL_CMS_YTD
+    ,ODI_INCM_NET_CMS_YTD
+    ,ODI_INCM_BGDL_NET_CMS_YTD
+    ,ODI_INCM_BGDL_TRAN_FEE_YTD
+    ,ODI_INCM_PSTK_OPTN_CMS_YTD
+    ,ODI_INCM_PSTK_OPTN_NET_CMS_YTD
+    ,ODI_INCM_SCDY_CMS_YTD
+    ,ODI_INCM_SCDY_NET_CMS_YTD
+    ,CRED_INCM_CREDIT_MARG_SPR_INCM_YTD
+    ,CRED_INCM_CREDIT_MARG_SPR_INCM_MTD
+    ,CRED_INCM_GROSS_CMS_MTD
+    ,CRED_INCM_NET_CMS_MTD
+    ,CRED_INCM_TRAN_FEE_MTD
+    ,CRED_INCM_STP_TAX_MTD
+    ,CRED_INCM_ORDR_FEE_MTD
+    ,CRED_INCM_HANDLE_FEE_MTD
+    ,CRED_INCM_SEC_RGLT_FEE_MTD
+    ,CRED_INCM_OTH_FEE_MTD
+    ,CRED_INCM_CREDIT_ODI_CMS_MTD
+    ,CRED_INCM_CREDIT_ODI_NET_CMS_MTD
+    ,CRED_INCM_CREDIT_ODI_TRAN_FEE_MTD
+    ,CRED_INCM_CREDIT_CRED_CMS_MTD
+    ,CRED_INCM_CREDIT_CRED_NET_CMS_MTD
+    ,CRED_INCM_CREDIT_CRED_TRAN_FEE_MTD
+    ,CRED_INCM_STKPLG_CMS_MTD
+    ,CRED_INCM_STKPLG_NET_CMS_MTD
+    ,CRED_INCM_STKPLG_PAIDINT_MTD
+    ,CRED_INCM_STKPLG_RECE_INT_MTD
+    ,CRED_INCM_APPTBUYB_CMS_MTD
+    ,CRED_INCM_APPTBUYB_NET_CMS_MTD
+    ,CRED_INCM_APPTBUYB_PAIDINT_MTD
+    ,CRED_INCM_FIN_PAIDINT_MTD
+    ,CRED_INCM_FIN_IE_MTD
+    ,CRED_INCM_CRDT_STK_IE_MTD
+    ,CRED_INCM_OTH_IE_MTD
+    ,CRED_INCM_FIN_RECE_INT_MTD
+    ,CRED_INCM_FEE_RECE_INT_MTD
+    ,CRED_INCM_OTH_RECE_INT_MTD
+    ,CRED_INCM_CREDIT_CPTL_COST_MTD
+    ,CRED_INCM_GROSS_CMS_YTD
+    ,CRED_INCM_NET_CMS_YTD
+    ,CRED_INCM_TRAN_FEE_YTD
+    ,CRED_INCM_STP_TAX_YTD
+    ,CRED_INCM_ORDR_FEE_YTD
+    ,CRED_INCM_HANDLE_FEE_YTD
+    ,CRED_INCM_SEC_RGLT_FEE_YTD
+    ,CRED_INCM_OTH_FEE_YTD
+    ,CRED_INCM_CREDIT_ODI_CMS_YTD
+    ,CRED_INCM_CREDIT_ODI_NET_CMS_YTD
+    ,CRED_INCM_CREDIT_ODI_TRAN_FEE_YTD
+    ,CRED_INCM_CREDIT_CRED_CMS_YTD
+    ,CRED_INCM_CREDIT_CRED_NET_CMS_YTD
+    ,CRED_INCM_CREDIT_CRED_TRAN_FEE_YTD
+    ,CRED_INCM_STKPLG_CMS_YTD
+    ,CRED_INCM_STKPLG_NET_CMS_YTD
+    ,CRED_INCM_STKPLG_PAIDINT_YTD
+    ,CRED_INCM_STKPLG_RECE_INT_YTD
+    ,CRED_INCM_APPTBUYB_CMS_YTD
+    ,CRED_INCM_APPTBUYB_NET_CMS_YTD
+    ,CRED_INCM_APPTBUYB_PAIDINT_YTD
+    ,CRED_INCM_FIN_PAIDINT_YTD
+    ,CRED_INCM_FIN_IE_YTD
+    ,CRED_INCM_CRDT_STK_IE_YTD
+    ,CRED_INCM_OTH_IE_YTD
+    ,CRED_INCM_FIN_RECE_INT_YTD
+    ,CRED_INCM_FEE_RECE_INT_YTD
+    ,CRED_INCM_OTH_RECE_INT_YTD
+    ,CRED_INCM_CREDIT_CPTL_COST_YTD
+    ,APPTBUYB_GUAR_SECMV_FINAL
+    ,APPTBUYB_APPTBUYB_BAL_FINAL
+    ,APPTBUYB_SH_GUAR_SECMV_FINAL
+    ,APPTBUYB_SZ_GUAR_SECMV_FINAL
+    ,APPTBUYB_SH_NOTS_GUAR_SECMV_FINAL
+    ,APPTBUYB_SZ_NOTS_GUAR_SECMV_FINAL
+    ,APPTBUYB_PROP_FINOS_BAL_FINAL
+    ,APPTBUYB_ASSM_FINOS_BAL_FINAL
+    ,APPTBUYB_SM_LOAN_FINO_BAL_FINAL
+    ,APPTBUYB_GUAR_SECMV_MDA
+    ,APPTBUYB_APPTBUYB_BAL_MDA
+    ,APPTBUYB_SH_GUAR_SECMV_MDA
+    ,APPTBUYB_SZ_GUAR_SECMV_MDA
+    ,APPTBUYB_SH_NOTS_GUAR_SECMV_MDA
+    ,APPTBUYB_SZ_NOTS_GUAR_SECMV_MDA
+    ,APPTBUYB_PROP_FINOS_BAL_MDA
+    ,APPTBUYB_ASSM_FINOS_BAL_MDA
+    ,APPTBUYB_SM_LOAN_FINO_BAL_MDA
+    ,APPTBUYB_GUAR_SECMV_YDA
+    ,APPTBUYB_APPTBUYB_BAL_YDA
+    ,APPTBUYB_SH_GUAR_SECMV_YDA
+    ,APPTBUYB_SZ_GUAR_SECMV_YDA
+    ,APPTBUYB_SH_NOTS_GUAR_SECMV_YDA
+    ,APPTBUYB_SZ_NOTS_GUAR_SECMV_YDA
+    ,APPTBUYB_PROP_FINOS_BAL_YDA
+    ,APPTBUYB_ASSM_FINOS_BAL_YDA
+    ,APPTBUYB_SM_LOAN_FINO_BAL_YDA
+    ,STKPLG_GUAR_SECMV_FINAL
+    ,STKPLG_STKPLG_FIN_BAL_FINAL
+    ,STKPLG_SH_GUAR_SECMV_FINAL
+    ,STKPLG_SZ_GUAR_SECMV_FINAL
+    ,STKPLG_SH_NOTS_GUAR_SECMV_FINAL
+    ,STKPLG_SZ_NOTS_GUAR_SECMV_FINAL
+    ,STKPLG_PROP_FINOS_BAL_FINAL
+    ,STKPLG_ASSM_FINOS_BAL_FINAL
+    ,STKPLG_SM_LOAN_FINO_BAL_FINAL
+    ,STKPLG_GUAR_SECMV_MDA
+    ,STKPLG_STKPLG_FIN_BAL_MDA
+    ,STKPLG_SH_GUAR_SECMV_MDA
+    ,STKPLG_SZ_GUAR_SECMV_MDA
+    ,STKPLG_SH_NOTS_GUAR_SECMV_MDA
+    ,STKPLG_SZ_NOTS_GUAR_SECMV_MDA
+    ,STKPLG_PROP_FINOS_BAL_MDA
+    ,STKPLG_ASSM_FINOS_BAL_MDA
+    ,STKPLG_SM_LOAN_FINO_BAL_MDA
+    ,STKPLG_GUAR_SECMV_YDA
+    ,STKPLG_STKPLG_FIN_BAL_YDA
+    ,STKPLG_SH_GUAR_SECMV_YDA
+    ,STKPLG_SZ_GUAR_SECMV_YDA
+    ,STKPLG_SH_NOTS_GUAR_SECMV_YDA
+    ,STKPLG_SZ_NOTS_GUAR_SECMV_YDA
+    ,STKPLG_PROP_FINOS_BAL_YDA
+    ,STKPLG_ASSM_FINOS_BAL_YDA
+    ,STKPLG_SM_LOAN_FINO_BAL_YDA
+    ,ODI_TRD_SCDY_TRD_FREQ_MTD
+    ,ODI_TRD_SCDY_TRD_QTY_MTD
+    ,ODI_TRD_SCDY_TRD_QTY_YTD
+    ,ODI_TRD_TRD_FREQ_YTD
+    ,ODI_TRD_STKF_TRD_QTY_MTD
+    ,ODI_TRD_STKF_TRD_QTY_YTD
+    ,ODI_TRD_S_REPUR_TRD_QTY_MTD
+    ,ODI_TRD_R_REPUR_TRD_QTY_MTD
+    ,ODI_TRD_S_REPUR_TRD_QTY_YTD
+    ,ODI_TRD_R_REPUR_TRD_QTY_YTD
+    ,ODI_TRD_HGT_TRD_QTY_MTD
+    ,ODI_TRD_SGT_TRD_QTY_MTD
+    ,ODI_TRD_SGT_TRD_QTY_YTD
+    ,ODI_TRD_HGT_TRD_QTY_YTD
+    ,ODI_TRD_Y_RCT_STK_TRD_QTY
+    ,ODI_TRD_SCDY_TRD_FREQ_YTD
+    ,ODI_TRD_TRD_FREQ_MTD
+    ,ODI_TRD_APPTBUYB_TRD_QTY_MTD
+    ,ODI_TRD_APPTBUYB_TRD_QTY_YTD
+    ,ODI_TRD_RCT_TRD_DT_M
+    ,ODI_TRD_STKPLG_TRD_QTY_MTD
+    ,ODI_TRD_STKPLG_TRD_QTY_YTD
+    ,ODI_TRD_PSTK_OPTN_TRD_QTY_MTD
+    ,ODI_TRD_PSTK_OPTN_TRD_QTY_YTD
+    ,ODI_TRD_REPQ_TRD_QTY_MTD
+    ,ODI_TRD_REPQ_TRD_QTY_YTD
+    ,ODI_TRD_BGDL_QTY_MTD
+    ,ODI_TRD_BGDL_QTY_YTD
+    ,CREDIT_CRED_QUO
+    ,APPTBUYB_CRED_QUO
+    ,STKPLG_CRED_QUO
+    ,LOAD_DT
+    ,ODI_TRD_SB_TRD_QTY_MTD
+    ,ODI_TRD_SB_TRD_QTY_YTD
+    ,ODI_TRD_BOND_TRD_QTY_MTD
+    ,ODI_TRD_BOND_TRD_QTY_YTD
+    ,ODI_TRD_ITC_CRRC_FUND_TRD_QTY_MTD
+    ,ODI_TRD_ITC_CRRC_FUND_TRD_QTY_YTD
+    ,ODI_TRD_S_REPUR_NET_CMS_MTD
+    ,ODI_TRD_S_REPUR_NET_CMS_YTD
+    ,ODI_TRD_R_REPUR_NET_CMS_MTD
+    ,ODI_TRD_R_REPUR_NET_CMS_YTD
+    ,ODI_TRD_ITC_CRRC_FUND_NET_CMS_MTD
+    ,ODI_TRD_ITC_CRRC_FUND_NET_CMS_YTD
+	)
+
+select
+	 t1.YEAR as 年
+	,t1.MTH as 月
+	,t1.YEAR||t1.MTH as 年月
+	,t_jg.WH_ORG_ID as 机构编号	
+	
+	--维度信息
+	,t_khsx.客户状态  
+	,t_khsx.是否特殊账户
+	,t_khsx.是否产品新客户
+	,t_khsx.是否月新增
+	,t_khsx.是否年新增	
+	,t_khsx.是否融资融券客户
+	,t_khsx.是否融资融券月新增
+	,t_khsx.是否融资融券年新增
+	,t_khsx.是否融资融券有效客户
+	,t_khsx.是否融资融券月新增有效户
+	,t_khsx.是否融资融券年新增有效户
+	,t_khsx.资产段
+	,t_khsx.客户类型	
+	
+	,sum(case when t_khsx.客户状态='0' then t2.JXBL1 else 0 end) as 客户数
+	,sum(case when t_khsx.客户状态='0' and t_khsx.是否有效=1 then t2.JXBL1 else 0 end) as 有效客户数
+	,sum(case when t_khsx.客户状态='0' and t_khsx.是否融资融券客户=1 then t2.JXBL9 else 0 end) as 融资融券_客户数
+	,sum(case when t_khsx.客户状态='0' and t_khsx.是否融资融券客户=1 and t_khsx.是否融资融券有效客户=1 then t2.JXBL9 else 0 end) as 融资融券_有效客户数
+	
+	--普通资产
+	,sum(COALESCE(t1.SCDY_MVAL_FINAL,0)) as 普通资产_二级市值_期末
+	,sum(COALESCE(t1.STKF_MVAL_FINAL,0)) as 普通资产_股基市值_期末
+	,sum(COALESCE(t1.A_SHR_MVAL_FINAL,0)) as 普通资产_A股市值_期末
+	,sum(COALESCE(t1.NOTS_MVAL_FINAL,0)) as 普通资产_限售股市值_期末
+	,sum(COALESCE(t1.OFFUND_MVAL_FINAL,0)) as 普通资产_场内基金市值_期末
+	,sum(COALESCE(t1.OPFUND_MVAL_FINAL,0)) as 普通资产_场外基金市值_期末
+	,sum(COALESCE(t1.SB_MVAL_FINAL,0)) as 普通资产_三板市值_期末
+	,sum(COALESCE(t1.IMGT_PD_MVAL_FINAL,0)) as 普通资产_资管产品市值_期末
+	,sum(COALESCE(t1.BANK_CHRM_MVAL_FINAL,0)) as 普通资产_银行理财市值_期末
+	,sum(COALESCE(t1.SECU_CHRM_MVAL_FINAL,0)) as 普通资产_证券理财市值_期末
+	,sum(COALESCE(t1.PSTK_OPTN_MVAL_FINAL,0)) as 普通资产_个股期权市值_期末
+	,sum(COALESCE(t1.B_SHR_MVAL_FINAL,0)) as 普通资产_B股市值_期末
+	,sum(COALESCE(t1.OUTMARK_MVAL_FINAL,0)) as 普通资产_体外市值_期末
+	,sum(COALESCE(t1.CPTL_BAL_FINAL,0)) as 普通资产_资金余额_期末
+	,sum(COALESCE(t1.NO_ARVD_CPTL_FINAL,0)) as 普通资产_未到账资金_期末
+	,sum(COALESCE(t1.PTE_FUND_MVAL_FINAL,0)) as 普通资产_私募基金市值_期末
+	,sum(COALESCE(t1.OVERSEA_TOT_AST_FINAL,0)) as 普通资产_海外总资产_期末
+	,sum(COALESCE(t1.FUTR_TOT_AST_FINAL,0)) as 普通资产_期货总资产_期末
+	,sum(COALESCE(t1.CPTL_BAL_RMB_FINAL,0)) as 普通资产_资金余额人民币_期末
+	,sum(COALESCE(t1.CPTL_BAL_HKD_FINAL,0)) as 普通资产_资金余额港币_期末
+	,sum(COALESCE(t1.CPTL_BAL_USD_FINAL,0)) as 普通资产_资金余额美元_期末
+	,sum(COALESCE(t1.LOW_RISK_TOT_AST_FINAL,0)) as 普通资产_低风险总资产_期末
+	,sum(COALESCE(t1.FUND_SPACCT_MVAL_FINAL,0)) as 普通资产_基金专户市值_期末
+	,sum(COALESCE(t1.HGT_MVAL_FINAL,0)) as 普通资产_沪港通市值_期末
+	,sum(COALESCE(t1.SGT_MVAL_FINAL,0)) as 普通资产_深港通市值_期末
+	,sum(COALESCE(t1.NET_AST_FINAL,0)) as 普通资产_净资产_期末
+	,sum(COALESCE(t1.TOT_AST_CONTAIN_NOTS_FINAL,0)) as 普通资产_总资产_含限售股_期末
+	,sum(COALESCE(t1.TOT_AST_N_CONTAIN_NOTS_FINAL,0)) as 普通资产_总资产_不含限售股_期末
+	,sum(COALESCE(t1.BOND_MVAL_FINAL,0)) as 普通资产_债券市值_期末
+	,sum(COALESCE(t1.REPO_MVAL_FINAL,0)) as 普通资产_回购市值_期末
+	,sum(COALESCE(t1.TREA_REPO_MVAL_FINAL,0)) as 普通资产_国债回购市值_期末
+	,sum(COALESCE(t1.REPQ_MVAL_FINAL,0)) as 普通资产_报价回购市值_期末
+	,sum(COALESCE(t1.SCDY_MVAL_MDA,0)) as 普通资产_二级市值_月日均
+	,sum(COALESCE(t1.STKF_MVAL_MDA,0)) as 普通资产_股基市值_月日均
+	,sum(COALESCE(t1.A_SHR_MVAL_MDA,0)) as 普通资产_A股市值_月日均
+	,sum(COALESCE(t1.NOTS_MVAL_MDA,0)) as 普通资产_限售股市值_月日均
+	,sum(COALESCE(t1.OFFUND_MVAL_MDA,0)) as 普通资产_场内基金市值_月日均
+	,sum(COALESCE(t1.OPFUND_MVAL_MDA,0)) as 普通资产_场外基金市值_月日均
+	,sum(COALESCE(t1.SB_MVAL_MDA,0)) as 普通资产_三板市值_月日均
+	,sum(COALESCE(t1.IMGT_PD_MVAL_MDA,0)) as 普通资产_资管产品市值_月日均
+	,sum(COALESCE(t1.BANK_CHRM_MVAL_MDA,0)) as 普通资产_银行理财市值_月日均
+	,sum(COALESCE(t1.SECU_CHRM_MVAL_MDA,0)) as 普通资产_证券理财市值_月日均
+	,sum(COALESCE(t1.PSTK_OPTN_MVAL_MDA,0)) as 普通资产_个股期权市值_月日均
+	,sum(COALESCE(t1.B_SHR_MVAL_MDA,0)) as 普通资产_B股市值_月日均
+	,sum(COALESCE(t1.OUTMARK_MVAL_MDA,0)) as 普通资产_体外市值_月日均
+	,sum(COALESCE(t1.CPTL_BAL_MDA,0)) as 普通资产_资金余额_月日均
+	,sum(COALESCE(t1.NO_ARVD_CPTL_MDA,0)) as 普通资产_未到账资金_月日均
+	,sum(COALESCE(t1.PTE_FUND_MVAL_MDA,0)) as 普通资产_私募基金市值_月日均
+	,sum(COALESCE(t1.OVERSEA_TOT_AST_MDA,0)) as 普通资产_海外总资产_月日均
+	,sum(COALESCE(t1.FUTR_TOT_AST_MDA,0)) as 普通资产_期货总资产_月日均
+	,sum(COALESCE(t1.CPTL_BAL_RMB_MDA,0)) as 普通资产_资金余额人民币_月日均
+	,sum(COALESCE(t1.CPTL_BAL_HKD_MDA,0)) as 普通资产_资金余额港币_月日均
+	,sum(COALESCE(t1.CPTL_BAL_USD_MDA,0)) as 普通资产_资金余额美元_月日均
+	,sum(COALESCE(t1.LOW_RISK_TOT_AST_MDA,0)) as 普通资产_低风险总资产_月日均
+	,sum(COALESCE(t1.FUND_SPACCT_MVAL_MDA,0)) as 普通资产_基金专户市值_月日均
+	,sum(COALESCE(t1.HGT_MVAL_MDA,0)) as 普通资产_沪港通市值_月日均
+	,sum(COALESCE(t1.SGT_MVAL_MDA,0)) as 普通资产_深港通市值_月日均
+	,sum(COALESCE(t1.NET_AST_MDA,0)) as 普通资产_净资产_月日均
+	,sum(COALESCE(t1.TOT_AST_CONTAIN_NOTS_MDA,0)) as 普通资产_总资产_含限售股_月日均
+	,sum(COALESCE(t1.TOT_AST_N_CONTAIN_NOTS_MDA,0)) as 普通资产_总资产_不含限售股_月日均
+	,sum(COALESCE(t1.BOND_MVAL_MDA,0)) as 普通资产_债券市值_月日均
+	,sum(COALESCE(t1.REPO_MVAL_MDA,0)) as 普通资产_回购市值_月日均
+	,sum(COALESCE(t1.TREA_REPO_MVAL_MDA,0)) as 普通资产_国债回购市值_月日均
+	,sum(COALESCE(t1.REPQ_MVAL_MDA,0)) as 普通资产_报价回购市值_月日均
+	,sum(COALESCE(t1.SCDY_MVAL_YDA,0)) as 普通资产_二级市值_年日均
+	,sum(COALESCE(t1.STKF_MVAL_YDA,0)) as 普通资产_股基市值_年日均
+	,sum(COALESCE(t1.A_SHR_MVAL_YDA,0)) as 普通资产_A股市值_年日均
+	,sum(COALESCE(t1.NOTS_MVAL_YDA,0)) as 普通资产_限售股市值_年日均
+	,sum(COALESCE(t1.OFFUND_MVAL_YDA,0)) as 普通资产_场内基金市值_年日均
+	,sum(COALESCE(t1.OPFUND_MVAL_YDA,0)) as 普通资产_场外基金市值_年日均
+	,sum(COALESCE(t1.SB_MVAL_YDA,0)) as 普通资产_三板市值_年日均
+	,sum(COALESCE(t1.IMGT_PD_MVAL_YDA,0)) as 普通资产_资管产品市值_年日均
+	,sum(COALESCE(t1.BANK_CHRM_MVAL_YDA,0)) as 普通资产_银行理财市值_年日均
+	,sum(COALESCE(t1.SECU_CHRM_MVAL_YDA,0)) as 普通资产_证券理财市值_年日均
+	,sum(COALESCE(t1.PSTK_OPTN_MVAL_YDA,0)) as 普通资产_个股期权市值_年日均
+	,sum(COALESCE(t1.B_SHR_MVAL_YDA,0)) as 普通资产_B股市值_年日均
+	,sum(COALESCE(t1.OUTMARK_MVAL_YDA,0)) as 普通资产_体外市值_年日均
+	,sum(COALESCE(t1.CPTL_BAL_YDA,0)) as 普通资产_资金余额_年日均
+	,sum(COALESCE(t1.NO_ARVD_CPTL_YDA,0)) as 普通资产_未到账资金_年日均
+	,sum(COALESCE(t1.PTE_FUND_MVAL_YDA,0)) as 普通资产_私募基金市值_年日均
+	,sum(COALESCE(t1.OVERSEA_TOT_AST_YDA,0)) as 普通资产_海外总资产_年日均
+	,sum(COALESCE(t1.FUTR_TOT_AST_YDA,0)) as 普通资产_期货总资产_年日均
+	,sum(COALESCE(t1.CPTL_BAL_RMB_YDA,0)) as 普通资产_资金余额人民币_年日均
+	,sum(COALESCE(t1.CPTL_BAL_HKD_YDA,0)) as 普通资产_资金余额港币_年日均
+	,sum(COALESCE(t1.CPTL_BAL_USD_YDA,0)) as 普通资产_资金余额美元_年日均
+	,sum(COALESCE(t1.LOW_RISK_TOT_AST_YDA,0)) as 普通资产_低风险总资产_年日均
+	,sum(COALESCE(t1.FUND_SPACCT_MVAL_YDA,0)) as 普通资产_基金专户市值_年日均
+	,sum(COALESCE(t1.HGT_MVAL_YDA,0)) as 普通资产_沪港通市值_年日均
+	,sum(COALESCE(t1.SGT_MVAL_YDA,0)) as 普通资产_深港通市值_年日均
+	,sum(COALESCE(t1.NET_AST_YDA,0)) as 普通资产_净资产_年日均
+	,sum(COALESCE(t1.TOT_AST_CONTAIN_NOTS_YDA,0)) as 普通资产_总资产_含限售股_年日均
+	,sum(COALESCE(t1.TOT_AST_N_CONTAIN_NOTS_YDA,0)) as 普通资产_总资产_不含限售股_年日均
+	,sum(COALESCE(t1.BOND_MVAL_YDA,0)) as 普通资产_债券市值_年日均
+	,sum(COALESCE(t1.REPO_MVAL_YDA,0)) as 普通资产_回购市值_年日均
+	,sum(COALESCE(t1.TREA_REPO_MVAL_YDA,0)) as 普通资产_国债回购市值_年日均
+	,sum(COALESCE(t1.REPQ_MVAL_YDA,0)) as 普通资产_报价回购市值_年日均
+	,sum(COALESCE(t1.PO_FUND_MVAL_FINAL,0)) as 普通资产_公募基金市值_期末
+	,sum(COALESCE(t1.PO_FUND_MVAL_MDA,0)) as 普通资产_公募基金市值_月日均
+	,sum(COALESCE(t1.PO_FUND_MVAL_YDA,0)) as 普通资产_公募基金市值_年日均
+	,sum(COALESCE(t1.STKT_FUND_MVAL_FINAL,0)) as 普通资产_股票型基金市值_期末
+	,sum(COALESCE(t1.OTH_PROD_MVAL_FINAL,0)) as 普通资产_其他产品市值_期末
+	,sum(COALESCE(t1.OTH_AST_MVAL_FINAL,0)) as 普通资产_其他资产市值_期末
+	,sum(COALESCE(t1.APPTBUYB_PLG_MVAL_FINAL,0)) as 普通资产_约定购回质押市值_期末
+	,sum(COALESCE(t1.STKT_FUND_MVAL_MDA,0)) as 普通资产_股票型基金市值_月日均
+	,sum(COALESCE(t1.OTH_PROD_MVAL_MDA,0)) as 普通资产_其他产品市值_月日均
+	,sum(COALESCE(t1.OTH_AST_MVAL_MDA,0)) as 普通资产_其他资产市值_月日均
+	,sum(COALESCE(t1.APPTBUYB_PLG_MVAL_MDA,0)) as 普通资产_约定购回质押市值_月日均
+	,sum(COALESCE(t1.STKT_FUND_MVAL_YDA,0)) as 普通资产_股票型基金市值_年日均
+	,sum(COALESCE(t1.OTH_PROD_MVAL_YDA,0)) as 普通资产_其他产品市值_年日均
+	,sum(COALESCE(t1.OTH_AST_MVAL_YDA,0)) as 普通资产_其他资产市值_年日均
+	,sum(COALESCE(t1.APPTBUYB_PLG_MVAL_YDA,0)) as 普通资产_约定购回质押市值_年日均
+	,sum(COALESCE(t1.CREDIT_NET_AST_FINAL,0)) as 普通资产_融资融券净资产_期末
+	,sum(COALESCE(t1.CREDIT_MARG_FINAL,0)) as 普通资产_融资融券保证金_期末
+	,sum(COALESCE(t1.CREDIT_BAL_FINAL,0)) as 普通资产_融资融券余额_期末
+	,sum(COALESCE(t1.CREDIT_NET_AST_MDA,0)) as 普通资产_融资融券净资产_月日均
+	,sum(COALESCE(t1.CREDIT_MARG_MDA,0)) as 普通资产_融资融券保证金_月日均
+	,sum(COALESCE(t1.CREDIT_BAL_MDA,0)) as 普通资产_融资融券余额_月日均
+	,sum(COALESCE(t1.CREDIT_NET_AST_YDA,0)) as 普通资产_融资融券净资产_年日均
+	,sum(COALESCE(t1.CREDIT_MARG_YDA,0)) as 普通资产_融资融券保证金_年日均
+	,sum(COALESCE(t1.CREDIT_BAL_YDA,0)) as 普通资产_融资融券余额_年日均
+	,sum(COALESCE(t1.PROD_TOT_MVAL_FINAL,0)) as 普通资产_产品总市值_期末
+	,sum(COALESCE(t1.PROD_TOT_MVAL_MDA,0)) as 普通资产_产品总市值_月日均
+	,sum(COALESCE(t1.PROD_TOT_MVAL_YDA,0)) as 普通资产_产品总市值_年日均
+	,sum(COALESCE(t1.TOT_AST_FINAL,0)) as 普通资产_总资产_期末
+	,sum(COALESCE(t1.TOT_AST_MDA,0)) as 普通资产_总资产_月日均
+	,sum(COALESCE(t1.TOT_AST_YDA,0)) as 普通资产_总资产_年日均
+	
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_FINAL_SCDY_DEDUCT,0)) as 普通资产_股票质押担保证券市值_期末_二级扣减
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_MDA_SCDY_DEDUCT,0)) as 普通资产_股票质押担保证券市值_月日均_二级扣减
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_YDA_SCDY_DEDUCT,0)) as 普通资产_股票质押担保证券市值_年日均_二级扣减
+	,sum(COALESCE(t1.STKPLG_LIAB_FINAL,0)) as 普通资产_股票质押负债_期末
+	,sum(COALESCE(t1.STKPLG_LIAB_MDA,0)) as 普通资产_股票质押负债_月日均
+	,sum(COALESCE(t1.STKPLG_LIAB_YDA,0)) as 普通资产_股票质押负债_年日均
+	,sum(COALESCE(t1.CREDIT_TOT_LIAB_FINAL,0)) as 普通资产_融资融券总负债_期末
+	,sum(COALESCE(t1.CREDIT_TOT_LIAB_MDA,0)) as 普通资产_融资融券总负债_月日均
+	,sum(COALESCE(t1.CREDIT_TOT_LIAB_YDA,0)) as 普通资产_融资融券总负债_年日均
+	,sum(COALESCE(t1.APPTBUYB_BAL_FINAL,0)) as 普通资产_约定购回余额_期末
+	,sum(COALESCE(t1.APPTBUYB_BAL_MDA,0)) as 普通资产_约定购回余额_月日均
+	,sum(COALESCE(t1.APPTBUYB_BAL_YDA,0)) as 普通资产_约定购回余额_年日均
+	,sum(COALESCE(t1.CREDIT_TOT_AST_FINAL,0)) as 普通资产_融资融券总资产_期末
+	,sum(COALESCE(t1.CREDIT_TOT_AST_MDA,0)) as 普通资产_融资融券总资产_月日均
+	,sum(COALESCE(t1.CREDIT_TOT_AST_YDA,0)) as 普通资产_融资融券总资产_年日均
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_FINAL,0)) as 普通资产_股票质押担保证券市值_期末
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_MDA,0)) as 普通资产_股票质押担保证券市值_月日均
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_YDA,0)) as 普通资产_股票质押担保证券市值_年日均
+	
+	--融资融券
+	,sum(COALESCE(t_rzrq.TOT_LIAB_FINAL,0)) as 融资融券_总负债_期末
+	,sum(COALESCE(t_rzrq.NET_AST_FINAL,0)) as 融资融券_净资产_期末
+	,sum(COALESCE(t_rzrq.CRED_MARG_FINAL,0)) as 融资融券_信用保证金_期末
+	,sum(COALESCE(t_rzrq.GUAR_SECU_MVAL_FINAL,0)) as 融资融券_担保证券市值_期末
+	,sum(COALESCE(t_rzrq.FIN_LIAB_FINAL,0)) as 融资融券_融资负债_期末
+	,sum(COALESCE(t_rzrq.CRDT_STK_LIAB_FINAL,0)) as 融资融券_融券负债_期末
+	,sum(COALESCE(t_rzrq.INTR_LIAB_FINAL,0)) as 融资融券_利息负债_期末
+	,sum(COALESCE(t_rzrq.FEE_LIAB_FINAL,0)) as 融资融券_费用负债_期末
+	,sum(COALESCE(t_rzrq.OTH_LIAB_FINAL,0)) as 融资融券_其他负债_期末
+	,sum(COALESCE(t_rzrq.TOT_AST_FINAL,0)) as 融资融券_总资产_期末
+	,sum(COALESCE(t_rzrq.A_SHR_MVAL_FINAL,0)) as 融资融券_A股市值_期末
+	
+	,sum(COALESCE(t_rzrq.TOT_LIAB_MDA,0)) as 融资融券_总负债_月日均
+	,sum(COALESCE(t_rzrq.NET_AST_MDA,0)) as 融资融券_净资产_月日均
+	,sum(COALESCE(t_rzrq.CRED_MARG_MDA,0)) as 融资融券_信用保证金_月日均
+	,sum(COALESCE(t_rzrq.GUAR_SECU_MVAL_MDA,0)) as 融资融券_担保证券市值_月日均
+	,sum(COALESCE(t_rzrq.FIN_LIAB_MDA,0)) as 融资融券_融资负债_月日均
+	,sum(COALESCE(t_rzrq.CRDT_STK_LIAB_MDA,0)) as 融资融券_融券负债_月日均
+	,sum(COALESCE(t_rzrq.INTR_LIAB_MDA,0)) as 融资融券_利息负债_月日均
+	,sum(COALESCE(t_rzrq.FEE_LIAB_MDA,0)) as 融资融券_费用负债_月日均
+	,sum(COALESCE(t_rzrq.OTH_LIAB_MDA,0)) as 融资融券_其他负债_月日均
+	,sum(COALESCE(t_rzrq.TOT_AST_MDA,0)) as 融资融券_总资产_月日均
+	,sum(COALESCE(t_rzrq.A_SHR_MVAL_MDA,0)) as 融资融券_A股市值_月日均
+	
+	,sum(COALESCE(t_rzrq.TOT_LIAB_YDA,0)) as 融资融券_总负债_年日均
+	,sum(COALESCE(t_rzrq.NET_AST_YDA,0)) as 融资融券_净资产_年日均
+	,sum(COALESCE(t_rzrq.CRED_MARG_YDA,0)) as 融资融券_信用保证金_年日均
+	,sum(COALESCE(t_rzrq.GUAR_SECU_MVAL_YDA,0)) as 融资融券_担保证券市值_年日均
+	,sum(COALESCE(t_rzrq.FIN_LIAB_YDA,0)) as 融资融券_融资负债_年日均
+	,sum(COALESCE(t_rzrq.CRDT_STK_LIAB_YDA,0)) as 融资融券_融券负债_年日均
+	,sum(COALESCE(t_rzrq.INTR_LIAB_YDA,0)) as 融资融券_利息负债_年日均
+	,sum(COALESCE(t_rzrq.FEE_LIAB_YDA,0)) as 融资融券_费用负债_年日均
+	,sum(COALESCE(t_rzrq.OTH_LIAB_YDA,0)) as 融资融券_其他负债_年日均
+	,sum(COALESCE(t_rzrq.TOT_AST_YDA,0)) as 融资融券_总资产_年日均
+	,sum(COALESCE(t_rzrq.A_SHR_MVAL_YDA,0)) as 融资融券_A股市值_年日均
+	
+	--资产变动
+	,sum(COALESCE(t_zcbd.ODI_CPTL_INFLOW_MTD,0)) as 资产变动_普通资金流入_月累计
+	,sum(COALESCE(t_zcbd.ODI_CPTL_OUTFLOW_MTD,0)) as 资产变动_普通资金流出_月累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_INFLOW_MTD,0)) as 资产变动_普通市值流入_月累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_OUTFLOW_MTD,0)) as 资产变动_普通市值流出_月累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_INFLOW_MTD,0)) as 资产变动_两融资金流入_月累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_OUTFLOW_MTD,0)) as 资产变动_两融资金流出_月累计
+	,sum(COALESCE(t_zcbd.ODI_ACC_CPTL_NET_INFLOW_MTD,0)) as 资产变动_普通账户资金净流入_月累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_NET_INFLOW_MTD,0)) as 资产变动_两融资金净流入_月累计
+	,sum(COALESCE(t_zcbd.ODI_CPTL_INFLOW_YTD,0)) as 资产变动_普通资金流入_年累计
+	,sum(COALESCE(t_zcbd.ODI_CPTL_OUTFLOW_YTD,0)) as 资产变动_普通资金流出_年累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_INFLOW_YTD,0)) as 资产变动_普通市值流入_年累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_OUTFLOW_YTD,0)) as 资产变动_普通市值流出_年累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_INFLOW_YTD,0)) as 资产变动_两融资金流入_年累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_OUTFLOW_YTD,0)) as 资产变动_两融资金流出_年累计
+	,sum(COALESCE(t_zcbd.ODI_ACC_CPTL_NET_INFLOW_YTD,0)) as 资产变动_普通账户资金净流入_年累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_NET_INFLOW_YTD,0)) as 资产变动_两融资金净流入_年累计
+	
+	--普通收入更新日期20180411
+	,sum(COALESCE(t_ptsr.PB_TRD_CMS_MTD,0)) as 普通收入_PB交易佣金_月累计
+	,sum(COALESCE(t_ptsr.MARG_SPR_INCM_MTD,0)) as 普通收入_保证金利差收入_月累计
+	,sum(COALESCE(t_ptsr.PB_TRD_CMS_YTD,0)) as 普通收入_PB交易佣金_年累计
+	,sum(COALESCE(t_ptsr.MARG_SPR_INCM_YTD,0)) as 普通收入_保证金利差收入_年累计
+	,sum(COALESCE(t_ptsr.GROSS_CMS_MTD,0)) as 普通收入_毛佣金_月累计
+	,sum(COALESCE(t_ptsr.TRAN_FEE_MTD,0)) as 普通收入_过户费_月累计
+	,sum(COALESCE(t_ptsr.SCDY_TRAN_FEE_MTD,0)) as 普通收入_二级过户费_月累计
+	,sum(COALESCE(t_ptsr.STP_TAX_MTD,0)) as 普通收入_印花税_月累计
+	,sum(COALESCE(t_ptsr.HANDLE_FEE_MTD,0)) as 普通收入_经手费_月累计
+	,sum(COALESCE(t_ptsr.SEC_RGLT_FEE_MTD,0)) as 普通收入_证管费_月累计
+	,sum(COALESCE(t_ptsr.OTH_FEE_MTD,0)) as 普通收入_其他费用_月累计
+	,sum(COALESCE(t_ptsr.STKF_CMS_MTD,0)) as 普通收入_股基佣金_月累计
+	,sum(COALESCE(t_ptsr.STKF_TRAN_FEE_MTD,0)) as 普通收入_股基过户费_月累计
+	,sum(COALESCE(t_ptsr.STKF_NET_CMS_MTD,0)) as 普通收入_股基净佣金_月累计
+	,sum(COALESCE(t_ptsr.BOND_CMS_MTD,0)) as 普通收入_债券佣金_月累计
+	,sum(COALESCE(t_ptsr.BOND_NET_CMS_MTD,0)) as 普通收入_债券净佣金_月累计
+	,sum(COALESCE(t_ptsr.REPQ_CMS_MTD,0)) as 普通收入_报价回购佣金_月累计
+	,sum(COALESCE(t_ptsr.REPQ_NET_CMS_MTD,0)) as 普通收入_报价回购净佣金_月累计
+	,sum(COALESCE(t_ptsr.HGT_CMS_MTD,0)) as 普通收入_沪港通佣金_月累计
+	,sum(COALESCE(t_ptsr.HGT_NET_CMS_MTD,0)) as 普通收入_沪港通净佣金_月累计
+	,sum(COALESCE(t_ptsr.HGT_TRAN_FEE_MTD,0)) as 普通收入_沪港通过户费_月累计
+	,sum(COALESCE(t_ptsr.SGT_CMS_MTD,0)) as 普通收入_深港通佣金_月累计
+	,sum(COALESCE(t_ptsr.SGT_NET_CMS_MTD,0)) as 普通收入_深港通净佣金_月累计
+	,sum(COALESCE(t_ptsr.SGT_TRAN_FEE_MTD,0)) as 普通收入_深港通过户费_月累计
+	,sum(COALESCE(t_ptsr.BGDL_CMS_MTD,0)) as 普通收入_大宗交易佣金_月累计
+	,sum(COALESCE(t_ptsr.NET_CMS_MTD,0)) as 普通收入_净佣金_月累计
+	,sum(COALESCE(t_ptsr.BGDL_NET_CMS_MTD,0)) as 普通收入_大宗交易净佣金_月累计
+	,sum(COALESCE(t_ptsr.BGDL_TRAN_FEE_MTD,0)) as 普通收入_大宗交易过户费_月累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_CMS_MTD,0)) as 普通收入_个股期权佣金_月累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_NET_CMS_MTD,0)) as 普通收入_个股期权净佣金_月累计
+	,sum(COALESCE(t_ptsr.SCDY_CMS_MTD,0)) as 普通收入_二级佣金_月累计
+	,sum(COALESCE(t_ptsr.SCDY_NET_CMS_MTD,0)) as 普通收入_二级净佣金_月累计
+	,sum(COALESCE(t_ptsr.GROSS_CMS_YTD,0)) as 普通收入_毛佣金_年累计
+	,sum(COALESCE(t_ptsr.TRAN_FEE_YTD,0)) as 普通收入_过户费_年累计
+	,sum(COALESCE(t_ptsr.SCDY_TRAN_FEE_YTD,0)) as 普通收入_二级过户费_年累计
+	,sum(COALESCE(t_ptsr.STP_TAX_YTD,0)) as 普通收入_印花税_年累计
+	,sum(COALESCE(t_ptsr.HANDLE_FEE_YTD,0)) as 普通收入_经手费_年累计
+	,sum(COALESCE(t_ptsr.SEC_RGLT_FEE_YTD,0)) as 普通收入_证管费_年累计
+	,sum(COALESCE(t_ptsr.OTH_FEE_YTD,0)) as 普通收入_其他费用_年累计
+	,sum(COALESCE(t_ptsr.STKF_CMS_YTD,0)) as 普通收入_股基佣金_年累计
+	,sum(COALESCE(t_ptsr.STKF_TRAN_FEE_YTD,0)) as 普通收入_股基过户费_年累计
+	,sum(COALESCE(t_ptsr.STKF_NET_CMS_YTD,0)) as 普通收入_股基净佣金_年累计
+	,sum(COALESCE(t_ptsr.BOND_CMS_YTD,0)) as 普通收入_债券佣金_年累计
+	,sum(COALESCE(t_ptsr.BOND_NET_CMS_YTD,0)) as 普通收入_债券净佣金_年累计
+	,sum(COALESCE(t_ptsr.REPQ_CMS_YTD,0)) as 普通收入_报价回购佣金_年累计
+	,sum(COALESCE(t_ptsr.REPQ_NET_CMS_YTD,0)) as 普通收入_报价回购净佣金_年累计
+	,sum(COALESCE(t_ptsr.HGT_CMS_YTD,0)) as 普通收入_沪港通佣金_年累计
+	,sum(COALESCE(t_ptsr.HGT_NET_CMS_YTD,0)) as 普通收入_沪港通净佣金_年累计
+	,sum(COALESCE(t_ptsr.HGT_TRAN_FEE_YTD,0)) as 普通收入_沪港通过户费_年累计
+	,sum(COALESCE(t_ptsr.SGT_CMS_YTD,0)) as 普通收入_深港通佣金_年累计
+	,sum(COALESCE(t_ptsr.SGT_NET_CMS_YTD,0)) as 普通收入_深港通净佣金_年累计
+	,sum(COALESCE(t_ptsr.SGT_TRAN_FEE_YTD,0)) as 普通收入_深港通过户费_年累计
+	,sum(COALESCE(t_ptsr.BGDL_CMS_YTD,0)) as 普通收入_大宗交易佣金_年累计
+	,sum(COALESCE(t_ptsr.NET_CMS_YTD,0)) as 普通收入_净佣金_年累计
+	,sum(COALESCE(t_ptsr.BGDL_NET_CMS_YTD,0)) as 普通收入_大宗交易净佣金_年累计
+	,sum(COALESCE(t_ptsr.BGDL_TRAN_FEE_YTD,0)) as 普通收入_大宗交易过户费_年累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_CMS_YTD,0)) as 普通收入_个股期权佣金_年累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_NET_CMS_YTD,0)) as 普通收入_个股期权净佣金_年累计
+	,sum(COALESCE(t_ptsr.SCDY_CMS_YTD,0)) as 普通收入_二级佣金_年累计
+	,sum(COALESCE(t_ptsr.SCDY_NET_CMS_YTD,0)) as 普通收入_二级净佣金_年累计
+	
+	--信用收入
+	,sum(COALESCE(t_xysr.CREDIT_MARG_SPR_INCM_YTD,0)) as 信用收入_融资融券保证金利差收入_年累计
+	,sum(COALESCE(t_xysr.CREDIT_MARG_SPR_INCM_MTD,0)) as 信用收入_融资融券保证金利差收入_月累计
+	,sum(COALESCE(t_xysr.GROSS_CMS_MTD,0)) as 信用收入_毛佣金_月累计
+	,sum(COALESCE(t_xysr.NET_CMS_MTD,0)) as 信用收入_净佣金_月累计
+	,sum(COALESCE(t_xysr.TRAN_FEE_MTD,0)) as 信用收入_过户费_月累计
+	,sum(COALESCE(t_xysr.STP_TAX_MTD,0)) as 信用收入_印花税_月累计
+	,sum(COALESCE(t_xysr.ORDR_FEE_MTD,0)) as 信用收入_委托费_月累计
+	,sum(COALESCE(t_xysr.HANDLE_FEE_MTD,0)) as 信用收入_经手费_月累计
+	,sum(COALESCE(t_xysr.SEC_RGLT_FEE_MTD,0)) as 信用收入_证管费_月累计
+	,sum(COALESCE(t_xysr.OTH_FEE_MTD,0)) as 信用收入_其他费用_月累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_CMS_MTD,0)) as 信用收入_融资融券普通佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_NET_CMS_MTD,0)) as 信用收入_融资融券普通净佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_TRAN_FEE_MTD,0)) as 信用收入_融资融券普通过户费_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_CMS_MTD,0)) as 信用收入_融资融券信用佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_NET_CMS_MTD,0)) as 信用收入_融资融券信用净佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_TRAN_FEE_MTD,0)) as 信用收入_融资融券信用过户费_月累计
+	,sum(COALESCE(t_xysr.STKPLG_CMS_MTD,0)) as 信用收入_股票质押佣金_月累计
+	,sum(COALESCE(t_xysr.STKPLG_NET_CMS_MTD,0)) as 信用收入_股票质押净佣金_月累计
+	,sum(COALESCE(t_xysr.STKPLG_PAIDINT_MTD,0)) as 信用收入_股票质押实收利息_月累计
+	,sum(COALESCE(t_xysr.STKPLG_RECE_INT_MTD,0)) as 信用收入_股票质押应收利息_月累计
+	,sum(COALESCE(t_xysr.APPTBUYB_CMS_MTD,0)) as 信用收入_约定购回佣金_月累计
+	,sum(COALESCE(t_xysr.APPTBUYB_NET_CMS_MTD,0)) as 信用收入_约定购回净佣金_月累计
+	,sum(COALESCE(t_xysr.APPTBUYB_PAIDINT_MTD,0)) as 信用收入_约定购回实收利息_月累计
+	,sum(COALESCE(t_xysr.FIN_PAIDINT_MTD,0)) as 信用收入_融资实收利息_月累计
+	,sum(COALESCE(t_xysr.FIN_IE_MTD,0)) as 信用收入_融资利息支出_月累计
+	,sum(COALESCE(t_xysr.CRDT_STK_IE_MTD,0)) as 信用收入_融券利息支出_月累计
+	,sum(COALESCE(t_xysr.OTH_IE_MTD,0)) as 信用收入_其他利息支出_月累计
+	,sum(COALESCE(t_xysr.FIN_RECE_INT_MTD,0)) as 信用收入_融资应收利息_月累计
+	,sum(COALESCE(t_xysr.FEE_RECE_INT_MTD,0)) as 信用收入_费用应收利息_月累计
+	,sum(COALESCE(t_xysr.OTH_RECE_INT_MTD,0)) as 信用收入_其他应收利息_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CPTL_COST_MTD,0)) as 信用收入_融资融券资金成本_月累计
+	,sum(COALESCE(t_xysr.GROSS_CMS_YTD,0)) as 信用收入_毛佣金_年累计
+	,sum(COALESCE(t_xysr.NET_CMS_YTD,0)) as 信用收入_净佣金_年累计
+	,sum(COALESCE(t_xysr.TRAN_FEE_YTD,0)) as 信用收入_过户费_年累计
+	,sum(COALESCE(t_xysr.STP_TAX_YTD,0)) as 信用收入_印花税_年累计
+	,sum(COALESCE(t_xysr.ORDR_FEE_YTD,0)) as 信用收入_委托费_年累计
+	,sum(COALESCE(t_xysr.HANDLE_FEE_YTD,0)) as 信用收入_经手费_年累计
+	,sum(COALESCE(t_xysr.SEC_RGLT_FEE_YTD,0)) as 信用收入_证管费_年累计
+	,sum(COALESCE(t_xysr.OTH_FEE_YTD,0)) as 信用收入_其他费用_年累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_CMS_YTD,0)) as 信用收入_融资融券普通佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_NET_CMS_YTD,0)) as 信用收入_融资融券普通净佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_TRAN_FEE_YTD,0)) as 信用收入_融资融券普通过户费_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_CMS_YTD,0)) as 信用收入_融资融券信用佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_NET_CMS_YTD,0)) as 信用收入_融资融券信用净佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_TRAN_FEE_YTD,0)) as 信用收入_融资融券信用过户费_年累计
+	,sum(COALESCE(t_xysr.STKPLG_CMS_YTD,0)) as 信用收入_股票质押佣金_年累计
+	,sum(COALESCE(t_xysr.STKPLG_NET_CMS_YTD,0)) as 信用收入_股票质押净佣金_年累计
+	,sum(COALESCE(t_xysr.STKPLG_PAIDINT_YTD,0)) as 信用收入_股票质押实收利息_年累计
+	,sum(COALESCE(t_xysr.STKPLG_RECE_INT_YTD,0)) as 信用收入_股票质押应收利息_年累计
+	,sum(COALESCE(t_xysr.APPTBUYB_CMS_YTD,0)) as 信用收入_约定购回佣金_年累计
+	,sum(COALESCE(t_xysr.APPTBUYB_NET_CMS_YTD,0)) as 信用收入_约定购回净佣金_年累计
+	,sum(COALESCE(t_xysr.APPTBUYB_PAIDINT_YTD,0)) as 信用收入_约定购回实收利息_年累计
+	,sum(COALESCE(t_xysr.FIN_PAIDINT_YTD,0)) as 信用收入_融资实收利息_年累计
+	,sum(COALESCE(t_xysr.FIN_IE_YTD,0)) as 信用收入_融资利息支出_年累计
+	,sum(COALESCE(t_xysr.CRDT_STK_IE_YTD,0)) as 信用收入_融券利息支出_年累计
+	,sum(COALESCE(t_xysr.OTH_IE_YTD,0)) as 信用收入_其他利息支出_年累计
+	,sum(COALESCE(t_xysr.FIN_RECE_INT_YTD,0)) as 信用收入_融资应收利息_年累计
+	,sum(COALESCE(t_xysr.FEE_RECE_INT_YTD,0)) as 信用收入_费用应收利息_年累计
+	,sum(COALESCE(t_xysr.OTH_RECE_INT_YTD,0)) as 信用收入_其他应收利息_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CPTL_COST_YTD,0)) as 信用收入_融资融券资金成本_年累计	
+	
+	--约定购回
+	,sum(COALESCE(t_ydgh.GUAR_SECU_MVAL_FINAL,0)) as 约定购回_担保证券市值_期末
+	,sum(COALESCE(t_ydgh.APPTBUYB_BAL_FINAL,0)) as 约定购回_约定购回余额_期末
+	,sum(COALESCE(t_ydgh.SH_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_上海担保证券市值_期末
+	,sum(COALESCE(t_ydgh.SZ_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_深圳担保证券市值_期末
+	,sum(COALESCE(t_ydgh.SH_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_上海限售股担保证券市值_期末
+	,sum(COALESCE(t_ydgh.SZ_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_深圳限售股担保证券市值_期末
+	,sum(COALESCE(t_ydgh.PROP_FINAC_OUT_SIDE_BAL_FINAL,0)) as 约定购回_自营融出方余额_期末
+	,sum(COALESCE(t_ydgh.ASSM_FINAC_OUT_SIDE_BAL_FINAL,0)) as 约定购回_资管融出方余额_期末
+	,sum(COALESCE(t_ydgh.SM_LOAN_FINAC_OUT_BAL_FINAL,0)) as 约定购回_小额贷融出余额_期末
+	,sum(COALESCE(t_ydgh.GUAR_SECU_MVAL_MDA,0)) as 约定购回_担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.APPTBUYB_BAL_MDA,0)) as 约定购回_约定购回余额_月日均
+	,sum(COALESCE(t_ydgh.SH_GUAR_SECU_MVAL_MDA,0)) as 约定购回_上海担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.SZ_GUAR_SECU_MVAL_MDA,0)) as 约定购回_深圳担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.SH_NOTS_GUAR_SECU_MVAL_MDA,0)) as 约定购回_上海限售股担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.SZ_NOTS_GUAR_SECU_MVAL_MDA,0)) as 约定购回_深圳限售股担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.PROP_FINAC_OUT_SIDE_BAL_MDA,0)) as 约定购回_自营融出方余额_月日均
+	,sum(COALESCE(t_ydgh.ASSM_FINAC_OUT_SIDE_BAL_MDA,0)) as 约定购回_资管融出方余额_月日均
+	,sum(COALESCE(t_ydgh.SM_LOAN_FINAC_OUT_BAL_MDA,0)) as 约定购回_小额贷融出余额_月日均
+	,sum(COALESCE(t_ydgh.GUAR_SECU_MVAL_YDA,0)) as 约定购回_担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.APPTBUYB_BAL_YDA,0)) as 约定购回_约定购回余额_年日均
+	,sum(COALESCE(t_ydgh.SH_GUAR_SECU_MVAL_YDA,0)) as 约定购回_上海担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.SZ_GUAR_SECU_MVAL_YDA,0)) as 约定购回_深圳担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.SH_NOTS_GUAR_SECU_MVAL_YDA,0)) as 约定购回_上海限售股担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.SZ_NOTS_GUAR_SECU_MVAL_YDA,0)) as 约定购回_深圳限售股担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.PROP_FINAC_OUT_SIDE_BAL_YDA,0)) as 约定购回_自营融出方余额_年日均
+	,sum(COALESCE(t_ydgh.ASSM_FINAC_OUT_SIDE_BAL_YDA,0)) as 约定购回_资管融出方余额_年日均
+	,sum(COALESCE(t_ydgh.SM_LOAN_FINAC_OUT_BAL_YDA,0)) as 约定购回_小额贷融出余额_年日均
+	
+	--股票质押
+	,sum(COALESCE(t_gpzy.GUAR_SECU_MVAL_FINAL,0)) as 股票质押_担保证券市值_期末
+	,sum(COALESCE(t_gpzy.STKPLG_FIN_BAL_FINAL,0)) as 股票质押_股票质押融资余额_期末
+	,sum(COALESCE(t_gpzy.SH_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_上海担保证券市值_期末
+	,sum(COALESCE(t_gpzy.SZ_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_深圳担保证券市值_期末
+	,sum(COALESCE(t_gpzy.SH_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_上海限售股担保证券市值_期末
+	,sum(COALESCE(t_gpzy.SZ_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_深圳限售股担保证券市值_期末
+	,sum(COALESCE(t_gpzy.PROP_FINAC_OUT_SIDE_BAL_FINAL,0)) as 股票质押_自营融出方余额_期末
+	,sum(COALESCE(t_gpzy.ASSM_FINAC_OUT_SIDE_BAL_FINAL,0)) as 股票质押_资管融出方余额_期末
+	,sum(COALESCE(t_gpzy.SM_LOAN_FINAC_OUT_BAL_FINAL,0)) as 股票质押_小额贷融出余额_期末
+	,sum(COALESCE(t_gpzy.GUAR_SECU_MVAL_MDA,0)) as 股票质押_担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.STKPLG_FIN_BAL_MDA,0)) as 股票质押_股票质押融资余额_月日均
+	,sum(COALESCE(t_gpzy.SH_GUAR_SECU_MVAL_MDA,0)) as 股票质押_上海担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.SZ_GUAR_SECU_MVAL_MDA,0)) as 股票质押_深圳担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.SH_NOTS_GUAR_SECU_MVAL_MDA,0)) as 股票质押_上海限售股担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.SZ_NOTS_GUAR_SECU_MVAL_MDA,0)) as 股票质押_深圳限售股担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.PROP_FINAC_OUT_SIDE_BAL_MDA,0)) as 股票质押_自营融出方余额_月日均
+	,sum(COALESCE(t_gpzy.ASSM_FINAC_OUT_SIDE_BAL_MDA,0)) as 股票质押_资管融出方余额_月日均
+	,sum(COALESCE(t_gpzy.SM_LOAN_FINAC_OUT_BAL_MDA,0)) as 股票质押_小额贷融出余额_月日均
+	,sum(COALESCE(t_gpzy.GUAR_SECU_MVAL_YDA,0)) as 股票质押_担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.STKPLG_FIN_BAL_YDA,0)) as 股票质押_股票质押融资余额_年日均
+	,sum(COALESCE(t_gpzy.SH_GUAR_SECU_MVAL_YDA,0)) as 股票质押_上海担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.SZ_GUAR_SECU_MVAL_YDA,0)) as 股票质押_深圳担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.SH_NOTS_GUAR_SECU_MVAL_YDA,0)) as 股票质押_上海限售股担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.SZ_NOTS_GUAR_SECU_MVAL_YDA,0)) as 股票质押_深圳限售股担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.PROP_FINAC_OUT_SIDE_BAL_YDA,0)) as 股票质押_自营融出方余额_年日均
+	,sum(COALESCE(t_gpzy.ASSM_FINAC_OUT_SIDE_BAL_YDA,0)) as 股票质押_资管融出方余额_年日均
+	,sum(COALESCE(t_gpzy.SM_LOAN_FINAC_OUT_BAL_YDA,0)) as 股票质押_小额贷融出余额_年日均
+	
+	--普通交易
+	,sum(COALESCE(t_ptjy.SCDY_TRD_FREQ_MTD,0)) as 普通交易_二级交易次数
+	,sum(COALESCE(t_ptjy.SCDY_TRD_QTY_MTD,0)) as 普通交易_二级交易量
+	,sum(COALESCE(t_ptjy.SCDY_TRD_QTY_YTD,0)) as 普通交易_二级交易量_本年
+	,sum(COALESCE(t_ptjy.TRD_FREQ_MTD,0)) as 普通交易_交易次数_本年
+	,sum(COALESCE(t_ptjy.STKF_TRD_QTY_MTD,0)) as 普通交易_股基交易量
+	,sum(COALESCE(t_ptjy.STKF_TRD_QTY_YTD,0)) as 普通交易_股基交易量_本年
+	,sum(COALESCE(t_ptjy.S_REPUR_TRD_QTY_MTD,0)) as 普通交易_正回购交易量
+	,sum(COALESCE(t_ptjy.R_REPUR_TRD_QTY_MTD,0)) as 普通交易_逆回购交易量
+	,sum(COALESCE(t_ptjy.S_REPUR_TRD_QTY_YTD,0)) as 普通交易_正回购交易量_本年
+	,sum(COALESCE(t_ptjy.R_REPUR_TRD_QTY_YTD,0)) as 普通交易_逆回购交易量_本年
+	,sum(COALESCE(t_ptjy.HGT_TRD_QTY_MTD,0)) as 普通交易_沪港通交易量
+	,sum(COALESCE(t_ptjy.SGT_TRD_QTY_MTD,0)) as 普通交易_深港通交易量
+	,sum(COALESCE(t_ptjy.SGT_TRD_QTY_YTD,0)) as 普通交易_深港通交易量_本年
+	,sum(COALESCE(t_ptjy.HGT_TRD_QTY_YTD,0)) as 普通交易_沪港通交易量_本年
+	,sum(COALESCE(t_ptjy.Y_RCT_STK_TRD_QTY,0)) as 普通交易_近12月股票交易量
+	,sum(COALESCE(t_ptjy.SCDY_TRD_FREQ_YTD,0)) as 普通交易_二级交易次数_本年
+	,sum(COALESCE(t_ptjy.TRD_FREQ_MTD,0)) as 普通交易_交易次数
+	,sum(COALESCE(t_ptjy.APPTBUYB_TRD_QTY_MTD,0)) as 普通交易_约定购回交易量
+	,sum(COALESCE(t_ptjy.APPTBUYB_TRD_QTY_YTD,0)) as 普通交易_约定购回交易量_本年
+	,sum(COALESCE(t_ptjy.RCT_TRD_DT_M,0)) as 普通交易_最近交易日期_本月
+	,sum(COALESCE(t_ptjy.STKPLG_TRD_QTY_MTD,0)) as 普通交易_股票质押交易量
+	,sum(COALESCE(t_ptjy.STKPLG_TRD_QTY_YTD,0)) as 普通交易_股票质押交易量_本年
+	,sum(COALESCE(t_ptjy.PSTK_OPTN_TRD_QTY_MTD,0)) as 普通交易_个股期权交易量
+	,sum(COALESCE(t_ptjy.PSTK_OPTN_TRD_QTY_YTD,0)) as 普通交易_个股期权交易量_本年
+	,sum(COALESCE(t_ptjy.REPQ_TRD_QTY_MTD,0)) as 普通交易_报价回购交易量
+	,sum(COALESCE(t_ptjy.REPQ_TRD_QTY_YTD,0)) as 普通交易_报价回购交易量_本年
+	,sum(COALESCE(t_ptjy.BGDL_QTY_MTD,0)) as 普通交易_大宗交易量
+	,sum(COALESCE(t_ptjy.BGDL_QTY_YTD,0)) as 普通交易_大宗交易量_本年
+	
+	,sum(COALESCE(t_khsx.融资融券授信额度,0)*t2.JXBL9) as 融资融券授信额度
+	,sum(COALESCE(t_khsx.约定购回授信额度,0)*t2.JXBL9) as 约定购回授信额度
+	,sum(COALESCE(t_khsx.股票质押授信额度,0)*t2.JXBL9) as 股票质押授信额度
+	,@V_BIN_DATE	
+
+	,sum(COALESCE(t_ptjy.SB_TRD_QTY_MTD,0))        			as 三板交易量_本月
+	,sum(COALESCE(t_ptjy.SB_TRD_QTY_YTD,0))        			as 三板交易量_本年
+	,sum(COALESCE(t_ptjy.BOND_TRD_QTY_MTD,0))      			as 债券交易量_本月
+	,sum(COALESCE(t_ptjy.BOND_TRD_QTY_YTD,0))      			as 债券交易量_本年
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_TRD_QTY_MTD,0)) 		as 场内货币基金交易量_本月
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_TRD_QTY_YTD,0)) 		as 场内货币基金交易量_本年
+	,sum(COALESCE(t_ptjy.S_REPUR_NET_CMS_MTD,0))   			as 正回购净佣金_本月
+	,sum(COALESCE(t_ptjy.S_REPUR_NET_CMS_YTD,0))   			as 正回购净佣金_本年
+	,sum(COALESCE(t_ptjy.R_REPUR_NET_CMS_MTD,0))   			as 逆回购净佣金_本月
+	,sum(COALESCE(t_ptjy.R_REPUR_NET_CMS_YTD,0))   			as 逆回购净佣金_本年
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_NET_CMS_MTD,0)) 		as 场内货币基金净佣金_本月
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_NET_CMS_YTD,0)) 		as 场内货币基金净佣金_本年
+from DM.T_AST_EMPCUS_ODI_M_D t1					--员工客户普通资产
+left join DM.T_PUB_ORG t_jg					--机构表
+	on t1.YEAR=t_jg.YEAR and t1.MTH=t_jg.MTH and t1.WH_ORG_ID_EMP=t_jg.WH_ORG_ID
+--20180427修改增加责权表
+left join DBA.t_ddw_serv_relation t2
+	on t1.year=t2.NIAN 
+		and t1.mth=t2.YUE 
+		and t2.KHBH_HS=t1.cust_id 
+		and t1.afa_sec_empid=t2.AFATWO_YGH
+left join 
+(											--客户属性和维度处理
+	select 
+		t1.YEAR
+		,t1.MTH	
+		,t1.CUST_ID
+		,t1.CUST_STAT_NAME as 客户状态
+		,case when t1.TE_OACT_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否月新增
+		,case when t1.TE_OACT_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否年新增
+		,coalesce(t1.IF_VLD,0) as 是否有效
+		,coalesce(t4.IF_SPCA_ACCT,0) as 是否特殊账户
+		,coalesce(t1.IF_PROD_NEW_CUST,0)   as 是否产品新客户
+		,t1.CUST_TYPE_NAME as 客户类型
+		
+		,coalesce(t3.IF_CREDIT_CUST,0) as 是否融资融券客户
+		,coalesce(t3.IF_CREDIT_EFF_CUST,0) as 是否融资融券有效客户		
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_OPEN_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否融资融券月新增
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_OPEN_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否融资融券年新增		
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_EFF_ACT_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否融资融券月新增有效户
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_EFF_ACT_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否融资融券年新增有效户
+		
+		,t3.CREDIT_CRED_QUO as 融资融券授信额度
+		,t3.APPTBUYB_CRED_QUO as 约定购回授信额度		
+		,t3.STKPLG_CRED_QUO as 股票质押授信额度
+		
+		,case 
+            when t5.TOT_AST_MDA<100                                     then '00-100以下'
+			when t5.TOT_AST_MDA >= 100      and t5.TOT_AST_MDA<1000     then '01-100_1000'
+			when t5.TOT_AST_MDA >= 1000     and t5.TOT_AST_MDA<2000     then '02-1000_2000'
+			when t5.TOT_AST_MDA >= 2000     and t5.TOT_AST_MDA<5000     then '03-2000_5000'
+			when t5.TOT_AST_MDA >= 5000     and t5.TOT_AST_MDA<10000    then '04-5000_1w'
+			when t5.TOT_AST_MDA >= 10000    and t5.TOT_AST_MDA<50000    then '05-1w_5w'
+			when t5.TOT_AST_MDA >= 50000    and t5.TOT_AST_MDA<100000   then '06-5w_10w'
+            when t5.TOT_AST_MDA >= 100000   and t5.TOT_AST_MDA<200000   then '1-10w_20w'
+    		when t5.TOT_AST_MDA >= 200000   and t5.TOT_AST_MDA<500000   then '2-20w_50w'
+    		when t5.TOT_AST_MDA >= 500000   and t5.TOT_AST_MDA<1000000  then '3-50w_100w'
+    		when t5.TOT_AST_MDA >= 1000000  and t5.TOT_AST_MDA<2000000  then '4-100w_200w'
+    		when t5.TOT_AST_MDA >= 2000000  and t5.TOT_AST_MDA<3000000  then '5-200w_300w'
+    		when t5.TOT_AST_MDA >= 3000000  and t5.TOT_AST_MDA<5000000  then '6-300w_500w'
+    		when t5.TOT_AST_MDA >= 5000000  and t5.TOT_AST_MDA<10000000 then '7-500w_1000w'
+    		when t5.TOT_AST_MDA >= 10000000 and t5.TOT_AST_MDA<30000000 then '8-1000w_3000w'
+			when t5.TOT_AST_MDA >= 30000000                             then '9-大于3000w'
+         end as 资产段		
+	 from DM.T_PUB_CUST t1	 
+	 left join DM.T_PUB_DATE_M t2 on t1.YEAR=t2.YEAR and t1.MTH=t2.MTH
+	 left join DM.T_PUB_CUST_LIMIT_M_D t3 on t1.YEAR=t3.YEAR and t1.MTH=t3.MTH and t1.CUST_ID=t3.CUST_ID
+	 left join DM.T_ACC_CPTL_ACC t4 on t1.YEAR=t4.YEAR and t1.MTH=t4.MTH and t1.MAIN_CPTL_ACCT=t4.CPTL_ACCT
+	 left join DM.T_AST_ODI_M_D t5 on t1.YEAR=t5.YEAR and t1.MTH=t5.MTH and t1.CUST_ID=t5.CUST_ID
+     where t1.YEAR=@V_YEAR 
+        and t1.MTH=@V_MONTH
+        AND 资产段 IS NOT NULL
+) t_khsx on t1.YEAR=t_khsx.YEAR and t1.MTH=t_khsx.MTH and t1.CUST_ID=t_khsx.CUST_ID
+left join DM.T_AST_EMPCUS_ODI_M_D t_ptzc			--员工客户普通资产
+	on t1.YEAR=t_ptzc.YEAR and t1.MTH=t_ptzc.MTH and t1.CUST_ID=t_ptzc.CUST_ID and t1.AFA_SEC_EMPID=t_ptzc.AFA_SEC_EMPID
+left join DM.T_AST_EMPCUS_CREDIT_M_D t_rzrq		--员工客户融资融券
+	on t1.YEAR=t_rzrq.YEAR and t1.MTH=t_rzrq.MTH and t1.CUST_ID=t_rzrq.CUST_ID and t1.AFA_SEC_EMPID=t_rzrq.AFA_SEC_EMPID
+left join DM.T_AST_EMPCUS_CPTL_CHG_M_D t_zcbd	--员工客户资产变动
+	on t1.YEAR=t_zcbd.YEAR and t1.MTH=t_zcbd.MTH and t1.CUST_ID=t_zcbd.CUST_ID and t1.AFA_SEC_EMPID=t_zcbd.AFA_SEC_EMPID
+left join DM.T_EVT_EMPCUS_ODI_TRD_M_D t_ptjy		--员工客户普通交易
+	on t1.YEAR=t_ptjy.YEAR and t1.MTH=t_ptjy.MTH and t1.CUST_ID=t_ptjy.CUST_ID and t1.AFA_SEC_EMPID=t_ptjy.AFA_SEC_EMPID
+left join DM.T_EVT_EMPCUS_ODI_INCM_M_D t_ptsr	--员工客户普通收入
+	on t1.YEAR=t_ptsr.YEAR and t1.MTH=t_ptsr.MTH and t1.CUST_ID=t_ptsr.CUST_ID and t1.AFA_SEC_EMPID=t_ptsr.AFA_SEC_EMPID
+left join DM.T_EVT_EMPCUS_CRED_INCM_M_D t_xysr	--员工客户信用收入
+	on t1.YEAR=t_xysr.YEAR and t1.MTH=t_xysr.MTH and t1.CUST_ID=t_xysr.CUST_ID and t1.AFA_SEC_EMPID=t_xysr.AFA_SEC_EMPID
+left join DM.T_AST_EMPCUS_APPTBUYB_M_D t_ydgh	--约定购回表
+	on t1.YEAR=t_ydgh.YEAR and t1.MTH=t_ydgh.MTH and t1.CUST_ID=t_ydgh.CUST_ID and t1.AFA_SEC_EMPID=t_ydgh.AFA_SEC_EMPID
+left join
+(
+	select
+		t1.YEAR
+		,t1.MTH
+		,t1.CUST_ID
+		,t1.AFA_SEC_EMPID
+		,sum(COALESCE(t1.GUAR_SECU_MVAL_FINAL,0)) as GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.STKPLG_FIN_BAL_FINAL,0)) as STKPLG_FIN_BAL_FINAL
+		,sum(COALESCE(t1.SH_GUAR_SECU_MVAL_FINAL,0)) as SH_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.SZ_GUAR_SECU_MVAL_FINAL,0)) as SZ_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL_FINAL,0)) as SH_NOTS_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL_FINAL,0)) as SZ_NOTS_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL_FINAL,0)) as PROP_FINAC_OUT_SIDE_BAL_FINAL
+		,sum(COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL_FINAL,0)) as ASSM_FINAC_OUT_SIDE_BAL_FINAL
+		,sum(COALESCE(t1.SM_LOAN_FINAC_OUT_BAL_FINAL,0)) as SM_LOAN_FINAC_OUT_BAL_FINAL
+		,sum(COALESCE(t1.GUAR_SECU_MVAL_MDA,0)) as GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.STKPLG_FIN_BAL_MDA,0)) as STKPLG_FIN_BAL_MDA
+		,sum(COALESCE(t1.SH_GUAR_SECU_MVAL_MDA,0)) as SH_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.SZ_GUAR_SECU_MVAL_MDA,0)) as SZ_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL_MDA,0)) as SH_NOTS_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL_MDA,0)) as SZ_NOTS_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL_MDA,0)) as PROP_FINAC_OUT_SIDE_BAL_MDA
+		,sum(COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL_MDA,0)) as ASSM_FINAC_OUT_SIDE_BAL_MDA
+		,sum(COALESCE(t1.SM_LOAN_FINAC_OUT_BAL_MDA,0)) as SM_LOAN_FINAC_OUT_BAL_MDA
+		,sum(COALESCE(t1.GUAR_SECU_MVAL_YDA,0)) as GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.STKPLG_FIN_BAL_YDA,0)) as STKPLG_FIN_BAL_YDA
+		,sum(COALESCE(t1.SH_GUAR_SECU_MVAL_YDA,0)) as SH_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.SZ_GUAR_SECU_MVAL_YDA,0)) as SZ_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL_YDA,0)) as SH_NOTS_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL_YDA,0)) as SZ_NOTS_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL_YDA,0)) as PROP_FINAC_OUT_SIDE_BAL_YDA
+		,sum(COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL_YDA,0)) as ASSM_FINAC_OUT_SIDE_BAL_YDA
+		,sum(COALESCE(t1.SM_LOAN_FINAC_OUT_BAL_YDA,0)) as SM_LOAN_FINAC_OUT_BAL_YDA
+	from DM.T_AST_EMPCUS_STKPLG_M_D t1
+	group by
+		t1.YEAR
+		,t1.MTH
+		,t1.CUST_ID
+		,t1.AFA_SEC_EMPID
+) t_gpzy 									--股票质押表
+	on t1.YEAR=t_gpzy.YEAR and t1.MTH=t_gpzy.MTH and t1.CUST_ID=t_gpzy.CUST_ID and t1.AFA_SEC_EMPID=t_gpzy.AFA_SEC_EMPID
+where t1.YEAR=@V_YEAR and t1.MTH=@V_MONTH
+ and t_jg.WH_ORG_ID  is not null
+ and t_khsx.客户状态 is not null
+ and t_khsx.客户类型 is not null
+ and t_khsx.cust_id  is not null
+group by
+	t1.YEAR
+	,t1.MTH
+	,t_jg.WH_ORG_ID	
+	
+	--维度信息
+	,t_khsx.客户状态
+	,t_khsx.是否特殊账户
+	,t_khsx.是否产品新客户
+	,t_khsx.是否月新增
+	,t_khsx.是否年新增	
+	,t_khsx.是否融资融券客户
+	,t_khsx.是否融资融券月新增
+	,t_khsx.是否融资融券年新增
+	,t_khsx.是否融资融券有效客户
+	,t_khsx.是否融资融券月新增有效户
+	,t_khsx.是否融资融券年新增有效户
+	,t_khsx.资产段
+	,t_khsx.客户类型;
+
+
+END
+GO
+CREATE PROCEDURE dm.P_EVT_BRH_PROD_M(IN @V_BIN_DATE INT)
+
+
+BEGIN 
+  
+  /******************************************************************
+  程序功能: 创建员营业部产品级别月表:带权责
+  编写者: YHB
+  创建日期: 2018-04-27
+  简介：员工客户数月表
+  *********************************************************************
+  修订记录： 修订日期       版本号    修订人             修改内容简要说明
+           
+  *********************************************************************/
+  	DECLARE @V_YEAR VARCHAR(4);		-- 年份
+  	DECLARE @V_MONTH VARCHAR(2);	-- 月份
+	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
+	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+
+--PART0 删除当月数据
+  DELETE FROM DM.T_EVT_BRH_PROD_M WHERE YEAR=SUBSTR(@V_BIN_DATE||'',1,4) AND MTH=SUBSTR(@V_BIN_DATE||'',5,2);
+
+  insert into DM.T_EVT_BRH_PROD_M
+  	(
+  		YEAR
+    ,MTH
+    ,YEAR_MTH
+    ,PROD_CD
+    ,PROD_TYPE
+    ,WH_ORG_ID_EMP
+    ,IF_SPCA_ACC
+    ,ITC_RETAIN_AMT_FINAL
+    ,OTC_RETAIN_AMT_FINAL
+    ,ITC_RETAIN_SHAR_FINAL
+    ,OTC_RETAIN_SHAR_FINAL
+    ,ITC_RETAIN_AMT_MDA
+    ,OTC_RETAIN_AMT_MDA
+    ,ITC_RETAIN_SHAR_MDA
+    ,OTC_RETAIN_SHAR_MDA
+    ,ITC_RETAIN_AMT_YDA
+    ,OTC_RETAIN_AMT_YDA
+    ,ITC_RETAIN_SHAR_YDA
+    ,OTC_RETAIN_SHAR_YDA
+    ,ITC_SUBS_AMT_MTD
+    ,ITC_PURS_AMT_MTD
+    ,ITC_BUYIN_AMT_MTD
+    ,ITC_REDP_AMT_MTD
+    ,ITC_SELL_AMT_MTD
+    ,OTC_SUBS_AMT_MTD
+    ,OTC_PURS_AMT_MTD
+    ,OTC_CASTSL_AMT_MTD
+    ,OTC_COVT_IN_AMT_MTD
+    ,OTC_REDP_AMT_MTD
+    ,OTC_COVT_OUT_AMT_MTD
+    ,SALE_AMT_MTD
+    ,TF_SALE_AMT_MTD
+    ,REDP_AMT_MTD
+    ,ITC_SUBS_SHAR_MTD
+    ,ITC_PURS_SHAR_MTD
+    ,ITC_BUYIN_SHAR_MTD
+    ,ITC_REDP_SHAR_MTD
+    ,ITC_SELL_SHAR_MTD
+    ,OTC_SUBS_SHAR_MTD
+    ,OTC_PURS_SHAR_MTD
+    ,OTC_CASTSL_SHAR_MTD
+    ,OTC_COVT_IN_SHAR_MTD
+    ,OTC_REDP_SHAR_MTD
+    ,OTC_COVT_OUT_SHAR_MTD
+    ,ITC_SUBS_CHAG_MTD
+    ,ITC_PURS_CHAG_MTD
+    ,ITC_BUYIN_CHAG_MTD
+    ,ITC_REDP_CHAG_MTD
+    ,ITC_SELL_CHAG_MTD
+    ,OTC_SUBS_CHAG_MTD
+    ,OTC_PURS_CHAG_MTD
+    ,OTC_CASTSL_CHAG_MTD
+    ,OTC_COVT_IN_CHAG_MTD
+    ,OTC_REDP_CHAG_MTD
+    ,OTC_COVT_OUT_CHAG_MTD
+    ,ITC_SUBS_AMT_YTD
+    ,ITC_PURS_AMT_YTD
+    ,ITC_BUYIN_AMT_YTD
+    ,ITC_REDP_AMT_YTD
+    ,ITC_SELL_AMT_YTD
+    ,OTC_SUBS_AMT_YTD
+    ,OTC_PURS_AMT_YTD
+    ,OTC_CASTSL_AMT_YTD
+    ,OTC_COVT_IN_AMT_YTD
+    ,OTC_REDP_AMT_YTD
+    ,OTC_COVT_OUT_AMT_YTD
+    ,SALE_AMT_YTD
+    ,TF_SALE_AMT_YTD
+    ,REDP_AMT_YTD
+    ,ITC_SUBS_SHAR_YTD
+    ,ITC_PURS_SHAR_YTD
+    ,ITC_BUYIN_SHAR_YTD
+    ,ITC_REDP_SHAR_YTD
+    ,ITC_SELL_SHAR_YTD
+    ,OTC_SUBS_SHAR_YTD
+    ,OTC_PURS_SHAR_YTD
+    ,OTC_CASTSL_SHAR_YTD
+    ,OTC_COVT_IN_SHAR_YTD
+    ,OTC_REDP_SHAR_YTD
+    ,OTC_COVT_OUT_SHAR_YTD
+    ,ITC_SUBS_CHAG_YTD
+    ,ITC_PURS_CHAG_YTD
+    ,ITC_BUYIN_CHAG_YTD
+    ,ITC_REDP_CHAG_YTD
+    ,ITC_SELL_CHAG_YTD
+    ,OTC_SUBS_CHAG_YTD
+    ,OTC_PURS_CHAG_YTD
+    ,OTC_CASTSL_CHAG_YTD
+    ,OTC_COVT_IN_CHAG_YTD
+    ,OTC_REDP_CHAG_YTD
+    ,OTC_COVT_OUT_CHAG_YTD
+    ,CONTD_SALE_SHAR_MTD
+    ,CONTD_SALE_AMT_MTD
+    ,CONTD_SALE_SHAR_YTD
+    ,CONTD_SALE_AMT_YTD
+    ,LOAD_DT             
+  	)
+    select 
+    	t1.YEAR as 年
+    	,t1.MTH as 月
+    	,t1.YEAR_MTH as 年月
+    	,t1.PROD_CD as 产品代码
+    	,t1.PROD_TYPE as 产品类型
+    	,t1.WH_ORG_ID_EMP as 仓库机构编码_员工
+    	
+    	--维度信息
+      /*  ,t_khsx.客户状态*/
+    	,t_khsx.是否特殊账户
+       /* ,t_khsx.是否产品新客户
+        ,t_khsx.是否月新增
+        ,t_khsx.是否年新增	
+        ,t_khsx.资产段
+        ,t_khsx.客户类型 */
+    	
+    	,sum(COALESCE(t1.ITC_RETAIN_AMT_FINAL,0)) as 场内保有金额_期末
+    	,sum(COALESCE(t1.OTC_RETAIN_AMT_FINAL,0)) as 场外保有金额_期末
+    	,sum(COALESCE(t1.ITC_RETAIN_SHAR_FINAL,0)) as 场内保有份额_期末
+    	,sum(COALESCE(t1.OTC_RETAIN_SHAR_FINAL,0)) as 场外保有份额_期末
+    	,sum(COALESCE(t1.ITC_RETAIN_AMT_MDA,0)) as 场内保有金额_月日均
+    	,sum(COALESCE(t1.OTC_RETAIN_AMT_MDA,0)) as 场外保有金额_月日均
+    	,sum(COALESCE(t1.ITC_RETAIN_SHAR_MDA,0)) as 场内保有份额_月日均
+    	,sum(COALESCE(t1.OTC_RETAIN_SHAR_MDA,0)) as 场外保有份额_月日均
+    	,sum(COALESCE(t1.ITC_RETAIN_AMT_YDA,0)) as 场内保有金额_年日均
+    	,sum(COALESCE(t1.OTC_RETAIN_AMT_YDA,0)) as 场外保有金额_年日均
+    	,sum(COALESCE(t1.ITC_RETAIN_SHAR_YDA,0)) as 场内保有份额_年日均
+    	,sum(COALESCE(t1.OTC_RETAIN_SHAR_YDA,0)) as 场外保有份额_年日均
+    	
+    	,sum(COALESCE(t1.ITC_SUBS_AMT_MTD,0)) as 场内认购金额_月累计
+    	,sum(COALESCE(t1.ITC_PURS_AMT_MTD,0)) as 场内申购金额_月累计
+    	,sum(COALESCE(t1.ITC_BUYIN_AMT_MTD,0)) as 场内买入金额_月累计
+    	,sum(COALESCE(t1.ITC_REDP_AMT_MTD,0)) as 场内赎回金额_月累计
+    	,sum(COALESCE(t1.ITC_SELL_AMT_MTD,0)) as 场内卖出金额_月累计
+    	,sum(COALESCE(t1.OTC_SUBS_AMT_MTD,0)) as 场外认购金额_月累计
+    	,sum(COALESCE(t1.OTC_PURS_AMT_MTD,0)) as 场外申购金额_月累计
+    	,sum(COALESCE(t1.OTC_CASTSL_AMT_MTD,0)) as 场外定投金额_月累计
+    	,sum(COALESCE(t1.OTC_COVT_IN_AMT_MTD,0)) as 场外转换入金额_月累计
+    	,sum(COALESCE(t1.OTC_REDP_AMT_MTD,0)) as 场外赎回金额_月累计
+    	,sum(COALESCE(t1.OTC_COVT_OUT_AMT_MTD,0)) as 场外转换出金额_月累计
+    	
+    	--销售金额：场内认购金额、场内认购手续费、场外认购金额、场外申购金额、场外定投金额、场外转换入金额、续作销售金额、转托管入金额
+    	,sum(COALESCE(t1.ITC_SUBS_AMT_MTD,0)	--场内认购金额_月累计
+    		+COALESCE(t1.ITC_SUBS_CHAG_MTD,0)	--场内认购手续费_月累计
+    		+COALESCE(t1.OTC_SUBS_AMT_MTD,0)	--场外认购金额_月累计
+    		+COALESCE(t1.OTC_PURS_AMT_MTD,0)	--场外申购金额_月累计
+    		+COALESCE(t1.OTC_CASTSL_AMT_MTD,0)	--场外定投金额_月累计		
+    		+COALESCE(t1.OTC_COVT_IN_AMT_MTD,0)	--场外转换入金额_月累计
+    		+COALESCE(t1.CONTD_SALE_AMT_MTD,0)	--续作销售金额_月累计				
+    		) as 销售金额_月累计
+    		
+    	--首发销售金额：场内认购金额、场内认购手续费、场外认购金额
+    	,sum(COALESCE(t1.ITC_SUBS_AMT_MTD,0)	--场内认购金额_月累计		
+    		+COALESCE(t1.ITC_SUBS_CHAG_MTD,0)	--场内认购手续费_月累计
+    		+COALESCE(t1.OTC_SUBS_AMT_MTD,0)	--场外认购金额_月累计		
+    		) as 首发销售金额_月累计		
+    		
+    	--赎回金额：场外赎回金额、场外转换出金额、转托管出金额
+    	,sum(		
+    		COALESCE(t1.OTC_REDP_AMT_MTD,0)		--场外赎回金额_月累计		
+    		+COALESCE(t1.OTC_COVT_OUT_AMT_MTD,0)--场外转换出金额_月累计	
+    		) as 赎回金额_月累计
+    			
+    	,sum(COALESCE(t1.ITC_SUBS_SHAR_MTD,0)) as 场内认购份额_月累计
+    	,sum(COALESCE(t1.ITC_PURS_SHAR_MTD,0)) as 场内申购份额_月累计
+    	,sum(COALESCE(t1.ITC_BUYIN_SHAR_MTD,0)) as 场内买入份额_月累计
+    	,sum(COALESCE(t1.ITC_REDP_SHAR_MTD,0)) as 场内赎回份额_月累计
+    	,sum(COALESCE(t1.ITC_SELL_SHAR_MTD,0)) as 场内卖出份额_月累计
+    	,sum(COALESCE(t1.OTC_SUBS_SHAR_MTD,0)) as 场外认购份额_月累计
+    	,sum(COALESCE(t1.OTC_PURS_SHAR_MTD,0)) as 场外申购份额_月累计
+    	,sum(COALESCE(t1.OTC_CASTSL_SHAR_MTD,0)) as 场外定投份额_月累计
+    	,sum(COALESCE(t1.OTC_COVT_IN_SHAR_MTD,0)) as 场外转换入份额_月累计
+    	,sum(COALESCE(t1.OTC_REDP_SHAR_MTD,0)) as 场外赎回份额_月累计
+    	,sum(COALESCE(t1.OTC_COVT_OUT_SHAR_MTD,0)) as 场外转换出份额_月累计
+    	,sum(COALESCE(t1.ITC_SUBS_CHAG_MTD,0)) as 场内认购手续费_月累计
+    	,sum(COALESCE(t1.ITC_PURS_CHAG_MTD,0)) as 场内申购手续费_月累计
+    	,sum(COALESCE(t1.ITC_BUYIN_CHAG_MTD,0)) as 场内买入手续费_月累计
+    	,sum(COALESCE(t1.ITC_REDP_CHAG_MTD,0)) as 场内赎回手续费_月累计
+    	,sum(COALESCE(t1.ITC_SELL_CHAG_MTD,0)) as 场内卖出手续费_月累计
+    	,sum(COALESCE(t1.OTC_SUBS_CHAG_MTD,0)) as 场外认购手续费_月累计
+    	,sum(COALESCE(t1.OTC_PURS_CHAG_MTD,0)) as 场外申购手续费_月累计
+    	,sum(COALESCE(t1.OTC_CASTSL_CHAG_MTD,0)) as 场外定投手续费_月累计
+    	,sum(COALESCE(t1.OTC_COVT_IN_CHAG_MTD,0)) as 场外转换入手续费_月累计
+    	,sum(COALESCE(t1.OTC_REDP_CHAG_MTD,0)) as 场外赎回手续费_月累计
+    	,sum(COALESCE(t1.OTC_COVT_OUT_CHAG_MTD,0)) as 场外转换出手续费_月累计
+    	,sum(COALESCE(t1.ITC_SUBS_AMT_YTD,0)) as 场内认购金额_年累计
+    	,sum(COALESCE(t1.ITC_PURS_AMT_YTD,0)) as 场内申购金额_年累计
+    	,sum(COALESCE(t1.ITC_BUYIN_AMT_YTD,0)) as 场内买入金额_年累计
+    	,sum(COALESCE(t1.ITC_REDP_AMT_YTD,0)) as 场内赎回金额_年累计
+    	,sum(COALESCE(t1.ITC_SELL_AMT_YTD,0)) as 场内卖出金额_年累计
+    	,sum(COALESCE(t1.OTC_SUBS_AMT_YTD,0)) as 场外认购金额_年累计
+    	,sum(COALESCE(t1.OTC_PURS_AMT_YTD,0)) as 场外申购金额_年累计
+    	,sum(COALESCE(t1.OTC_CASTSL_AMT_YTD,0)) as 场外定投金额_年累计
+    	,sum(COALESCE(t1.OTC_COVT_IN_AMT_YTD,0)) as 场外转换入金额_年累计
+    	,sum(COALESCE(t1.OTC_REDP_AMT_YTD,0)) as 场外赎回金额_年累计
+    	,sum(COALESCE(t1.OTC_COVT_OUT_AMT_YTD,0)) as 场外转换出金额_年累计
+    	
+    	--销售金额：场内认购金额、场内认购手续费、场外认购金额、场外申购金额、场外定投金额、场外转换入金额、续作销售金额、转托管入金额
+    	,sum(COALESCE(t1.ITC_SUBS_AMT_YTD,0)	--场内认购金额_年累计		
+    		+COALESCE(t1.ITC_SUBS_CHAG_YTD,0)	--场内认购手续费_年累计
+    		+COALESCE(t1.OTC_SUBS_AMT_YTD,0)	--场外认购金额_年累计
+    		+COALESCE(t1.OTC_PURS_AMT_YTD,0)	--场外申购金额_年累计
+    		+COALESCE(t1.OTC_CASTSL_AMT_YTD,0)	--场外定投金额_年累计		
+    		+COALESCE(t1.OTC_COVT_IN_AMT_YTD,0)	--场外转换入金额_年累计
+    		+COALESCE(t1.CONTD_SALE_AMT_YTD,0)	--续作销售金额_年累计	
+    		) as 销售金额_年累计
+    		
+    	--首发销售金额：场内认购金额、场内认购手续费、场外认购金额
+    	,sum(COALESCE(t1.ITC_SUBS_AMT_YTD,0)	--场内认购金额_年累计	
+    		+COALESCE(t1.ITC_SUBS_CHAG_YTD,0)	--场内认购手续费_年累计	
+    		+COALESCE(t1.OTC_SUBS_AMT_YTD,0)	--场外认购金额_年累计		
+    		) as 首发销售金额_年累计				
+    	
+    	--赎回金额：场外赎回金额、场外转换出金额、转托管出金额
+    	,sum(COALESCE(t1.OTC_REDP_AMT_YTD,0)	--场外赎回金额_年累计		
+    		+COALESCE(t1.OTC_COVT_OUT_AMT_YTD,0)--场外转换出金额_年累计	
+    		) as 赎回金额_年累计	
+    		
+    	,sum(COALESCE(t1.ITC_SUBS_SHAR_YTD,0)) as 场内认购份额_年累计
+    	,sum(COALESCE(t1.ITC_PURS_SHAR_YTD,0)) as 场内申购份额_年累计
+    	,sum(COALESCE(t1.ITC_BUYIN_SHAR_YTD,0)) as 场内买入份额_年累计
+    	,sum(COALESCE(t1.ITC_REDP_SHAR_YTD,0)) as 场内赎回份额_年累计
+    	,sum(COALESCE(t1.ITC_SELL_SHAR_YTD,0)) as 场内卖出份额_年累计
+    	,sum(COALESCE(t1.OTC_SUBS_SHAR_YTD,0)) as 场外认购份额_年累计
+    	,sum(COALESCE(t1.OTC_PURS_SHAR_YTD,0)) as 场外申购份额_年累计
+    	,sum(COALESCE(t1.OTC_CASTSL_SHAR_YTD,0)) as 场外定投份额_年累计
+    	,sum(COALESCE(t1.OTC_COVT_IN_SHAR_YTD,0)) as 场外转换入份额_年累计
+    	,sum(COALESCE(t1.OTC_REDP_SHAR_YTD,0)) as 场外赎回份额_年累计
+    	,sum(COALESCE(t1.OTC_COVT_OUT_SHAR_YTD,0)) as 场外转换出份额_年累计
+    	,sum(COALESCE(t1.ITC_SUBS_CHAG_YTD,0)) as 场内认购手续费_年累计
+    	,sum(COALESCE(t1.ITC_PURS_CHAG_YTD,0)) as 场内申购手续费_年累计
+    	,sum(COALESCE(t1.ITC_BUYIN_CHAG_YTD,0)) as 场内买入手续费_年累计
+    	,sum(COALESCE(t1.ITC_REDP_CHAG_YTD,0)) as 场内赎回手续费_年累计
+    	,sum(COALESCE(t1.ITC_SELL_CHAG_YTD,0)) as 场内卖出手续费_年累计
+    	,sum(COALESCE(t1.OTC_SUBS_CHAG_YTD,0)) as 场外认购手续费_年累计
+    	,sum(COALESCE(t1.OTC_PURS_CHAG_YTD,0)) as 场外申购手续费_年累计
+    	,sum(COALESCE(t1.OTC_CASTSL_CHAG_YTD,0)) as 场外定投手续费_年累计
+    	,sum(COALESCE(t1.OTC_COVT_IN_CHAG_YTD,0)) as 场外转换入手续费_年累计
+    	,sum(COALESCE(t1.OTC_REDP_CHAG_YTD,0)) as 场外赎回手续费_年累计
+    	,sum(COALESCE(t1.OTC_COVT_OUT_CHAG_YTD,0)) as 场外转换出手续费_年累计
+    	--续作销售
+    	,sum(COALESCE(t1.CONTD_SALE_SHAR_MTD,0)) as 续作销售份额_月累计
+    	,sum(COALESCE(t1.CONTD_SALE_AMT_MTD,0)) as 续作销售金额_月累计
+    	,sum(COALESCE(t1.CONTD_SALE_SHAR_YTD,0)) as 续作销售份额_年累计
+    	,sum(COALESCE(t1.CONTD_SALE_AMT_YTD,0)) as 续作销售金额_年累计
+    	,@V_BIN_DATE
+    from DM.T_EVT_EMPCUS_PROD_TRD_M_D t1
+    left join 
+    (											--客户属性和维度处理
+    	select 
+    		t1.YEAR
+    		,t1.MTH	
+    		,t1.CUST_ID
+    		,t1.CUST_STAT as 客户状态
+    		,case when t1.TE_OACT_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否月新增
+    		,case when t1.TE_OACT_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否年新增
+			,coalesce(t1.IF_VLD,0) as 是否有效
+			,coalesce(CONVERT(VARCHAR,t4.IF_SPCA_ACCT),'0') as 是否特殊账户
+			,coalesce(convert(varchar,t1.IF_PROD_NEW_CUST),'0') as 是否产品新客户
+    		,t1.CUST_TYPE as 客户类型
+    		
+		,case 
+            when t5.TOT_AST_MDA<100                                     then '00-100以下'
+			when t5.TOT_AST_MDA >= 100      and t5.TOT_AST_MDA<1000     then '01-100_1000'
+			when t5.TOT_AST_MDA >= 1000     and t5.TOT_AST_MDA<2000     then '02-1000_2000'
+			when t5.TOT_AST_MDA >= 2000     and t5.TOT_AST_MDA<5000     then '03-2000_5000'
+			when t5.TOT_AST_MDA >= 5000     and t5.TOT_AST_MDA<10000    then '04-5000_1w'
+			when t5.TOT_AST_MDA >= 10000    and t5.TOT_AST_MDA<50000    then '05-1w_5w'
+			when t5.TOT_AST_MDA >= 50000    and t5.TOT_AST_MDA<100000   then '06-5w_10w'
+            when t5.TOT_AST_MDA >= 100000   and t5.TOT_AST_MDA<200000   then '1-10w_20w'
+    		when t5.TOT_AST_MDA >= 200000   and t5.TOT_AST_MDA<500000   then '2-20w_50w'
+    		when t5.TOT_AST_MDA >= 500000   and t5.TOT_AST_MDA<1000000  then '3-50w_100w'
+    		when t5.TOT_AST_MDA >= 1000000  and t5.TOT_AST_MDA<2000000  then '4-100w_200w'
+    		when t5.TOT_AST_MDA >= 2000000  and t5.TOT_AST_MDA<3000000  then '5-200w_300w'
+    		when t5.TOT_AST_MDA >= 3000000  and t5.TOT_AST_MDA<5000000  then '6-300w_500w'
+    		when t5.TOT_AST_MDA >= 5000000  and t5.TOT_AST_MDA<10000000 then '7-500w_1000w'
+    		when t5.TOT_AST_MDA >= 10000000 and t5.TOT_AST_MDA<30000000 then '8-1000w_3000w'
+			when t5.TOT_AST_MDA >= 30000000                             then '9-大于3000w'
+         end as 资产段		
+    	 from DM.T_PUB_CUST t1	 
+    	 left join DM.T_PUB_DATE_M t2 on t1.YEAR=t2.YEAR and t1.MTH=t2.MTH
+    	 left join DM.T_PUB_CUST_LIMIT_M_D t3 on t1.YEAR=t3.YEAR and t1.MTH=t3.MTH and t1.CUST_ID=t3.CUST_ID
+    	 left join DM.T_ACC_CPTL_ACC t4 on t1.YEAR=t4.YEAR and t1.MTH=t4.MTH and t1.MAIN_CPTL_ACCT=t4.CPTL_ACCT
+    	 left join DM.T_AST_ODI_M_D t5 on t1.YEAR=t5.YEAR and t1.MTH=t5.MTH and t1.CUST_ID=t5.CUST_ID
+    where  t1.YEAR=@V_YEAR 
+      and t1.MTH=@V_MONTH
+      and t4.IF_SPCA_ACCT is not null
+      AND 资产段 IS NOT NULL
+    ) t_khsx on t1.YEAR=t_khsx.YEAR and t1.MTH=t_khsx.MTH and t1.CUST_ID=t_khsx.CUST_ID
+where  t1.YEAR=@V_YEAR 
+  and t1.MTH=@V_MONTH
+  AND t_khsx.是否特殊账户 IS NOT NULL
+  AND t_khsx.CUST_ID IS NOT NULL  
+    group by
+    	t1.YEAR
+    	,t1.MTH 
+    	,t1.YEAR_MTH
+    	,t1.PROD_CD
+    	,t1.PROD_TYPE
+    	,t1.WH_ORG_ID_EMP
+    	/*,t_khsx.客户状态*/
+    	,t_khsx.是否特殊账户
+       /* ,t_khsx.是否产品新客户
+        ,t_khsx.是否月新增
+        ,t_khsx.是否年新增	
+        ,t_khsx.资产段
+        ,t_khsx.客户类型 */
+    
 
 END
 GO
@@ -5597,26 +7162,26 @@ begin
                   b.fund_account 
     from (select distinct client_id, load_dt
             from DBA.T_EDW_RZRQ_CLIENT t
-           where t.load_dt = @v_bin_date
-             and t.client_status = '0'
-             and convert(varchar, t.branch_no) not in ('5', '55', '51', '44', '9999')
+           where t.load_dt = @v_bin_date 
+             --and t.client_status = '0'                                                  ---20180525 不限制
+             --and convert(varchar, t.branch_no) not in ('5', '55', '51', '44', '9999')   ---20180525 不剔除总部账户
              and t.client_id <> '448999999' ----剔除1户“专项头寸账户自动生成”。疑似公司自有账户，client_id下无普通账户，仅有多个信用账户且均为主资金户
           union
           select distinct khbh_hs, rq
             from dba.t_ddw_gpzyhg_d t
            where t.rq = @v_bin_date ---股票质押
-             and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')
+             --and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')
              and t.khbh_hs <> '448999999'
           union
           select distinct khbh_hs, rq
             from dba.t_ddw_ydsgh_d t
            where t.rq = @v_bin_date ---约定式购回
-             and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')
+             --and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')
              and t.khbh_hs <> '448999999') a
     left join dba.t_edw_uf2_fundaccount b
       on a.client_id = b.client_id
      and b.load_dt = @v_bin_date
-     and b.fundacct_status = '0'
+    -- and b.fundacct_status = '0'           ---20180525 不限制
      and b.asset_prop = '0'
      and b.main_flag = '1';
    
@@ -5930,25 +7495,25 @@ begin
     from (select distinct client_id, load_dt
             from DBA.T_EDW_RZRQ_CLIENT t
            where t.load_dt = @v_bin_date
-             and t.client_status = '0'
-             and convert(varchar, t.branch_no) not in ('5', '55', '51', '44', '9999')
+             -- and t.client_status = '0'		-- 20180525 算年累计不需排除 
+             -- and convert(varchar, t.branch_no) not in ('5', '55', '51', '44', '9999')   --20180525 客户层不限制
              and t.client_id <> '448999999' ----剔除1户“专项头寸账户自动生成”。疑似公司自有账户，client_id下无普通账户，仅有多个信用账户且均为主资金户
           union
           select distinct khbh_hs, rq
             from dba.t_ddw_gpzyhg_d t
-           where t.rq = @v_bin_date ---股票质押
-             and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')
+           where t.rq = @v_bin_date ---股票质押 
+             -- and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')  --20180525 客户层不限制
              and t.khbh_hs <> '448999999'
           union
           select distinct khbh_hs, rq
             from dba.t_ddw_ydsgh_d t
            where t.rq = @v_bin_date ---约定式购回
-             and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')
+             -- and convert(varchar, t.jgbh_hs) not in ('5', '55', '51', '44', '9999')  --20180525 客户层不限制
              and t.khbh_hs <> '448999999') a
     left join dba.t_edw_uf2_fundaccount b
       on a.client_id = b.client_id
      and b.load_dt = @v_bin_date
-     and b.fundacct_status = '0'
+     -- and b.fundacct_status = '0'	-- 20180525 算年累计不需排除
      and b.asset_prop = '0'
      and b.main_flag = '1';
    
@@ -6198,6 +7763,18 @@ begin
     where a.occur_dt=@v_bin_date;
     commit; 
 
+	-- pb过户费
+	update dm.T_EVT_CRED_INCM_M_D
+	set pb_tran_fee = coalesce(b.PB_TRAN_FEE_M,0)
+	from dm.T_EVT_CRED_INCM_M_D a
+	left join (
+		select cust_id, sum(PB_TRAN_FEE) as PB_TRAN_FEE_M
+		from dm.T_EVT_ODI_INCM_D_D
+		where occur_dt between @v_bin_mth_start_date AND @v_bin_date
+		group by cust_id
+	) b on a.cust_id=b.cust_id
+	where a.occur_dt=@v_bin_date;
+
 
 ------------------------
   -- 修正本季度2两个月的融资融券_核算保证金利差收入_月累计
@@ -6440,7 +8017,6 @@ begin
 	where a.YEAR=@v_year and a.MTH=@v_month;
 
 	-- 最近交易日期_累计
-	/*
 	UPDATE DM.T_EVT_CUS_ODI_TRD_M_D
 	set RCT_TRD_DT_GT = coalesce(b.RCT_TRD_DT_GT,0)
 	from DM.T_EVT_CUS_ODI_TRD_M_D a
@@ -6450,9 +8026,8 @@ begin
 		from dba.T_EDW_T05_TRADE_JOUR
 		where load_dt<=@v_date
 		group by fund_acct
-	) b on 
+	) b on a.main_cptl_acct=b.fund_acct
 	where a.YEAR=@v_year and a.MTH=@v_month;
-	*/
 
 	-- 股基交易量_本年 正回购交易量_本年 逆回购交易量_本年 沪港通交易量_本年 深港通交易量_本年 股票质押交易量_本年 约定购回交易量_本年
 	-- 报价回购交易量_本年 大宗交易量_本年 个股期权交易量_本年 交易次数_本年 二级交易次数_本年
@@ -6820,49 +8395,83 @@ BEGIN
   编写者: DCY
   创建日期: 2018-02-28
   简介：客户交易事实月表
+  	部分指标需要跑整年，如年累计基于月度数据汇总
+  	依赖：T_EVT_PROD_TRD_M_D
   *********************************************************************
   修订记录： 修订日期       版本号    修订人             修改内容简要说明
-           
+  					20180523										zq							修正月日均指标计算问题
+  					20180523										zq							从T_EVT_CUS_ODI_TRD_M_D迁移指标
   *********************************************************************/
-    --DECLARE @V_BIN_DATE INT ;
-    DECLARE @V_BIN_YEAR VARCHAR(4) ;    
-    DECLARE @V_BIN_MTH  VARCHAR(2) ;    
-    DECLARE @V_BIN_NATRE_DAY_MTHBEG  INT ;    --自然日_月初
-    DECLARE @V_BIN_NATRE_DAY_MTHEND  INT ;    --自然日_月末
-    DECLARE @V_BIN_TRD_DAY_MTHBEG    INT ;    --交易日_月初
-    DECLARE @V_BIN_TRD_DAY_MTHEND    INT ;    --交易日_月末
-    DECLARE @V_BIN_NATRE_DAY_YEARBGN INT ;    --自然日_年初
-    DECLARE @V_BIN_TRD_DAY_YEARBGN   INT ;    --交易日_年初
-    DECLARE @V_BIN_NATRE_DAYS_MTH    INT ;    --自然天数_月
-    DECLARE @V_BIN_TRD_DAYS_MTH      INT ;    --交易天数_月
-    DECLARE @V_BIN_NATRE_DAYS_YEAR   INT ;    --自然天数_年
-    DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年
 
+ 	DECLARE @V_YEAR VARCHAR(4);		-- 年份
+	DECLARE @V_MONTH VARCHAR(2);	-- 月份
+  DECLARE @V_BIN_NATRE_DAY_MTHBEG  INT ;    --自然日_月初
+  DECLARE @V_BIN_NATRE_DAY_MTHEND  INT ;    --自然日_月末
+  DECLARE @V_BIN_TRD_DAY_MTHBEG    INT ;    --交易日_月初
+  DECLARE @V_BIN_TRD_DAY_MTHEND    INT ;    --交易日_月末
+  DECLARE @V_BIN_NATRE_DAY_YEARBGN INT ;    --自然日_年初
+  DECLARE @V_BIN_TRD_DAY_YEARBGN   INT ;    --交易日_年初
+  DECLARE @V_BIN_NATRE_DAYS_MTH    INT ;    --自然天数_月
+  DECLARE @V_BIN_TRD_DAYS_MTH      INT ;    --交易天数_月
+  DECLARE @V_BIN_NATRE_DAYS_YEAR   INT ;    --自然天数_年
+  DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年
+  DECLARE @V_LAST_YEAR VARCHAR(4);	-- 去年年份
+  DECLARE @V_CORR_BGNDAY_LASTYEAR INT;	-- 去年同期开始日期
 
-    ----衍生变量
-    SET @V_BIN_DATE=@V_BIN_DATE;
-    SET @V_BIN_YEAR=SUBSTR(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
-    SET @V_BIN_MTH =SUBSTR(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
-    SET @V_BIN_NATRE_DAY_MTHBEG  =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH);
-    SET @V_BIN_NATRE_DAY_MTHEND  =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH);
-    SET @V_BIN_TRD_DAY_MTHBEG    =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR  );
-    SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE );
-    SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE);
-    SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
-	
+  SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
+	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+  SET @V_BIN_NATRE_DAY_MTHBEG  =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_NATRE_DAY_MTHEND  =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_TRD_DAY_MTHBEG    =(SELECT MIN(DT)	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR  );
+  SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=
+  																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_BIN_DATE END);
+                     									
+  SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=
+  																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_BIN_DATE END);
+
+  SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
+  SET @V_LAST_YEAR = CONVERT(VARCHAR,CONVERT(INT,@V_YEAR)-1);
+  SET @V_CORR_BGNDAY_LASTYEAR = (SELECT MIN(RQ) FROM DBA.T_DDW_D_RQ WHERE RQ>CONVERT(INT,(@V_LAST_YEAR||substr(convert(varchar,@V_BIN_DATE),5,4))) );
+  
 --PART0 删除当月数据
-  DELETE FROM DM.T_EVT_CUS_TRD_M_D WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH;
+  DELETE FROM DM.T_EVT_CUS_TRD_M_D WHERE YEAR=SUBSTR(@V_BIN_DATE||'',1,4) AND MTH=SUBSTR(@V_BIN_DATE||'',5,2);
 
-	insert into DM.T_EVT_CUS_TRD_M_D 
-	(
-	 CUST_ID   
-    ,OCCUR_DT	 
+
+	select
+		t1.YEAR 			as 年
+		,t2.MTH 			as 月
+		,t1.DT 			    as 日期
+		,t1.TRD_DT 			as 交易日期
+		,t2.NATRE_DAY_MTHBEG as 自然日_月初
+		,t2.NATRE_DAY_MTHEND as 自然日_月末
+		,t2.TRD_DAY_MTHBEG 	 as 交易日_月初
+		,t2.TRD_DAY_MTHEND   as 交易日_月末
+		,t2.NATRE_DAY_YEARBGN as 自然日_年初
+		,t2.TRD_DAY_YEARBGN  as 交易日_年初
+		,t2.NATRE_DAYS_MTH   as 自然天数_月
+		,t2.TRD_DAYS_MTH     as 交易天数_月
+		,t2.NATRE_DAYS_YEAR  as 自然天数_年
+		,t2.TRD_DAYS_YEAR    as 交易天数_年
+		,t1.IF_TRD_DAY_FLAG
+	INTO #TEMP_RQ
+	from DM.T_PUB_DATE t1
+	left join DM.T_PUB_DATE_M t2 on t1.YEAR=t2.YEAR and t1.MTH<=t2.MTH	
+	where t1.YEAR=substr(@V_BIN_DATE||'',1,4) 
+	  and t2.MTH=substr(@V_BIN_DATE||'',5,2) ;
+
+insert into DM.T_EVT_CUS_TRD_M_D 
+(
+	 CUST_ID            
+	 ,main_cptl_acct
 	,YEAR                 
-	,MTH                  
+	,MTH   
+    ,occur_dt               
 	,NATRE_DAYS_MTH       
 	,NATRE_DAYS_YEAR      
 	,YEAR_MTH             
@@ -6943,13 +8552,14 @@ BEGIN
 	,APPTBUYB_REP_AMT_YTD 
 	,APPTBUYB_BUYB_AMT_YTD 
 	,APPTBUYB_TRD_AMT_YTD 
-	,LOAD_DT        
-	)
+	,LOAD_DT	        
+)
 select
 	t1.CUST_ID as 客户编码	
-	,@V_BIN_DATE as occur_dt
+	,t1.main_cptl_acct as 主资金账号
 	,t_rq.年
 	,t_rq.月
+    ,@V_BIN_DATE as 日期
 	,t_rq.自然天数_月
 	,t_rq.自然天数_年		
 	,t_rq.年||t_rq.月 as 年月
@@ -6960,116 +8570,369 @@ select
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CREDIT_ODI_TRD_QTY,0) else 0 end)/t_rq.自然天数_月 as 信用账户普通交易量_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CREDIT_CRED_TRD_QTY,0) else 0 end)/t_rq.自然天数_月 as 信用账户信用交易量_月日均
 	
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.STKF_TRD_QTY,0) else 0 end) as 股基交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.SCDY_TRD_QTY,0) else 0 end) as 二级交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.S_REPUR_TRD_QTY,0) else 0 end) as 正回购交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.R_REPUR_TRD_QTY,0) else 0 end) as 逆回购交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.HGT_TRD_QTY,0) else 0 end) as 沪港通交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.SGT_TRD_QTY,0) else 0 end) as 深港通交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.STKPLG_TRD_QTY,0) else 0 end) as 股票质押交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.APPTBUYB_TRD_QTY,0) else 0 end) as 约定购回交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CREDIT_TRD_QTY,0) else 0 end) as 融资融券交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.OFFUND_TRD_QTY,0) else 0 end) as 场内基金交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.OPFUND_TRD_QTY,0) else 0 end) as 场外基金交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.BANK_CHRM_TRD_QTY,0) else 0 end) as 银行理财交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.SECU_CHRM_TRD_QTY,0) else 0 end) as 证券理财交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CREDIT_ODI_TRD_QTY,0) else 0 end) as 信用账户普通交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CREDIT_CRED_TRD_QTY,0) else 0 end) as 信用账户信用交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.FIN_AMT,0) else 0 end) as 融资金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CRDT_STK_AMT,0) else 0 end) as 融券金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.STKPLG_BUYB_AMT,0) else 0 end) as 股票质押购回金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.PSTK_OPTN_TRD_QTY,0) else 0 end) as 个股期权交易量_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.GROSS_CMS,0) else 0 end) as 毛佣金_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.NET_CMS,0) else 0 end) as 净佣金_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.STKPLG_BUYB_CNT,0) else 0 end) as 股票质押购回笔数_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CCB_AMT,0) else 0 end) as 融资买入金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CCB_CNT,0) else 0 end) as 融资买入笔数_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.FIN_SELL_AMT,0) else 0 end) as 融资卖出金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.FIN_SELL_CNT,0) else 0 end) as 融资卖出笔数_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CRDT_STK_BUYIN_AMT,0) else 0 end) as 融券买入金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CRDT_STK_BUYIN_CNT,0) else 0 end) as 融券买入笔数_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CSS_AMT,0) else 0 end) as 融券卖出金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.CSS_CNT,0) else 0 end) as 融券卖出笔数_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.FIN_RTN_AMT,0) else 0 end) as 融资归还金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.APPTBUYB_REP_AMT,0) else 0 end) as 约定购回还款金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.APPTBUYB_BUYB_AMT,0) else 0 end) as 约定购回购回金额_月累计
-	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.APPTBUYB_TRD_AMT,0) else 0 end) as 约定购回交易金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKF_TRD_QTY,0) else 0 end) as 股基交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.SCDY_TRD_QTY,0) else 0 end) as 二级交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.S_REPUR_TRD_QTY,0) else 0 end) as 正回购交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.R_REPUR_TRD_QTY,0) else 0 end) as 逆回购交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.HGT_TRD_QTY,0) else 0 end) as 沪港通交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.SGT_TRD_QTY,0) else 0 end) as 深港通交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKPLG_TRD_QTY,0) else 0 end) as 股票质押交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_TRD_QTY,0) else 0 end) as 约定购回交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CREDIT_TRD_QTY,0) else 0 end) as 融资融券交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.OFFUND_TRD_QTY,0) else 0 end) as 场内基金交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.OPFUND_TRD_QTY,0) else 0 end) as 场外基金交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.BANK_CHRM_TRD_QTY,0) else 0 end) as 银行理财交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.SECU_CHRM_TRD_QTY,0) else 0 end) as 证券理财交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CREDIT_ODI_TRD_QTY,0) else 0 end) as 信用账户普通交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CREDIT_CRED_TRD_QTY,0) else 0 end) as 信用账户信用交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_AMT,0) else 0 end) as 融资金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CRDT_STK_AMT,0) else 0 end) as 融券金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKPLG_BUYB_AMT,0) else 0 end) as 股票质押购回金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.PSTK_OPTN_TRD_QTY,0) else 0 end) as 个股期权交易量_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.GROSS_CMS,0) else 0 end) as 毛佣金_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.NET_CMS,0) else 0 end) as 净佣金_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKPLG_BUYB_CNT,0) else 0 end) as 股票质押购回笔数_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CCB_AMT,0) else 0 end) as 融资买入金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CCB_CNT,0) else 0 end) as 融资买入笔数_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_SELL_AMT,0) else 0 end) as 融资卖出金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_SELL_CNT,0) else 0 end) as 融资卖出笔数_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CRDT_STK_BUYIN_AMT,0) else 0 end) as 融券买入金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CRDT_STK_BUYIN_CNT,0) else 0 end) as 融券买入笔数_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CSS_AMT,0) else 0 end) as 融券卖出金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CSS_CNT,0) else 0 end) as 融券卖出笔数_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_RTN_AMT,0) else 0 end) as 融资归还金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_REP_AMT,0) else 0 end) as 约定购回还款金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_BUYB_AMT,0) else 0 end) as 约定购回购回金额_月累计
+	,sum(case when t_rq.日期>=t_rq.自然日_月初 AND t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_TRD_AMT,0) else 0 end) as 约定购回交易金额_月累计
 
 	,sum(COALESCE(t1.STKF_TRD_QTY,0))/t_rq.自然天数_年 as 股基交易量_年日均
 	,sum(COALESCE(t1.SCDY_TRD_QTY,0))/t_rq.自然天数_年 as 二级交易量_年日均
 	,sum(COALESCE(t1.CREDIT_ODI_TRD_QTY,0))/t_rq.自然天数_年 as 信用账户普通交易量_年日均
 	,sum(COALESCE(t1.CREDIT_CRED_TRD_QTY,0))/t_rq.自然天数_年 as 信用账户信用交易量_年日均
 	
-	,sum(COALESCE(t1.STKF_TRD_QTY,0)) as 股基交易量_年累计
-	,sum(COALESCE(t1.SCDY_TRD_QTY,0)) as 二级交易量_年累计
-	,sum(COALESCE(t1.S_REPUR_TRD_QTY,0)) as 正回购交易量_年累计
-	,sum(COALESCE(t1.R_REPUR_TRD_QTY,0)) as 逆回购交易量_年累计
-	,sum(COALESCE(t1.HGT_TRD_QTY,0)) as 沪港通交易量_年累计
-	,sum(COALESCE(t1.SGT_TRD_QTY,0)) as 深港通交易量_年累计
-	,sum(COALESCE(t1.STKPLG_TRD_QTY,0)) as 股票质押交易量_年累计
-	,sum(COALESCE(t1.APPTBUYB_TRD_QTY,0)) as 约定购回交易量_年累计
-	,sum(COALESCE(t1.CREDIT_TRD_QTY,0)) as 融资融券交易量_年累计
-	,sum(COALESCE(t1.OFFUND_TRD_QTY,0)) as 场内基金交易量_年累计
-	,sum(COALESCE(t1.OPFUND_TRD_QTY,0)) as 场外基金交易量_年累计
-	,sum(COALESCE(t1.BANK_CHRM_TRD_QTY,0)) as 银行理财交易量_年累计
-	,sum(COALESCE(t1.SECU_CHRM_TRD_QTY,0)) as 证券理财交易量_年累计
-	,sum(COALESCE(t1.CREDIT_ODI_TRD_QTY,0)) as 信用账户普通交易量_年累计
-	,sum(COALESCE(t1.CREDIT_CRED_TRD_QTY,0)) as 信用账户信用交易量_年累计
-	,sum(COALESCE(t1.FIN_AMT,0)) as 融资金额_年累计
-	,sum(COALESCE(t1.CRDT_STK_AMT,0)) as 融券金额_年累计
-	,sum(COALESCE(t1.STKPLG_BUYB_AMT,0)) as 股票质押购回金额_年累计
-	,sum(COALESCE(t1.PSTK_OPTN_TRD_QTY,0)) as 个股期权交易量_年累计
-	,sum(COALESCE(t1.GROSS_CMS,0)) as 毛佣金_年累计
-	,sum(COALESCE(t1.NET_CMS,0)) as 净佣金_年累计
-	,sum(COALESCE(t1.STKPLG_BUYB_CNT,0)) as 股票质押购回笔数_年累计
-	,sum(COALESCE(t1.CCB_AMT,0)) as 融资买入金额_年累计
-	,sum(COALESCE(t1.CCB_CNT,0)) as 融资买入笔数_年累计
-	,sum(COALESCE(t1.FIN_SELL_AMT,0)) as 融资卖出金额_年累计
-	,sum(COALESCE(t1.FIN_SELL_CNT,0)) as 融资卖出笔数_年累计
-	,sum(COALESCE(t1.CRDT_STK_BUYIN_AMT,0)) as 融券买入金额_年累计
-	,sum(COALESCE(t1.CRDT_STK_BUYIN_CNT,0)) as 融券买入笔数_年累计
-	,sum(COALESCE(t1.CSS_AMT,0)) as 融券卖出金额_年累计
-	,sum(COALESCE(t1.CSS_CNT,0)) as 融券卖出笔数_年累计
-	,sum(COALESCE(t1.FIN_RTN_AMT,0)) as 融资归还金额_年累计
-	,sum(COALESCE(t1.APPTBUYB_REP_AMT,0)) as 约定购回还款金额_年累计
-	,sum(COALESCE(t1.APPTBUYB_BUYB_AMT,0)) as 约定购回购回金额_年累计
-	,sum(COALESCE(t1.APPTBUYB_TRD_AMT,0)) as 约定购回交易金额_年累计
-	,@V_BIN_DATE
-
-from
-(
-	select
-		@V_BIN_YEAR as 年
-		,@V_BIN_MTH as 月
-		,t1.DT as 日期
-		,t1.TRD_DT as 交易日期
-		,@V_BIN_NATRE_DAY_MTHBEG    as 自然日_月初
-		,@V_BIN_NATRE_DAY_MTHEND    as 自然日_月末
-		,@V_BIN_TRD_DAY_MTHBEG      as 交易日_月初
-		,@V_BIN_TRD_DAY_MTHEND      as 交易日_月末
-		,@V_BIN_NATRE_DAY_YEARBGN   as 自然日_年初
-		,@V_BIN_TRD_DAY_YEARBGN     as 交易日_年初
-		,@V_BIN_NATRE_DAYS_MTH      as 自然天数_月
-		,@V_BIN_TRD_DAYS_MTH        as 交易天数_月
-		,@V_BIN_NATRE_DAYS_YEAR     as 自然天数_年
-		,@V_BIN_TRD_DAYS_YEAR       as 交易天数_年
-	from DM.T_PUB_DATE t1 
-	where t1.YEAR=@V_BIN_YEAR
-	  AND T1.DT<=@V_BIN_DATE
- 	  and t1.IF_TRD_DAY_FLAG=1
-) t_rq
-left join DM.T_EVT_CUS_TRD_D_D t1 on t_rq.日期=t1.OCCUR_DT
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKF_TRD_QTY,0) end ) as 股基交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.SCDY_TRD_QTY,0) end ) as 二级交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.S_REPUR_TRD_QTY,0) end ) as 正回购交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.R_REPUR_TRD_QTY,0) end ) as 逆回购交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.HGT_TRD_QTY,0) end ) as 沪港通交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.SGT_TRD_QTY,0) end ) as 深港通交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKPLG_TRD_QTY,0) end ) as 股票质押交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_TRD_QTY,0) end ) as 约定购回交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CREDIT_TRD_QTY,0) end ) as 融资融券交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.OFFUND_TRD_QTY,0) end ) as 场内基金交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.OPFUND_TRD_QTY,0) end ) as 场外基金交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.BANK_CHRM_TRD_QTY,0) end ) as 银行理财交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.SECU_CHRM_TRD_QTY,0) end ) as 证券理财交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CREDIT_ODI_TRD_QTY,0) end ) as 信用账户普通交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CREDIT_CRED_TRD_QTY,0) end ) as 信用账户信用交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_AMT,0) end ) as 融资金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CRDT_STK_AMT,0) end ) as 融券金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKPLG_BUYB_AMT,0) end ) as 股票质押购回金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.PSTK_OPTN_TRD_QTY,0) end ) as 个股期权交易量_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.GROSS_CMS,0) end ) as 毛佣金_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.NET_CMS,0) end ) as 净佣金_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.STKPLG_BUYB_CNT,0) end ) as 股票质押购回笔数_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CCB_AMT,0) end ) as 融资买入金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CCB_CNT,0) end ) as 融资买入笔数_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_SELL_AMT,0) end ) as 融资卖出金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_SELL_CNT,0) end ) as 融资卖出笔数_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CRDT_STK_BUYIN_AMT,0) end ) as 融券买入金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CRDT_STK_BUYIN_CNT,0) end ) as 融券买入笔数_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CSS_AMT,0) end ) as 融券卖出金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.CSS_CNT,0) end ) as 融券卖出笔数_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.FIN_RTN_AMT,0) end ) as 融资归还金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_REP_AMT,0) end ) as 约定购回还款金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_BUYB_AMT,0) end ) as 约定购回购回金额_年累计
+	,sum(case when  t_rq.IF_TRD_DAY_FLAG=1 then COALESCE(t1.APPTBUYB_TRD_AMT,0) end ) as 约定购回交易金额_年累计
+	,@V_BIN_DATE AS RQ
+from DM.T_EVT_CUS_TRD_D_D T1 
+LEFT JOIN #TEMP_RQ        t_rq  ON  t_rq.交易日期=T1.OCCUR_DT
+where t_rq.日期 is not null 
 group by
 	t_rq.年
 	,t_rq.月
+    ,日期
 	,t_rq.自然天数_月
 	,t_rq.自然天数_年		
 	,t1.CUST_ID
+	,t1.main_cptl_acct
 	,年月
 	,年月客户编码
 ;
 
+
+
+-- 补充字段客户交易月表字段
+/*
+UPDATE DM.T_EVT_CUS_TRD_M_D 
+	SET 
+		EQT_CLAS_KEPP_PERCN  		= 	COALESCE(T2.EQT_CLAS_KEPP_PERCN,0) 							--权益类持仓占比		--
+	   ,SCDY_TRD_FREQ_MTD    		= 	COALESCE(T2.SCDY_TRD_FREQ,0)								--二级交易次数_月累计		--
+	   ,SCDY_TRD_FREQ_YTD    		= 	COALESCE(T2.SCDY_TRD_FREQ_TY,0)								--二级交易次数_年累计		--
+	   ,RCT_TRD_DT_GT        		= 	COALESCE(T2.RCT_TRD_DT_GT,0)								--最近交易日期_累计		-- 
+	   ,RCT_TRD_DT_M         		= 	COALESCE(T2.RCT_TRD_DT_M,0)								    --最近交易日期_本月		--
+	   ,Y_RCT_STK_TRD_QTY    		= 	COALESCE(T2.Y_RCT_STK_TRD_QTY,0)							--近12月股票交易量		--
+	   ,TRD_FREQ_MTD         		= 	COALESCE(T2.TRD_FREQ,0)									    --交易次数_月累计		--
+	   ,TRD_FREQ_YTD         		= 	COALESCE(T2.TRD_FREQ_TY,0)								    --交易次数_年累计		--
+	   ,REPQ_TRD_QTY_MTD     		= 	COALESCE(T2.REPQ_TRD_QTY,0)								    --报价回购交易量_月累计		--
+	   ,REPQ_TRD_QTY_YTD     		= 	COALESCE(T2.REPQ_TRD_QTY_TY,0)								--报价回购交易量_年累计		--
+	   ,BGDL_QTY_MTD         		= 	COALESCE(T2.BGDL_QTY,0)									    --大宗交易量_月累计		--
+	   ,BGDL_QTY_YTD         		= 	COALESCE(T2.BGDL_QTY_TY,0)								    --大宗交易量_年累计	--	
+	   ,PB_TRD_QTY_MTD       		= 	COALESCE(T2.PB_TRD_QTY,0)								    --PB交易量_月累计			--
+	   ,MAIN_CPTL_ACCT       		= 	T2.MAIN_CPTL_ACCT 							                --主资金账号			--
+	   ,S_REPUR_TRD_QTY_MDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY,0)/@V_BIN_NATRE_DAYS_MTH				--正回购交易量_月日均		
+	   ,R_REPUR_TRD_QTY_MDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY_TY,0)/@V_BIN_NATRE_DAYS_MTH 			--逆回购交易量_月日均		
+	   ,S_REPUR_TRD_QTY_YDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY,0)/@V_BIN_NATRE_DAYS_YEAR 				--正回购交易量_年日均		
+	   ,R_REPUR_TRD_QTY_YDA  		= 	COALESCE(T2.S_REPUR_TRD_QTY,0)/@V_BIN_NATRE_DAYS_YEAR 				--逆回购交易量_年日均  
+	 FROM DM.T_EVT_CUS_TRD_M_D T1
+	 LEFT JOIN DM.T_EVT_CUS_ODI_TRD_M_D T2
+	 	ON T1.YEAR = T2.YEAR 
+	 		AND T1.MTH = T2.MTH
+	 		AND T1.CUST_ID = T2.CUST_ID
+	WHERE T1.OCCUR_DT=@V_BIN_DATE;
+
+*/
+
+
+
+	-- 报价回购交易量
+	update DM.T_EVT_CUS_TRD_M_D
+	set REPQ_TRD_QTY_MTD = coalesce(b.REPQ_TRD_QTY,0)
+	from DM.T_EVT_CUS_TRD_M_D a
+	left join (
+		select fund_acct
+			,sum(trad_amt) as REPQ_TRD_QTY
+		from dba.T_EDW_T05_TRADE_JOUR
+		where load_dt between @V_BIN_TRD_DAY_MTHBEG AND @V_BIN_DATE
+		and busi_type_cd in ('3703','3704') and "stock_cd" like '205%'
+		group by fund_acct
+	) b ON a.MAIN_CPTL_ACCT=b.fund_acct
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+	
+	-- 大宗交易量
+	update DM.T_EVT_CUS_TRD_M_D
+	set BGDL_QTY_MTD = coalesce(b.BGDL_QTY,0)
+	from DM.T_EVT_CUS_TRD_M_D a
+	left join (
+		select fund_acct
+			,sum(trad_amt) as BGDL_QTY
+		from dba.T_EDW_T05_TRADE_JOUR
+		where load_dt between  @V_BIN_TRD_DAY_MTHBEG AND @V_BIN_DATE
+		and busi_type_cd in ('3101', '3102') and note like '%大宗%'
+		group by fund_acct
+	) b ON a.MAIN_CPTL_ACCT=b.fund_acct
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+	
+  -- PB交易量
+  update DM.T_EVT_CUS_TRD_M_D
+  set PB_TRD_QTY_MTD = coalesce(b.jyl,0)
+  from DM.T_EVT_CUS_TRD_M_D a 
+  left join (
+      select client_id, sum(business_balance) as jyl
+      from dba.t_edw_uf2_his_deliver a
+      where a.business_flag in (4001,4002,4103,4104)
+      and fund_account in (
+          select distinct fund_account from dba.t_edw_uf2_fundaccount 
+          where client_group in (30,38) and substring(convert(varchar,load_dt),1,6)=@V_YEAR||@V_MONTH
+      ) and substring(convert(varchar,load_dt),1,6)=@V_YEAR||@V_MONTH
+      group by client_id
+  ) b on a.cust_id=b.client_id
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+	
+	-- 月度指标
+	UPDATE DM.T_EVT_CUS_TRD_M_D
+	SET SCDY_TRD_FREQ_MTD = coalesce(b.SCDY_TRD_FREQ_MTD,0)	-- 二级交易次数
+		,RCT_TRD_DT_M = coalesce(b.RCT_TRD_DT_M,0)	-- 最近交易日期_本月
+		,TRD_FREQ_MTD = coalesce(b.TRD_FREQ_MTD,0)	-- 交易次数
+	FROM DM.T_EVT_CUS_TRD_M_D a
+	LEFT JOIN (
+		SELECT fund_acct
+			,sum(case when t.market_type_cd in ('01','02','03','04','05','0G','0S') then 1 else 0 end) as SCDY_TRD_FREQ_MTD
+			,max(t.load_dt) as RCT_TRD_DT_M
+			,count(1) as TRD_FREQ_MTD
+		FROM DBA.T_EDW_T05_TRADE_JOUR t
+		WHERE LOAD_DT BETWEEN @V_BIN_TRD_DAY_MTHBEG AND @V_BIN_DATE
+		and busi_type_cd in ( '3101','3102','3701','3703')
+		group by fund_acct
+	) b ON a.MAIN_CPTL_ACCT = b.fund_acct
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+	
+	UPDATE DM.T_EVT_CUS_TRD_M_D
+	SET	r_repur_net_cms_mtd = coalesce(b.r_repur_net_cms_mtd,0)	-- 逆回购净佣金_月累计
+		,s_repur_net_cms_mtd = coalesce(b.s_repur_net_cms_mtd,0)	-- 正回购净佣金_月累计
+	FROM DM.T_EVT_CUS_TRD_M_D a 
+	LEFT JOIN (
+		SELECT ZJZH
+			,SUM(CASE WHEN busi_type_cd = '3703' then jyj else 0 end) as r_repur_net_cms_mtd
+			,SUM(CASE WHEN busi_type_cd = '3701' then jyj else 0 end) as s_repur_net_cms_mtd
+		FROM DBA.T_DDW_F00_KHZQHZ_D 
+		WHERE LOAD_DT BETWEEN @V_BIN_TRD_DAY_MTHBEG AND @V_BIN_DATE
+		GROUP BY ZJZH
+	) b ON a.MAIN_CPTL_ACCT=b.zjzh
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+	
+	UPDATE DM.T_EVT_CUS_TRD_M_D
+	SET itc_crrc_fund_net_cms_mtd = coalesce(b.sxf,0)	-- 场内货币基金净佣金_月累计
+		,itc_crrc_fund_trd_qty_mtd = coalesce(b.jyl,0)	-- 场内货币基金交易量_月累计
+	FROM DM.T_EVT_CUS_TRD_M_D a
+	LEFT JOIN (
+		select cust_id
+			,sum(ITC_SUBS_CHAG_MTD+ITC_PURS_CHAG_MTD+ITC_BUYIN_CHAG_MTD+ITC_REDP_CHAG_MTD+ITC_SELL_CHAG_MTD) as sxf
+			,sum(ITC_SUBS_AMT_MTD+ITC_PURS_AMT_MTD+ITC_BUYIN_AMT_MTD+ITC_REDP_AMT_MTD+ITC_SELL_AMT_MTD) as jyl
+		from dm.T_EVT_PROD_TRD_M_D a
+		left join dba.t_ddw_d_jj b on a.prod_cd=b.jjdm and a.year=b.nian and a.mth=b.yue
+		where a.year=@V_YEAR AND a.mth=@V_MONTH and b.jjlb like '%货币%'
+		group by a.cust_id
+	) b on a.cust_id=b.cust_id
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+
+
+	-- 年度指标
+	update dm.T_EVT_CUS_TRD_M_D
+		set SCDY_TRD_FREQ_YTD =  coalesce(b.SCDY_TRD_FREQ_YTD,0) 	-- 二级交易次数_本年
+		,TRD_FREQ_YTD = coalesce(b.TRD_FREQ_YTD,0)								-- 交易次数_年累计
+		,REPQ_TRD_QTY_YTD = coalesce(b.REPQ_TRD_QTY_YTD,0)	-- 报价回购交易量_年累计
+		,BGDL_QTY_YTD = coalesce(b.BGDL_QTY_YTD,0)					-- 大宗交易量_年累计
+		,r_repur_net_cms_ytd = coalesce(b.r_repur_net_cms_ytd,0)	-- 逆回购净佣金_年累计
+		,s_repur_net_cms_ytd = coalesce(b.s_repur_net_cms_ytd,0)	-- 正回购净佣金_年累计
+		,itc_crrc_fund_net_cms_ytd = coalesce(b.itc_crrc_fund_net_cms_ytd,0)	-- 场内货币基金净佣金_年累计
+		,itc_crrc_fund_trd_qty_ytd = coalesce(b.itc_crrc_fund_trd_qty_ytd,0)	-- 场内货币基金交易量_年累计
+	from dm.T_EVT_CUS_TRD_M_D a
+	left join (
+		select CUST_ID
+			,sum(SCDY_TRD_FREQ_MTD) as SCDY_TRD_FREQ_YTD
+			,sum(TRD_FREQ_MTD) as TRD_FREQ_YTD
+			,sum(REPQ_TRD_QTY_MTD) as REPQ_TRD_QTY_YTD
+			,sum(BGDL_QTY_MTD) as BGDL_QTY_YTD
+			,sum(r_repur_net_cms_mtd) as r_repur_net_cms_ytd
+			,sum(s_repur_net_cms_mtd) as s_repur_net_cms_ytd
+			,sum(itc_crrc_fund_net_cms_mtd) as itc_crrc_fund_net_cms_ytd
+			,sum(itc_crrc_fund_trd_qty_mtd) as itc_crrc_fund_trd_qty_ytd
+		from dm.T_EVT_CUS_TRD_M_D
+		where YEAR=@V_YEAR and MTH<=@V_MONTH
+		group by CUST_ID
+	) b on a.CUST_ID=b.CUST_ID
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+
+
+	-- 最近交易日期_累计
+	UPDATE DM.T_EVT_CUS_TRD_M_D
+	set RCT_TRD_DT_GT = coalesce(b.RCT_TRD_DT_GT,0)
+	from DM.T_EVT_CUS_TRD_M_D a
+	left join (
+		select fund_acct
+			,max(load_dt) as RCT_TRD_DT_GT
+		from dba.T_EDW_T05_TRADE_JOUR
+		where load_dt<=@V_BIN_DATE
+		group by fund_acct
+	) b on a.main_cptl_acct=b.fund_acct
+	WHERE a.OCCUR_DT=@V_BIN_DATE;
+
+
+	UPDATE DM.T_EVT_CUS_TRD_M_D 
+	SET EQT_CLAS_KEPP_PERCN = 0			-- 权益类持仓占比
+		 ,S_REPUR_TRD_QTY_MDA  		= 	S_REPUR_TRD_QTY_MTD/@V_BIN_NATRE_DAYS_MTH				--正回购交易量_月日均		
+	   ,R_REPUR_TRD_QTY_MDA  		= 	R_REPUR_TRD_QTY_MTD/@V_BIN_NATRE_DAYS_MTH 			--逆回购交易量_月日均		
+	   ,S_REPUR_TRD_QTY_YDA  		= 	S_REPUR_TRD_QTY_YTD/@V_BIN_NATRE_DAYS_YEAR 				--正回购交易量_年日均		
+	   ,R_REPUR_TRD_QTY_YDA  		= 	R_REPUR_TRD_QTY_YTD/@V_BIN_NATRE_DAYS_YEAR 				--逆回购交易量_年日均  
+	WHERE OCCUR_DT=@V_BIN_DATE;
+
+-- 补充场内委托事实表字段
+SELECT 
+     SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4) as YEAR
+    ,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),5,2) as MTH
+    ,A.CUST_ID 	as CUST_ID
+    ,SUM(CASE WHEN A.SECU_TYPE IN ('10','18','24') THEN A.MTCH_VOL ELSE 0 END ) AS SB_TRD_QTY_MTD
+    ,SUM(CASE WHEN A.SECU_TYPE IN ('12','13','14') THEN A.MTCH_VOL ELSE 0 END ) AS BOND_TRD_QTY_MTD
+    --SUM(CASE WHEN SECU_TYPE = '19' THEN MTCH_VOL END ) AS 场内开基交易量
+INTO #TEMP_A
+FROM DM.T_EVT_ITC_ORDR_TRD_D_D A
+WHERE A.OCCUR_DT BETWEEN @V_BIN_TRD_DAY_MTHBEG AND @V_BIN_DATE
+ 	AND A.MKT_TYPE IN  ( '01','02','03','04','05','0G','0S')
+GROUP BY SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4)
+		,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),5,2)
+		,A.CUST_ID;
+
+SELECT 
+     SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4) as YEAR
+    ,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),5,2) as MTH
+    ,A.CUST_ID   as CUST_ID
+    ,SUM(CASE WHEN A.SECU_TYPE IN ('10','18','24') THEN A.MTCH_VOL ELSE 0 END ) AS SB_TRD_QTY_YTD
+    ,SUM(CASE WHEN A.SECU_TYPE IN ('12','13','14') THEN A.MTCH_VOL ELSE 0 END ) AS BOND_TRD_QTY_YTD
+    --SUM(CASE WHEN SECU_TYPE = '19' THEN MTCH_VOL END ) AS 场内开基交易量
+INTO #TEMP_B
+FROM DM.T_EVT_ITC_ORDR_TRD_D_D A
+WHERE A.OCCUR_DT BETWEEN @V_BIN_TRD_DAY_YEARBGN AND @V_BIN_DATE
+ 	AND A.MKT_TYPE IN  ( '01','02','03','04','05','0G','0S')
+GROUP BY SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),1,4)
+		,SUBSTRING(CONVERT(VARCHAR,A.OCCUR_DT),5,2)
+		,A.CUST_ID;
+
+UPDATE DM.T_EVT_CUS_TRD_M_D 
+	SET 
+	   SB_TRD_QTY_MTD       		= 		COALESCE(T2.SB_TRD_QTY_MTD,0)				--三板交易量_月累计		
+	  ,SB_TRD_QTY_YTD       		= 		COALESCE(T3.SB_TRD_QTY_YTD,0)				--三板交易量_年累计		
+	  ,BOND_TRD_QTY_MTD     		= 		COALESCE(T2.BOND_TRD_QTY_MTD,0)				--债券交易量_月累计		
+	  ,BOND_TRD_QTY_YTD     		= 		COALESCE(T3.BOND_TRD_QTY_YTD,0)				--债券交易量_年累计		
+	  /*
+	  ,ITC_CRRC_FUND_TRD_QTY_MTD	= 		0								--场内货币基金交易量_月累计		
+	  ,ITC_CRRC_FUND_TRD_QTY_YTD	= 		0								--场内货币基金交易量_年累计		
+	  ,S_REPUR_NET_CMS_MTD  		= 		0								--正回购净佣金_月累计		
+	  ,S_REPUR_NET_CMS_YTD  		= 		0								--正回购净佣金_年累计		
+	  ,R_REPUR_NET_CMS_MTD  		= 		0								--逆回购净佣金_月累计		
+	  ,R_REPUR_NET_CMS_YTD  		= 		0								--逆回购净佣金_年累计		
+	  ,ITC_CRRC_FUND_NET_CMS_MTD	= 		0								--场内货币基金净佣金_月累计		
+	  ,ITC_CRRC_FUND_NET_CMS_YTD	= 		0								--场内货币基金净佣金_年累计		
+	  */
+	 FROM DM.T_EVT_CUS_TRD_M_D T1
+	 LEFT JOIN #TEMP_A T2
+	 	ON T1.YEAR = T2.YEAR
+	 		AND T1.MTH = T2.MTH
+	 		AND T1.CUST_ID = T2.CUST_ID
+	 LEFT JOIN #TEMP_B T3
+	 	ON T1.YEAR = T3.YEAR
+	 		AND T1.MTH = T3.MTH
+	 		AND T1.CUST_ID = T3.CUST_ID
+	WHERE T1.OCCUR_DT=@V_BIN_DATE;
+
+
+
+  --近12个月股票交易量
+  UPDATE DM.T_EVT_CUS_TRD_M_D
+  SET  y_rct_stk_trd_qty = coalesce(b.gpjyl_12ylj, 0)	+ coalesce(c.pt_gpjyl_12ylj,0) + coalesce(c.xy_gpjyl_12ylj,0)
+  FROM DM.T_EVT_CUS_TRD_M_D a
+  LEFT JOIN (
+		select a1.fund_acct as zjzh,
+		    sum(a1.trad_amt * a2.turn_rmb) as gpjyl_12ylj
+		FROM    DBA.T_EDW_T05_TRADE_JOUR           a1
+			  LEFT JOIN DBA.T_EDW_T06_YEAR_EXCHANGE_RATE a2
+			  ON      a1.occur_dt BETWEEN a2.star_dt AND a2.end_dt
+			  AND     a2.curr_type_cd = CASE
+			                                 WHEN a1.stock_type_cd='18' AND a1.market_type_cd = '05' THEN 'USD'
+			                                 WHEN a1.stock_type_cd='17' THEN 'USD'
+			                                 WHEN a1.stock_type_cd='18' THEN 'HKD'
+			                                 ELSE 'CNY'
+			                            END
+		 WHERE   a1.occur_dt BETWEEN @V_CORR_BGNDAY_LASTYEAR AND @V_BIN_DATE
+		AND   busi_type_cd IN ('3101','3102','3701','3703')
+		and a1.stock_type_cd in ('10','17','18','A1','35') and market_type_cd in ('01','02','03','04','05','0G','0S')	--2016-11-18 新增深港通业务
+		group by a1.fund_acct
+  ) b ON a.main_cptl_acct = b.zjzh
+  left join (
+  	  SELECT client_id
+			  ,sum(case when business_flag in ( 4001, 4002) then business_balance else 0 end) as pt_gpjyl_12ylj
+			,sum(case when  business_flag in ( 4211, 4212, 4213, 4214, 4215, 4216) then business_balance else 0 end) as xy_gpjyl_12ylj
+	  FROM  DBA.T_EDW_RZRQ_HISDELIVER
+	  WHERE load_dt BETWEEN @V_CORR_BGNDAY_LASTYEAR AND @V_BIN_DATE
+	  AND stock_type in ('0','c')	--普通股票、创业板
+	  GROUP BY client_id
+  ) c on a.cust_id=c.client_id
+  WHERE a.OCCUR_DT=@V_BIN_DATE;
+  
+
 END
+GO
+GRANT EXECUTE ON dm.P_EVT_CUS_TRD_M_D TO query_dev
 GO
 CREATE PROCEDURE dm.P_EVT_CUST_OACT_FEE(IN @V_BIN_DATE INT,OUT @V_OUT_FLAG  INT)
 BEGIN 
@@ -7187,6 +9050,1395 @@ GO
 GRANT EXECUTE ON dm.P_EVT_CUST_OACT_FEE TO query_dev
 GO
 GRANT EXECUTE ON dm.P_EVT_CUST_OACT_FEE TO xydc
+GO
+CREATE PROCEDURE dm.P_EVT_EMP_BIS_M(IN @V_BIN_DATE INT)
+
+
+BEGIN 
+  
+  /******************************************************************
+  程序功能: 创建员工业务数据月表:带权责
+  编写者: YHB
+  创建日期: 2018-04-27
+  简介：员工业务数据月表
+  *********************************************************************/
+  	DECLARE @V_YEAR VARCHAR(4);		-- 年份
+  	DECLARE @V_MONTH VARCHAR(2);	-- 月份
+	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
+	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+
+
+	--PART0 删除当月数据
+  DELETE FROM DM.T_EVT_EMP_BIS_M WHERE YEAR=@V_YEAR AND MTH=@V_MONTH;
+
+  insert into DM.T_EVT_EMP_BIS_M
+	(
+	YEAR
+     ,MTH
+     ,YEAR_MTH
+     ,ORG_NO
+     ,AFA_SEC_EMPID
+     ,CUST_STAT
+     ,IF_SPCA_ACC
+     ,IF_PROD_NEW_CUST
+     ,IF_MTH_NA
+     ,IF_YEAR_NA
+     ,IF_CREDIT_CUST
+     ,IF_CREDIT_MTH_NA
+     ,IF_CREDIT_YEAR_NA
+     ,IF_CREDIT_EFF_CUST
+     ,IF_CREDIT_MTH_NA_EFF_ACT
+     ,IF_CREDIT_YEAR_NA_EFF_ACT
+     ,AST_SGMTS
+     ,CUST_TYPE
+     ,CUST_NUM
+     ,EFF_CUST_NUM
+     ,CREDIT_CUST_NUM
+     ,CREDIT_EFF_CUST_NUM
+     ,ODIAST_SCDY_MVAL_FINAL
+     ,ODIAST_STKF_MVAL_FINAL
+     ,ODIAST_A_SHR_MVAL_FINAL
+     ,ODIAST_NOTS_MVAL_FINAL
+     ,ODIAST_OFFUND_MVAL_FINAL
+     ,ODIAST_OPFUND_MVAL_FINAL
+     ,ODIAST_SB_MVAL_FINAL
+     ,ODIAST_IMGT_PD_MVAL_FINAL
+     ,ODIAST_BANK_CHRM_MVAL_FINAL
+     ,ODIAST_SECU_CHRM_MVAL_FINAL
+     ,ODIAST_PSTK_OPTN_MVAL_FINAL
+     ,ODIAST_B_SHR_MVAL_FINAL
+     ,ODIAST_OUTMARK_MVAL_FINAL
+     ,ODIAST_CPTL_BAL_FINAL
+     ,ODIAST_NO_ARVD_CPTL_FINAL
+     ,ODIAST_PTE_FUND_MVAL_FINAL
+     ,ODIAST_OVERSEA_TOTAST_FINAL
+     ,ODIAST_FUTR_TOTAST_FINAL
+     ,ODIAST_CPTL_BAL_RMB_FINAL
+     ,ODIAST_CPTL_BAL_HKD_FINAL
+     ,ODIAST_CPTL_BAL_USD_FINAL
+     ,ODIAST_LOW_RISK_TOTAST_FINAL
+     ,ODIAST_FUND_SPACCT_MVAL_FINAL
+     ,ODIAST_HGT_MVAL_FINAL
+     ,ODIAST_SGT_MVAL_FINAL
+     ,ODIAST_NET_AST_FINAL
+     ,ODIAST_TOTAST_CONTAIN_NOTS_FINAL
+     ,ODIAST_TOTAST_N_CONTAIN_NOTS_FINAL
+     ,ODIAST_BOND_MVAL_FINAL
+     ,ODIAST_REPO_MVAL_FINAL
+     ,ODIAST_TREA_REPO_MVAL_FINAL
+     ,ODIAST_REPQ_MVAL_FINAL
+     ,ODIAST_SCDY_MVAL_MDA
+     ,ODIAST_STKF_MVAL_MDA
+     ,ODIAST_A_SHR_MVAL_MDA
+     ,ODIAST_NOTS_MVAL_MDA
+     ,ODIAST_OFFUND_MVAL_MDA
+     ,ODIAST_OPFUND_MVAL_MDA
+     ,ODIAST_SB_MVAL_MDA
+     ,ODIAST_IMGT_PD_MVAL_MDA
+     ,ODIAST_BANK_CHRM_MVAL_MDA
+     ,ODIAST_SECU_CHRM_MVAL_MDA
+     ,ODIAST_PSTK_OPTN_MVAL_MDA
+     ,ODIAST_B_SHR_MVAL_MDA
+     ,ODIAST_OUTMARK_MVAL_MDA
+     ,ODIAST_CPTL_BAL_MDA
+     ,ODIAST_NO_ARVD_CPTL_MDA
+     ,ODIAST_PTE_FUND_MVAL_MDA
+     ,ODIAST_OVERSEA_TOTAST_MDA
+     ,ODIAST_FUTR_TOTAST_MDA
+     ,ODIAST_CPTL_BAL_RMB_MDA
+     ,ODIAST_CPTL_BAL_HKD_MDA
+     ,ODIAST_CPTL_BAL_USD_MDA
+     ,ODIAST_LOW_RISK_TOTAST_MDA
+     ,ODIAST_FUND_SPACCT_MVAL_MDA
+     ,ODIAST_HGT_MVAL_MDA
+     ,ODIAST_SGT_MVAL_MDA
+     ,ODIAST_NET_AST_MDA
+     ,ODIAST_TOTAST_CONTAIN_NOTS_MDA
+     ,ODIAST_TOTAST_N_CONTAIN_NOTS_MDA
+     ,ODIAST_BOND_MVAL_MDA
+     ,ODIAST_REPO_MVAL_MDA
+     ,ODIAST_TREA_REPO_MVAL_MDA
+     ,ODIAST_REPQ_MVAL_MDA
+     ,ODIAST_SCDY_MVAL_YDA
+     ,ODIAST_STKF_MVAL_YDA
+     ,ODIAST_A_SHR_MVAL_YDA
+     ,ODIAST_NOTS_MVAL_YDA
+     ,ODIAST_OFFUND_MVAL_YDA
+     ,ODIAST_OPFUND_MVAL_YDA
+     ,ODIAST_SB_MVAL_YDA
+     ,ODIAST_IMGT_PD_MVAL_YDA
+     ,ODIAST_BANK_CHRM_MVAL_YDA
+     ,ODIAST_SECU_CHRM_MVAL_YDA
+     ,ODIAST_PSTK_OPTN_MVAL_YDA
+     ,ODIAST_B_SHR_MVAL_YDA
+     ,ODIAST_OUTMARK_MVAL_YDA
+     ,ODIAST_CPTL_BAL_YDA
+     ,ODIAST_NO_ARVD_CPTL_YDA
+     ,ODIAST_PTE_FUND_MVAL_YDA
+     ,ODIAST_OVERSEA_TOTAST_YDA
+     ,ODIAST_FUTR_TOTAST_YDA
+     ,ODIAST_CPTL_BAL_RMB_YDA
+     ,ODIAST_CPTL_BAL_HKD_YDA
+     ,ODIAST_CPTL_BAL_USD_YDA
+     ,ODIAST_LOW_RISK_TOTAST_YDA
+     ,ODIAST_FUND_SPACCT_MVAL_YDA
+     ,ODIAST_HGT_MVAL_YDA
+     ,ODIAST_SGT_MVAL_YDA
+     ,ODIAST_NET_AST_YDA
+     ,ODIAST_TOTAST_CONTAIN_NOTS_YDA
+     ,ODIAST_TOTAST_N_CONTAIN_NOTS_YDA
+     ,ODIAST_BOND_MVAL_YDA
+     ,ODIAST_REPO_MVAL_YDA
+     ,ODIAST_TREA_REPO_MVAL_YDA
+     ,ODIAST_REPQ_MVAL_YDA
+     ,ODIAST_PO_FUND_MVAL_FINAL
+     ,ODIAST_PO_FUND_MVAL_MDA
+     ,ODIAST_PO_FUND_MVAL_YDA
+     ,ODIAST_STKT_FUND_MVAL_FINAL
+     ,ODIAST_OTH_PROD_MVAL_FINAL
+     ,ODIAST_OTH_AST_MVAL_FINAL
+     ,ODIAST_APPTBUYB_PLG_MVAL_FINAL
+     ,ODIAST_STKT_FUND_MVAL_MDA
+     ,ODIAST_OTH_PROD_MVAL_MDA
+     ,ODIAST_OTH_AST_MVAL_MDA
+     ,ODIAST_APPTBUYB_PLG_MVAL_MDA
+     ,ODIAST_STKT_FUND_MVAL_YDA
+     ,ODIAST_OTH_PROD_MVAL_YDA
+     ,ODIAST_OTH_AST_MVAL_YDA
+     ,ODIAST_APPTBUYB_PLG_MVAL_YDA
+     ,ODIAST_CREDIT_NET_AST_FINAL
+     ,ODIAST_CREDIT_MARG_FINAL
+     ,ODIAST_CREDIT_BAL_FINAL
+     ,ODIAST_CREDIT_NET_AST_MDA
+     ,ODIAST_CREDIT_MARG_MDA
+     ,ODIAST_CREDIT_BAL_MDA
+     ,ODIAST_CREDIT_NET_AST_YDA
+     ,ODIAST_CREDIT_MARG_YDA
+     ,ODIAST_CREDIT_BAL_YDA
+     ,ODIAST_PROD_TOT_MVAL_FINAL
+     ,ODIAST_PROD_TOT_MVAL_MDA
+     ,ODIAST_PROD_TOT_MVAL_YDA
+     ,ODIAST_TOTAST_FINAL
+     ,ODIAST_TOTAST_MDA
+     ,ODIAST_TOTAST_YDA
+     ,ODIAST_STKPLG_GUAR_SECMV_FINAL_SCDY_DEDUCT
+     ,ODIAST_STKPLG_GUAR_SECMV_MDA_SCDY_DEDUCT
+     ,ODIAST_STKPLG_GUAR_SECMV_YDA_SCDY_DEDUCT
+     ,ODIAST_STKPLG_LIAB_FINAL
+     ,ODIAST_STKPLG_LIAB_MDA
+     ,ODIAST_STKPLG_LIAB_YDA
+     ,ODIAST_CREDIT_TOT_LIAB_FINAL
+     ,ODIAST_CREDIT_TOT_LIAB_MDA
+     ,ODIAST_CREDIT_TOT_LIAB_YDA
+     ,ODIAST_APPTBUYB_BAL_FINAL
+     ,ODIAST_APPTBUYB_BAL_MDA
+     ,ODIAST_APPTBUYB_BAL_YDA
+     ,ODIAST_CREDIT_TOTAST_FINAL
+     ,ODIAST_CREDIT_TOTAST_MDA
+     ,ODIAST_CREDIT_TOTAST_YDA
+     ,ODIAST_STKPLG_GUAR_SECMV_FINAL
+     ,ODIAST_STKPLG_GUAR_SECMV_MDA
+     ,ODIAST_STKPLG_GUAR_SECMV_YDA
+     ,CREDIT_TOT_LIAB_FINAL
+     ,CREDIT_NET_AST_FINAL
+     ,CREDIT_CRED_MARG_FINAL
+     ,CREDIT_GUAR_SECMV_FINAL
+     ,CREDIT_FIN_LIAB_FINAL
+     ,CREDIT_CRDT_STK_LIAB_FINAL
+     ,CREDIT_INTR_LIAB_FINAL
+     ,CREDIT_FEE_LIAB_FINAL
+     ,CREDIT_OTHLIAB_FINAL
+     ,CREDIT_TOTAST_FINAL
+     ,CREDIT_A_SHR_MVAL_FINAL
+     ,CREDIT_TOT_LIAB_MDA
+     ,CREDIT_NET_AST_MDA
+     ,CREDIT_CRED_MARG_MDA
+     ,CREDIT_GUAR_SECMV_MDA
+     ,CREDIT_FIN_LIAB_MDA
+     ,CREDIT_CRDT_STK_LIAB_MDA
+     ,CREDIT_INTR_LIAB_MDA
+     ,CREDIT_FEE_LIAB_MDA
+     ,CREDIT_OTHLIAB_MDA
+     ,CREDIT_TOTAST_MDA
+     ,CREDIT_A_SHR_MVAL_MDA
+     ,CREDIT_TOT_LIAB_YDA
+     ,CREDIT_NET_AST_YDA
+     ,CREDIT_CRED_MARG_YDA
+     ,CREDIT_GUAR_SECMV_YDA
+     ,CREDIT_FIN_LIAB_YDA
+     ,CREDIT_CRDT_STK_LIAB_YDA
+     ,CREDIT_INTR_LIAB_YDA
+     ,CREDIT_FEE_LIAB_YDA
+     ,CREDIT_OTHLIAB_YDA
+     ,CREDIT_TOTAST_YDA
+     ,CREDIT_A_SHR_MVAL_YDA
+     ,ASTCHG_ODI_CPTL_INFLOW_MTD
+     ,ASTCHG_ODI_CPTL_OUTFLOW_MTD
+     ,ASTCHG_ODI_MVAL_INFLOW_MTD
+     ,ASTCHG_ODI_MVAL_OUTFLOW_MTD
+     ,ASTCHG_CREDIT_CPTL_INFLOW_MTD
+     ,ASTCHG_CREDIT_CPTL_OUTFLOW_MTD
+     ,ASTCHG_ODI_ACC_CPTL_NET_INFLOW_MTD
+     ,ASTCHG_CREDIT_CPTL_NET_INFLOW_MTD
+     ,ASTCHG_ODI_CPTL_INFLOW_YTD
+     ,ASTCHG_ODI_CPTL_OUTFLOW_YTD
+     ,ASTCHG_ODI_MVAL_INFLOW_YTD
+     ,ASTCHG_ODI_MVAL_OUTFLOW_YTD
+     ,ASTCHG_CREDIT_CPTL_INFLOW_YTD
+     ,ASTCHG_CREDIT_CPTL_OUTFLOW_YTD
+     ,ASTCHG_ODI_ACC_CPTL_NET_INFLOW_YTD
+     ,ASTCHG_CREDIT_CPTL_NET_INFLOW_YTD
+     ,ODI_INCM_PB_TRD_CMS_MTD
+     ,ODI_INCM_MARG_SPR_INCM_MTD
+     ,ODI_INCM_PB_TRD_CMS_YTD
+     ,ODI_INCM_MARG_SPR_INCM_YTD
+     ,ODI_INCM_GROSS_CMS_MTD
+     ,ODI_INCM_TRAN_FEE_MTD
+     ,ODI_INCM_SCDY_TRAN_FEE_MTD
+     ,ODI_INCM_STP_TAX_MTD
+     ,ODI_INCM_HANDLE_FEE_MTD
+     ,ODI_INCM_SEC_RGLT_FEE_MTD
+     ,ODI_INCM_OTH_FEE_MTD
+     ,ODI_INCM_STKF_CMS_MTD
+     ,ODI_INCM_STKF_TRAN_FEE_MTD
+     ,ODI_INCM_STKF_NET_CMS_MTD
+     ,ODI_INCM_BOND_CMS_MTD
+     ,ODI_INCM_BOND_NET_CMS_MTD
+     ,ODI_INCM_REPQ_CMS_MTD
+     ,ODI_INCM_REPQ_NET_CMS_MTD
+     ,ODI_INCM_HGT_CMS_MTD
+     ,ODI_INCM_HGT_NET_CMS_MTD
+     ,ODI_INCM_HGT_TRAN_FEE_MTD
+     ,ODI_INCM_SGT_CMS_MTD
+     ,ODI_INCM_SGT_NET_CMS_MTD
+     ,ODI_INCM_SGT_TRAN_FEE_MTD
+     ,ODI_INCM_BGDL_CMS_MTD
+     ,ODI_INCM_NET_CMS_MTD
+     ,ODI_INCM_BGDL_NET_CMS_MTD
+     ,ODI_INCM_BGDL_TRAN_FEE_MTD
+     ,ODI_INCM_PSTK_OPTN_CMS_MTD
+     ,ODI_INCM_PSTK_OPTN_NET_CMS_MTD
+     ,ODI_INCM_SCDY_CMS_MTD
+     ,ODI_INCM_SCDY_NET_CMS_MTD
+     ,ODI_INCM_GROSS_CMS_YTD
+     ,ODI_INCM_TRAN_FEE_YTD
+     ,ODI_INCM_SCDY_TRAN_FEE_YTD
+     ,ODI_INCM_STP_TAX_YTD
+     ,ODI_INCM_HANDLE_FEE_YTD
+     ,ODI_INCM_SEC_RGLT_FEE_YTD
+     ,ODI_INCM_OTH_FEE_YTD
+     ,ODI_INCM_STKF_CMS_YTD
+     ,ODI_INCM_STKF_TRAN_FEE_YTD
+     ,ODI_INCM_STKF_NET_CMS_YTD
+     ,ODI_INCM_BOND_CMS_YTD
+     ,ODI_INCM_BOND_NET_CMS_YTD
+     ,ODI_INCM_REPQ_CMS_YTD
+     ,ODI_INCM_REPQ_NET_CMS_YTD
+     ,ODI_INCM_HGT_CMS_YTD
+     ,ODI_INCM_HGT_NET_CMS_YTD
+     ,ODI_INCM_HGT_TRAN_FEE_YTD
+     ,ODI_INCM_SGT_CMS_YTD
+     ,ODI_INCM_SGT_NET_CMS_YTD
+     ,ODI_INCM_SGT_TRAN_FEE_YTD
+     ,ODI_INCM_BGDL_CMS_YTD
+     ,ODI_INCM_NET_CMS_YTD
+     ,ODI_INCM_BGDL_NET_CMS_YTD
+     ,ODI_INCM_BGDL_TRAN_FEE_YTD
+     ,ODI_INCM_PSTK_OPTN_CMS_YTD
+     ,ODI_INCM_PSTK_OPTN_NET_CMS_YTD
+     ,ODI_INCM_SCDY_CMS_YTD
+     ,ODI_INCM_SCDY_NET_CMS_YTD
+     ,CRED_INCM_CREDIT_MARG_SPR_INCM_YTD
+     ,CRED_INCM_CREDIT_MARG_SPR_INCM_MTD
+     ,CRED_INCM_GROSS_CMS_MTD
+     ,CRED_INCM_NET_CMS_MTD
+     ,CRED_INCM_TRAN_FEE_MTD
+     ,CRED_INCM_STP_TAX_MTD
+     ,CRED_INCM_ORDR_FEE_MTD
+     ,CRED_INCM_HANDLE_FEE_MTD
+     ,CRED_INCM_SEC_RGLT_FEE_MTD
+     ,CRED_INCM_OTH_FEE_MTD
+     ,CRED_INCM_CREDIT_ODI_CMS_MTD
+     ,CRED_INCM_CREDIT_ODI_NET_CMS_MTD
+     ,CRED_INCM_CREDIT_ODI_TRAN_FEE_MTD
+     ,CRED_INCM_CREDIT_CRED_CMS_MTD
+     ,CRED_INCM_CREDIT_CRED_NET_CMS_MTD
+     ,CRED_INCM_CREDIT_CRED_TRAN_FEE_MTD
+     ,CRED_INCM_STKPLG_CMS_MTD
+     ,CRED_INCM_STKPLG_NET_CMS_MTD
+     ,CRED_INCM_STKPLG_PAIDINT_MTD
+     ,CRED_INCM_STKPLG_RECE_INT_MTD
+     ,CRED_INCM_APPTBUYB_CMS_MTD
+     ,CRED_INCM_APPTBUYB_NET_CMS_MTD
+     ,CRED_INCM_APPTBUYB_PAIDINT_MTD
+     ,CRED_INCM_FIN_PAIDINT_MTD
+     ,CRED_INCM_FIN_IE_MTD
+     ,CRED_INCM_CRDT_STK_IE_MTD
+     ,CRED_INCM_OTH_IE_MTD
+     ,CRED_INCM_FIN_RECE_INT_MTD
+     ,CRED_INCM_FEE_RECE_INT_MTD
+     ,CRED_INCM_OTH_RECE_INT_MTD
+     ,CRED_INCM_CREDIT_CPTL_COST_MTD
+     ,CRED_INCM_GROSS_CMS_YTD
+     ,CRED_INCM_NET_CMS_YTD
+     ,CRED_INCM_TRAN_FEE_YTD
+     ,CRED_INCM_STP_TAX_YTD
+     ,CRED_INCM_ORDR_FEE_YTD
+     ,CRED_INCM_HANDLE_FEE_YTD
+     ,CRED_INCM_SEC_RGLT_FEE_YTD
+     ,CRED_INCM_OTH_FEE_YTD
+     ,CRED_INCM_CREDIT_ODI_CMS_YTD
+     ,CRED_INCM_CREDIT_ODI_NET_CMS_YTD
+     ,CRED_INCM_CREDIT_ODI_TRAN_FEE_YTD
+     ,CRED_INCM_CREDIT_CRED_CMS_YTD
+     ,CRED_INCM_CREDIT_CRED_NET_CMS_YTD
+     ,CRED_INCM_CREDIT_CRED_TRAN_FEE_YTD
+     ,CRED_INCM_STKPLG_CMS_YTD
+     ,CRED_INCM_STKPLG_NET_CMS_YTD
+     ,CRED_INCM_STKPLG_PAIDINT_YTD
+     ,CRED_INCM_STKPLG_RECE_INT_YTD
+     ,CRED_INCM_APPTBUYB_CMS_YTD
+     ,CRED_INCM_APPTBUYB_NET_CMS_YTD
+     ,CRED_INCM_APPTBUYB_PAIDINT_YTD
+     ,CRED_INCM_FIN_PAIDINT_YTD
+     ,CRED_INCM_FIN_IE_YTD
+     ,CRED_INCM_CRDT_STK_IE_YTD
+     ,CRED_INCM_OTH_IE_YTD
+     ,CRED_INCM_FIN_RECE_INT_YTD
+     ,CRED_INCM_FEE_RECE_INT_YTD
+     ,CRED_INCM_OTH_RECE_INT_YTD
+     ,CRED_INCM_CREDIT_CPTL_COST_YTD
+     ,APPTBUYB_GUAR_SECMV_FINAL
+     ,APPTBUYB_APPTBUYB_BAL_FINAL
+     ,APPTBUYB_SH_GUAR_SECMV_FINAL
+     ,APPTBUYB_SZ_GUAR_SECMV_FINAL
+     ,APPTBUYB_SH_NOTS_GUAR_SECMV_FINAL
+     ,APPTBUYB_SZ_NOTS_GUAR_SECMV_FINAL
+     ,APPTBUYB_PROP_FINOS_BAL_FINAL
+     ,APPTBUYB_ASSM_FINOS_BAL_FINAL
+     ,APPTBUYB_SM_LOAN_FINO_BAL_FINAL
+     ,APPTBUYB_GUAR_SECMV_MDA
+     ,APPTBUYB_APPTBUYB_BAL_MDA
+     ,APPTBUYB_SH_GUAR_SECMV_MDA
+     ,APPTBUYB_SZ_GUAR_SECMV_MDA
+     ,APPTBUYB_SH_NOTS_GUAR_SECMV_MDA
+     ,APPTBUYB_SZ_NOTS_GUAR_SECMV_MDA
+     ,APPTBUYB_PROP_FINOS_BAL_MDA
+     ,APPTBUYB_ASSM_FINOS_BAL_MDA
+     ,APPTBUYB_SM_LOAN_FINO_BAL_MDA
+     ,APPTBUYB_GUAR_SECMV_YDA
+     ,APPTBUYB_APPTBUYB_BAL_YDA
+     ,APPTBUYB_SH_GUAR_SECMV_YDA
+     ,APPTBUYB_SZ_GUAR_SECMV_YDA
+     ,APPTBUYB_SH_NOTS_GUAR_SECMV_YDA
+     ,APPTBUYB_SZ_NOTS_GUAR_SECMV_YDA
+     ,APPTBUYB_PROP_FINOS_BAL_YDA
+     ,APPTBUYB_ASSM_FINOS_BAL_YDA
+     ,APPTBUYB_SM_LOAN_FINO_BAL_YDA
+     ,STKPLG_GUAR_SECMV_FINAL
+     ,STKPLG_STKPLG_FIN_BAL_FINAL
+     ,STKPLG_SH_GUAR_SECMV_FINAL
+     ,STKPLG_SZ_GUAR_SECMV_FINAL
+     ,STKPLG_SH_NOTS_GUAR_SECMV_FINAL
+     ,STKPLG_SZ_NOTS_GUAR_SECMV_FINAL
+     ,STKPLG_PROP_FINOS_BAL_FINAL
+     ,STKPLG_ASSM_FINOS_BAL_FINAL
+     ,STKPLG_SM_LOAN_FINO_BAL_FINAL
+     ,STKPLG_GUAR_SECMV_MDA
+     ,STKPLG_STKPLG_FIN_BAL_MDA
+     ,STKPLG_SH_GUAR_SECMV_MDA
+     ,STKPLG_SZ_GUAR_SECMV_MDA
+     ,STKPLG_SH_NOTS_GUAR_SECMV_MDA
+     ,STKPLG_SZ_NOTS_GUAR_SECMV_MDA
+     ,STKPLG_PROP_FINOS_BAL_MDA
+     ,STKPLG_ASSM_FINOS_BAL_MDA
+     ,STKPLG_SM_LOAN_FINO_BAL_MDA
+     ,STKPLG_GUAR_SECMV_YDA
+     ,STKPLG_STKPLG_FIN_BAL_YDA
+     ,STKPLG_SH_GUAR_SECMV_YDA
+     ,STKPLG_SZ_GUAR_SECMV_YDA
+     ,STKPLG_SH_NOTS_GUAR_SECMV_YDA
+     ,STKPLG_SZ_NOTS_GUAR_SECMV_YDA
+     ,STKPLG_PROP_FINOS_BAL_YDA
+     ,STKPLG_ASSM_FINOS_BAL_YDA
+     ,STKPLG_SM_LOAN_FINO_BAL_YDA
+     ,ODI_TRD_SCDY_TRD_FREQ_MTD
+     ,ODI_TRD_SCDY_TRD_QTY_MTD
+     ,ODI_TRD_SCDY_TRD_QTY_YTD
+     ,ODI_TRD_TRD_FREQ_YTD
+     ,ODI_TRD_STKF_TRD_QTY_MTD
+     ,ODI_TRD_STKF_TRD_QTY_YTD
+     ,ODI_TRD_S_REPUR_TRD_QTY_MTD
+     ,ODI_TRD_R_REPUR_TRD_QTY_MTD
+     ,ODI_TRD_S_REPUR_TRD_QTY_YTD
+     ,ODI_TRD_R_REPUR_TRD_QTY_YTD
+     ,ODI_TRD_HGT_TRD_QTY_MTD
+     ,ODI_TRD_SGT_TRD_QTY_MTD
+     ,ODI_TRD_SGT_TRD_QTY_YTD
+     ,ODI_TRD_HGT_TRD_QTY_YTD
+     ,ODI_TRD_Y_RCT_STK_TRD_QTY
+     ,ODI_TRD_SCDY_TRD_FREQ_YTD
+     ,ODI_TRD_TRD_FREQ_MTD
+     ,ODI_TRD_APPTBUYB_TRD_QTY_MTD
+     ,ODI_TRD_APPTBUYB_TRD_QTY_YTD
+     ,ODI_TRD_RCT_TRD_DT_M
+     ,ODI_TRD_STKPLG_TRD_QTY_MTD
+     ,ODI_TRD_STKPLG_TRD_QTY_YTD
+     ,ODI_TRD_PSTK_OPTN_TRD_QTY_MTD
+     ,ODI_TRD_PSTK_OPTN_TRD_QTY_YTD
+     ,ODI_TRD_REPQ_TRD_QTY_MTD
+     ,ODI_TRD_REPQ_TRD_QTY_YTD
+     ,ODI_TRD_BGDL_QTY_MTD
+     ,ODI_TRD_BGDL_QTY_YTD
+     ,CREDIT_CRED_QUO
+     ,APPTBUYB_CRED_QUO
+     ,STKPLG_CRED_QUO
+     ,LOAD_DT
+     ,ODI_TRD_SB_TRD_QTY_MTD
+     ,ODI_TRD_SB_TRD_QTY_YTD
+     ,ODI_TRD_BOND_TRD_QTY_MTD
+     ,ODI_TRD_BOND_TRD_QTY_YTD
+     ,ODI_TRD_ITC_CRRC_FUND_TRD_QTY_MTD
+     ,ODI_TRD_ITC_CRRC_FUND_TRD_QTY_YTD
+     ,ODI_TRD_S_REPUR_NET_CMS_MTD
+     ,ODI_TRD_S_REPUR_NET_CMS_YTD
+     ,ODI_TRD_R_REPUR_NET_CMS_MTD
+     ,ODI_TRD_R_REPUR_NET_CMS_YTD
+     ,ODI_TRD_ITC_CRRC_FUND_NET_CMS_MTD
+     ,ODI_TRD_ITC_CRRC_FUND_NET_CMS_YTD 
+	)
+	select
+	t1.YEAR as 年
+	,t1.MTH as 月
+	,t1.YEAR||t1.MTH as 年月
+	,t_jg.WH_ORG_ID as 机构编号	
+	,t1.AFA_SEC_EMPID as AFA二期员工号
+	
+	--维度信息
+	,t_khsx.客户状态
+	,t_khsx.是否特殊账户
+	,t_khsx.是否产品新客户
+	,t_khsx.是否月新增
+	,t_khsx.是否年新增	
+	,t_khsx.是否融资融券客户
+	,t_khsx.是否融资融券月新增
+	,t_khsx.是否融资融券年新增
+	,t_khsx.是否融资融券有效客户
+	,t_khsx.是否融资融券月新增有效户
+	,t_khsx.是否融资融券年新增有效户
+	,t_khsx.资产段
+	,t_khsx.客户类型	
+	
+	,sum(case when t_khsx.客户状态='0' then t2.JXBL1 else 0 end) as 客户数
+	,sum(case when t_khsx.客户状态='0' and t_khsx.是否有效=1 then t2.JXBL1 else 0 end) as 有效客户数
+	,sum(case when t_khsx.客户状态='0' and t_khsx.是否融资融券客户=1 then t2.JXBL9 else 0 end) as 融资融券_客户数
+	,sum(case when t_khsx.客户状态='0' and t_khsx.是否融资融券客户=1 and t_khsx.是否融资融券有效客户=1 then t2.JXBL9 else 0 end) as 融资融券_有效客户数
+	
+	--普通资产
+	,sum(COALESCE(t1.SCDY_MVAL_FINAL,0)) as 普通资产_二级市值_期末
+	,sum(COALESCE(t1.STKF_MVAL_FINAL,0)) as 普通资产_股基市值_期末
+	,sum(COALESCE(t1.A_SHR_MVAL_FINAL,0)) as 普通资产_A股市值_期末
+	,sum(COALESCE(t1.NOTS_MVAL_FINAL,0)) as 普通资产_限售股市值_期末
+	,sum(COALESCE(t1.OFFUND_MVAL_FINAL,0)) as 普通资产_场内基金市值_期末
+	,sum(COALESCE(t1.OPFUND_MVAL_FINAL,0)) as 普通资产_场外基金市值_期末
+	,sum(COALESCE(t1.SB_MVAL_FINAL,0)) as 普通资产_三板市值_期末
+	,sum(COALESCE(t1.IMGT_PD_MVAL_FINAL,0)) as 普通资产_资管产品市值_期末
+	,sum(COALESCE(t1.BANK_CHRM_MVAL_FINAL,0)) as 普通资产_银行理财市值_期末
+	,sum(COALESCE(t1.SECU_CHRM_MVAL_FINAL,0)) as 普通资产_证券理财市值_期末
+	,sum(COALESCE(t1.PSTK_OPTN_MVAL_FINAL,0)) as 普通资产_个股期权市值_期末
+	,sum(COALESCE(t1.B_SHR_MVAL_FINAL,0)) as 普通资产_B股市值_期末
+	,sum(COALESCE(t1.OUTMARK_MVAL_FINAL,0)) as 普通资产_体外市值_期末
+	,sum(COALESCE(t1.CPTL_BAL_FINAL,0)) as 普通资产_资金余额_期末
+	,sum(COALESCE(t1.NO_ARVD_CPTL_FINAL,0)) as 普通资产_未到账资金_期末
+	,sum(COALESCE(t1.PTE_FUND_MVAL_FINAL,0)) as 普通资产_私募基金市值_期末
+	,sum(COALESCE(t1.OVERSEA_TOT_AST_FINAL,0)) as 普通资产_海外总资产_期末
+	,sum(COALESCE(t1.FUTR_TOT_AST_FINAL,0)) as 普通资产_期货总资产_期末
+	,sum(COALESCE(t1.CPTL_BAL_RMB_FINAL,0)) as 普通资产_资金余额人民币_期末
+	,sum(COALESCE(t1.CPTL_BAL_HKD_FINAL,0)) as 普通资产_资金余额港币_期末
+	,sum(COALESCE(t1.CPTL_BAL_USD_FINAL,0)) as 普通资产_资金余额美元_期末
+	,sum(COALESCE(t1.LOW_RISK_TOT_AST_FINAL,0)) as 普通资产_低风险总资产_期末
+	,sum(COALESCE(t1.FUND_SPACCT_MVAL_FINAL,0)) as 普通资产_基金专户市值_期末
+	,sum(COALESCE(t1.HGT_MVAL_FINAL,0)) as 普通资产_沪港通市值_期末
+	,sum(COALESCE(t1.SGT_MVAL_FINAL,0)) as 普通资产_深港通市值_期末
+	,sum(COALESCE(t1.NET_AST_FINAL,0)) as 普通资产_净资产_期末
+	,sum(COALESCE(t1.TOT_AST_CONTAIN_NOTS_FINAL,0)) as 普通资产_总资产_含限售股_期末
+	,sum(COALESCE(t1.TOT_AST_N_CONTAIN_NOTS_FINAL,0)) as 普通资产_总资产_不含限售股_期末
+	,sum(COALESCE(t1.BOND_MVAL_FINAL,0)) as 普通资产_债券市值_期末
+	,sum(COALESCE(t1.REPO_MVAL_FINAL,0)) as 普通资产_回购市值_期末
+	,sum(COALESCE(t1.TREA_REPO_MVAL_FINAL,0)) as 普通资产_国债回购市值_期末
+	,sum(COALESCE(t1.REPQ_MVAL_FINAL,0)) as 普通资产_报价回购市值_期末
+	,sum(COALESCE(t1.SCDY_MVAL_MDA,0)) as 普通资产_二级市值_月日均
+	,sum(COALESCE(t1.STKF_MVAL_MDA,0)) as 普通资产_股基市值_月日均
+	,sum(COALESCE(t1.A_SHR_MVAL_MDA,0)) as 普通资产_A股市值_月日均
+	,sum(COALESCE(t1.NOTS_MVAL_MDA,0)) as 普通资产_限售股市值_月日均
+	,sum(COALESCE(t1.OFFUND_MVAL_MDA,0)) as 普通资产_场内基金市值_月日均
+	,sum(COALESCE(t1.OPFUND_MVAL_MDA,0)) as 普通资产_场外基金市值_月日均
+	,sum(COALESCE(t1.SB_MVAL_MDA,0)) as 普通资产_三板市值_月日均
+	,sum(COALESCE(t1.IMGT_PD_MVAL_MDA,0)) as 普通资产_资管产品市值_月日均
+	,sum(COALESCE(t1.BANK_CHRM_MVAL_MDA,0)) as 普通资产_银行理财市值_月日均
+	,sum(COALESCE(t1.SECU_CHRM_MVAL_MDA,0)) as 普通资产_证券理财市值_月日均
+	,sum(COALESCE(t1.PSTK_OPTN_MVAL_MDA,0)) as 普通资产_个股期权市值_月日均
+	,sum(COALESCE(t1.B_SHR_MVAL_MDA,0)) as 普通资产_B股市值_月日均
+	,sum(COALESCE(t1.OUTMARK_MVAL_MDA,0)) as 普通资产_体外市值_月日均
+	,sum(COALESCE(t1.CPTL_BAL_MDA,0)) as 普通资产_资金余额_月日均
+	,sum(COALESCE(t1.NO_ARVD_CPTL_MDA,0)) as 普通资产_未到账资金_月日均
+	,sum(COALESCE(t1.PTE_FUND_MVAL_MDA,0)) as 普通资产_私募基金市值_月日均
+	,sum(COALESCE(t1.OVERSEA_TOT_AST_MDA,0)) as 普通资产_海外总资产_月日均
+	,sum(COALESCE(t1.FUTR_TOT_AST_MDA,0)) as 普通资产_期货总资产_月日均
+	,sum(COALESCE(t1.CPTL_BAL_RMB_MDA,0)) as 普通资产_资金余额人民币_月日均
+	,sum(COALESCE(t1.CPTL_BAL_HKD_MDA,0)) as 普通资产_资金余额港币_月日均
+	,sum(COALESCE(t1.CPTL_BAL_USD_MDA,0)) as 普通资产_资金余额美元_月日均
+	,sum(COALESCE(t1.LOW_RISK_TOT_AST_MDA,0)) as 普通资产_低风险总资产_月日均
+	,sum(COALESCE(t1.FUND_SPACCT_MVAL_MDA,0)) as 普通资产_基金专户市值_月日均
+	,sum(COALESCE(t1.HGT_MVAL_MDA,0)) as 普通资产_沪港通市值_月日均
+	,sum(COALESCE(t1.SGT_MVAL_MDA,0)) as 普通资产_深港通市值_月日均
+	,sum(COALESCE(t1.NET_AST_MDA,0)) as 普通资产_净资产_月日均
+	,sum(COALESCE(t1.TOT_AST_CONTAIN_NOTS_MDA,0)) as 普通资产_总资产_含限售股_月日均
+	,sum(COALESCE(t1.TOT_AST_N_CONTAIN_NOTS_MDA,0)) as 普通资产_总资产_不含限售股_月日均
+	,sum(COALESCE(t1.BOND_MVAL_MDA,0)) as 普通资产_债券市值_月日均
+	,sum(COALESCE(t1.REPO_MVAL_MDA,0)) as 普通资产_回购市值_月日均
+	,sum(COALESCE(t1.TREA_REPO_MVAL_MDA,0)) as 普通资产_国债回购市值_月日均
+	,sum(COALESCE(t1.REPQ_MVAL_MDA,0)) as 普通资产_报价回购市值_月日均
+	,sum(COALESCE(t1.SCDY_MVAL_YDA,0)) as 普通资产_二级市值_年日均
+	,sum(COALESCE(t1.STKF_MVAL_YDA,0)) as 普通资产_股基市值_年日均
+	,sum(COALESCE(t1.A_SHR_MVAL_YDA,0)) as 普通资产_A股市值_年日均
+	,sum(COALESCE(t1.NOTS_MVAL_YDA,0)) as 普通资产_限售股市值_年日均
+	,sum(COALESCE(t1.OFFUND_MVAL_YDA,0)) as 普通资产_场内基金市值_年日均
+	,sum(COALESCE(t1.OPFUND_MVAL_YDA,0)) as 普通资产_场外基金市值_年日均
+	,sum(COALESCE(t1.SB_MVAL_YDA,0)) as 普通资产_三板市值_年日均
+	,sum(COALESCE(t1.IMGT_PD_MVAL_YDA,0)) as 普通资产_资管产品市值_年日均
+	,sum(COALESCE(t1.BANK_CHRM_MVAL_YDA,0)) as 普通资产_银行理财市值_年日均
+	,sum(COALESCE(t1.SECU_CHRM_MVAL_YDA,0)) as 普通资产_证券理财市值_年日均
+	,sum(COALESCE(t1.PSTK_OPTN_MVAL_YDA,0)) as 普通资产_个股期权市值_年日均
+	,sum(COALESCE(t1.B_SHR_MVAL_YDA,0)) as 普通资产_B股市值_年日均
+	,sum(COALESCE(t1.OUTMARK_MVAL_YDA,0)) as 普通资产_体外市值_年日均
+	,sum(COALESCE(t1.CPTL_BAL_YDA,0)) as 普通资产_资金余额_年日均
+	,sum(COALESCE(t1.NO_ARVD_CPTL_YDA,0)) as 普通资产_未到账资金_年日均
+	,sum(COALESCE(t1.PTE_FUND_MVAL_YDA,0)) as 普通资产_私募基金市值_年日均
+	,sum(COALESCE(t1.OVERSEA_TOT_AST_YDA,0)) as 普通资产_海外总资产_年日均
+	,sum(COALESCE(t1.FUTR_TOT_AST_YDA,0)) as 普通资产_期货总资产_年日均
+	,sum(COALESCE(t1.CPTL_BAL_RMB_YDA,0)) as 普通资产_资金余额人民币_年日均
+	,sum(COALESCE(t1.CPTL_BAL_HKD_YDA,0)) as 普通资产_资金余额港币_年日均
+	,sum(COALESCE(t1.CPTL_BAL_USD_YDA,0)) as 普通资产_资金余额美元_年日均
+	,sum(COALESCE(t1.LOW_RISK_TOT_AST_YDA,0)) as 普通资产_低风险总资产_年日均
+	,sum(COALESCE(t1.FUND_SPACCT_MVAL_YDA,0)) as 普通资产_基金专户市值_年日均
+	,sum(COALESCE(t1.HGT_MVAL_YDA,0)) as 普通资产_沪港通市值_年日均
+	,sum(COALESCE(t1.SGT_MVAL_YDA,0)) as 普通资产_深港通市值_年日均
+	,sum(COALESCE(t1.NET_AST_YDA,0)) as 普通资产_净资产_年日均
+	,sum(COALESCE(t1.TOT_AST_CONTAIN_NOTS_YDA,0)) as 普通资产_总资产_含限售股_年日均
+	,sum(COALESCE(t1.TOT_AST_N_CONTAIN_NOTS_YDA,0)) as 普通资产_总资产_不含限售股_年日均
+	,sum(COALESCE(t1.BOND_MVAL_YDA,0)) as 普通资产_债券市值_年日均
+	,sum(COALESCE(t1.REPO_MVAL_YDA,0)) as 普通资产_回购市值_年日均
+	,sum(COALESCE(t1.TREA_REPO_MVAL_YDA,0)) as 普通资产_国债回购市值_年日均
+	,sum(COALESCE(t1.REPQ_MVAL_YDA,0)) as 普通资产_报价回购市值_年日均
+	,sum(COALESCE(t1.PO_FUND_MVAL_FINAL,0)) as 普通资产_公募基金市值_期末
+	,sum(COALESCE(t1.PO_FUND_MVAL_MDA,0)) as 普通资产_公募基金市值_月日均
+	,sum(COALESCE(t1.PO_FUND_MVAL_YDA,0)) as 普通资产_公募基金市值_年日均
+	,sum(COALESCE(t1.STKT_FUND_MVAL_FINAL,0)) as 普通资产_股票型基金市值_期末
+	,sum(COALESCE(t1.OTH_PROD_MVAL_FINAL,0)) as 普通资产_其他产品市值_期末
+	,sum(COALESCE(t1.OTH_AST_MVAL_FINAL,0)) as 普通资产_其他资产市值_期末
+	,sum(COALESCE(t1.APPTBUYB_PLG_MVAL_FINAL,0)) as 普通资产_约定购回质押市值_期末
+	,sum(COALESCE(t1.STKT_FUND_MVAL_MDA,0)) as 普通资产_股票型基金市值_月日均
+	,sum(COALESCE(t1.OTH_PROD_MVAL_MDA,0)) as 普通资产_其他产品市值_月日均
+	,sum(COALESCE(t1.OTH_AST_MVAL_MDA,0)) as 普通资产_其他资产市值_月日均
+	,sum(COALESCE(t1.APPTBUYB_PLG_MVAL_MDA,0)) as 普通资产_约定购回质押市值_月日均
+	,sum(COALESCE(t1.STKT_FUND_MVAL_YDA,0)) as 普通资产_股票型基金市值_年日均
+	,sum(COALESCE(t1.OTH_PROD_MVAL_YDA,0)) as 普通资产_其他产品市值_年日均
+	,sum(COALESCE(t1.OTH_AST_MVAL_YDA,0)) as 普通资产_其他资产市值_年日均
+	,sum(COALESCE(t1.APPTBUYB_PLG_MVAL_YDA,0)) as 普通资产_约定购回质押市值_年日均
+	,sum(COALESCE(t1.CREDIT_NET_AST_FINAL,0)) as 普通资产_融资融券净资产_期末
+	,sum(COALESCE(t1.CREDIT_MARG_FINAL,0)) as 普通资产_融资融券保证金_期末
+	,sum(COALESCE(t1.CREDIT_BAL_FINAL,0)) as 普通资产_融资融券余额_期末
+	,sum(COALESCE(t1.CREDIT_NET_AST_MDA,0)) as 普通资产_融资融券净资产_月日均
+	,sum(COALESCE(t1.CREDIT_MARG_MDA,0)) as 普通资产_融资融券保证金_月日均
+	,sum(COALESCE(t1.CREDIT_BAL_MDA,0)) as 普通资产_融资融券余额_月日均
+	,sum(COALESCE(t1.CREDIT_NET_AST_YDA,0)) as 普通资产_融资融券净资产_年日均
+	,sum(COALESCE(t1.CREDIT_MARG_YDA,0)) as 普通资产_融资融券保证金_年日均
+	,sum(COALESCE(t1.CREDIT_BAL_YDA,0)) as 普通资产_融资融券余额_年日均
+	,sum(COALESCE(t1.PROD_TOT_MVAL_FINAL,0)) as 普通资产_产品总市值_期末
+	,sum(COALESCE(t1.PROD_TOT_MVAL_MDA,0)) as 普通资产_产品总市值_月日均
+	,sum(COALESCE(t1.PROD_TOT_MVAL_YDA,0)) as 普通资产_产品总市值_年日均
+	,sum(COALESCE(t1.TOT_AST_FINAL,0)) as 普通资产_总资产_期末
+	,sum(COALESCE(t1.TOT_AST_MDA,0)) as 普通资产_总资产_月日均
+	,sum(COALESCE(t1.TOT_AST_YDA,0)) as 普通资产_总资产_年日均
+	
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_FINAL_SCDY_DEDUCT,0)) as 普通资产_股票质押担保证券市值_期末_二级扣减
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_MDA_SCDY_DEDUCT,0)) as 普通资产_股票质押担保证券市值_月日均_二级扣减
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_YDA_SCDY_DEDUCT,0)) as 普通资产_股票质押担保证券市值_年日均_二级扣减
+	,sum(COALESCE(t1.STKPLG_LIAB_FINAL,0)) as 普通资产_股票质押负债_期末
+	,sum(COALESCE(t1.STKPLG_LIAB_MDA,0)) as 普通资产_股票质押负债_月日均
+	,sum(COALESCE(t1.STKPLG_LIAB_YDA,0)) as 普通资产_股票质押负债_年日均
+	,sum(COALESCE(t1.CREDIT_TOT_LIAB_FINAL,0)) as 普通资产_融资融券总负债_期末
+	,sum(COALESCE(t1.CREDIT_TOT_LIAB_MDA,0)) as 普通资产_融资融券总负债_月日均
+	,sum(COALESCE(t1.CREDIT_TOT_LIAB_YDA,0)) as 普通资产_融资融券总负债_年日均
+	,sum(COALESCE(t1.APPTBUYB_BAL_FINAL,0)) as 普通资产_约定购回余额_期末
+	,sum(COALESCE(t1.APPTBUYB_BAL_MDA,0)) as 普通资产_约定购回余额_月日均
+	,sum(COALESCE(t1.APPTBUYB_BAL_YDA,0)) as 普通资产_约定购回余额_年日均
+	,sum(COALESCE(t1.CREDIT_TOT_AST_FINAL,0)) as 普通资产_融资融券总资产_期末
+	,sum(COALESCE(t1.CREDIT_TOT_AST_MDA,0)) as 普通资产_融资融券总资产_月日均
+	,sum(COALESCE(t1.CREDIT_TOT_AST_YDA,0)) as 普通资产_融资融券总资产_年日均
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_FINAL,0)) as 普通资产_股票质押担保证券市值_期末
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_MDA,0)) as 普通资产_股票质押担保证券市值_月日均
+	,sum(COALESCE(t1.STKPLG_GUAR_SECU_MVAL_YDA,0)) as 普通资产_股票质押担保证券市值_年日均
+	
+	--融资融券
+	,sum(COALESCE(t_rzrq.TOT_LIAB_FINAL,0)) as 融资融券_总负债_期末
+	,sum(COALESCE(t_rzrq.NET_AST_FINAL,0)) as 融资融券_净资产_期末
+	,sum(COALESCE(t_rzrq.CRED_MARG_FINAL,0)) as 融资融券_信用保证金_期末
+	,sum(COALESCE(t_rzrq.GUAR_SECU_MVAL_FINAL,0)) as 融资融券_担保证券市值_期末
+	,sum(COALESCE(t_rzrq.FIN_LIAB_FINAL,0)) as 融资融券_融资负债_期末
+	,sum(COALESCE(t_rzrq.CRDT_STK_LIAB_FINAL,0)) as 融资融券_融券负债_期末
+	,sum(COALESCE(t_rzrq.INTR_LIAB_FINAL,0)) as 融资融券_利息负债_期末
+	,sum(COALESCE(t_rzrq.FEE_LIAB_FINAL,0)) as 融资融券_费用负债_期末
+	,sum(COALESCE(t_rzrq.OTH_LIAB_FINAL,0)) as 融资融券_其他负债_期末
+	,sum(COALESCE(t_rzrq.TOT_AST_FINAL,0)) as 融资融券_总资产_期末
+	,sum(COALESCE(t_rzrq.A_SHR_MVAL_FINAL,0)) as 融资融券_A股市值_期末
+	
+	,sum(COALESCE(t_rzrq.TOT_LIAB_MDA,0)) as 融资融券_总负债_月日均
+	,sum(COALESCE(t_rzrq.NET_AST_MDA,0)) as 融资融券_净资产_月日均
+	,sum(COALESCE(t_rzrq.CRED_MARG_MDA,0)) as 融资融券_信用保证金_月日均
+	,sum(COALESCE(t_rzrq.GUAR_SECU_MVAL_MDA,0)) as 融资融券_担保证券市值_月日均
+	,sum(COALESCE(t_rzrq.FIN_LIAB_MDA,0)) as 融资融券_融资负债_月日均
+	,sum(COALESCE(t_rzrq.CRDT_STK_LIAB_MDA,0)) as 融资融券_融券负债_月日均
+	,sum(COALESCE(t_rzrq.INTR_LIAB_MDA,0)) as 融资融券_利息负债_月日均
+	,sum(COALESCE(t_rzrq.FEE_LIAB_MDA,0)) as 融资融券_费用负债_月日均
+	,sum(COALESCE(t_rzrq.OTH_LIAB_MDA,0)) as 融资融券_其他负债_月日均
+	,sum(COALESCE(t_rzrq.TOT_AST_MDA,0)) as 融资融券_总资产_月日均
+	,sum(COALESCE(t_rzrq.A_SHR_MVAL_MDA,0)) as 融资融券_A股市值_月日均
+	
+	,sum(COALESCE(t_rzrq.TOT_LIAB_YDA,0)) as 融资融券_总负债_年日均
+	,sum(COALESCE(t_rzrq.NET_AST_YDA,0)) as 融资融券_净资产_年日均
+	,sum(COALESCE(t_rzrq.CRED_MARG_YDA,0)) as 融资融券_信用保证金_年日均
+	,sum(COALESCE(t_rzrq.GUAR_SECU_MVAL_YDA,0)) as 融资融券_担保证券市值_年日均
+	,sum(COALESCE(t_rzrq.FIN_LIAB_YDA,0)) as 融资融券_融资负债_年日均
+	,sum(COALESCE(t_rzrq.CRDT_STK_LIAB_YDA,0)) as 融资融券_融券负债_年日均
+	,sum(COALESCE(t_rzrq.INTR_LIAB_YDA,0)) as 融资融券_利息负债_年日均
+	,sum(COALESCE(t_rzrq.FEE_LIAB_YDA,0)) as 融资融券_费用负债_年日均
+	,sum(COALESCE(t_rzrq.OTH_LIAB_YDA,0)) as 融资融券_其他负债_年日均
+	,sum(COALESCE(t_rzrq.TOT_AST_YDA,0)) as 融资融券_总资产_年日均
+	,sum(COALESCE(t_rzrq.A_SHR_MVAL_YDA,0)) as 融资融券_A股市值_年日均
+	
+	--资产变动
+	,sum(COALESCE(t_zcbd.ODI_CPTL_INFLOW_MTD,0)) as 资产变动_普通资金流入_月累计
+	,sum(COALESCE(t_zcbd.ODI_CPTL_OUTFLOW_MTD,0)) as 资产变动_普通资金流出_月累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_INFLOW_MTD,0)) as 资产变动_普通市值流入_月累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_OUTFLOW_MTD,0)) as 资产变动_普通市值流出_月累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_INFLOW_MTD,0)) as 资产变动_两融资金流入_月累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_OUTFLOW_MTD,0)) as 资产变动_两融资金流出_月累计
+	,sum(COALESCE(t_zcbd.ODI_ACC_CPTL_NET_INFLOW_MTD,0)) as 资产变动_普通账户资金净流入_月累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_NET_INFLOW_MTD,0)) as 资产变动_两融资金净流入_月累计
+	,sum(COALESCE(t_zcbd.ODI_CPTL_INFLOW_YTD,0)) as 资产变动_普通资金流入_年累计
+	,sum(COALESCE(t_zcbd.ODI_CPTL_OUTFLOW_YTD,0)) as 资产变动_普通资金流出_年累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_INFLOW_YTD,0)) as 资产变动_普通市值流入_年累计
+	,sum(COALESCE(t_zcbd.ODI_MVAL_OUTFLOW_YTD,0)) as 资产变动_普通市值流出_年累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_INFLOW_YTD,0)) as 资产变动_两融资金流入_年累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_OUTFLOW_YTD,0)) as 资产变动_两融资金流出_年累计
+	,sum(COALESCE(t_zcbd.ODI_ACC_CPTL_NET_INFLOW_YTD,0)) as 资产变动_普通账户资金净流入_年累计
+	,sum(COALESCE(t_zcbd.CREDIT_CPTL_NET_INFLOW_YTD,0)) as 资产变动_两融资金净流入_年累计
+	
+	--普通收入更新日期20180411
+	,sum(COALESCE(t_ptsr.PB_TRD_CMS_MTD,0)) as 普通收入_PB交易佣金_月累计
+	,sum(COALESCE(t_ptsr.MARG_SPR_INCM_MTD,0)) as 普通收入_保证金利差收入_月累计
+	,sum(COALESCE(t_ptsr.PB_TRD_CMS_YTD,0)) as 普通收入_PB交易佣金_年累计
+	,sum(COALESCE(t_ptsr.MARG_SPR_INCM_YTD,0)) as 普通收入_保证金利差收入_年累计
+	,sum(COALESCE(t_ptsr.GROSS_CMS_MTD,0)) as 普通收入_毛佣金_月累计
+	,sum(COALESCE(t_ptsr.TRAN_FEE_MTD,0)) as 普通收入_过户费_月累计
+	,sum(COALESCE(t_ptsr.SCDY_TRAN_FEE_MTD,0)) as 普通收入_二级过户费_月累计
+	,sum(COALESCE(t_ptsr.STP_TAX_MTD,0)) as 普通收入_印花税_月累计
+	,sum(COALESCE(t_ptsr.HANDLE_FEE_MTD,0)) as 普通收入_经手费_月累计
+	,sum(COALESCE(t_ptsr.SEC_RGLT_FEE_MTD,0)) as 普通收入_证管费_月累计
+	,sum(COALESCE(t_ptsr.OTH_FEE_MTD,0)) as 普通收入_其他费用_月累计
+	,sum(COALESCE(t_ptsr.STKF_CMS_MTD,0)) as 普通收入_股基佣金_月累计
+	,sum(COALESCE(t_ptsr.STKF_TRAN_FEE_MTD,0)) as 普通收入_股基过户费_月累计
+	,sum(COALESCE(t_ptsr.STKF_NET_CMS_MTD,0)) as 普通收入_股基净佣金_月累计
+	,sum(COALESCE(t_ptsr.BOND_CMS_MTD,0)) as 普通收入_债券佣金_月累计
+	,sum(COALESCE(t_ptsr.BOND_NET_CMS_MTD,0)) as 普通收入_债券净佣金_月累计
+	,sum(COALESCE(t_ptsr.REPQ_CMS_MTD,0)) as 普通收入_报价回购佣金_月累计
+	,sum(COALESCE(t_ptsr.REPQ_NET_CMS_MTD,0)) as 普通收入_报价回购净佣金_月累计
+	,sum(COALESCE(t_ptsr.HGT_CMS_MTD,0)) as 普通收入_沪港通佣金_月累计
+	,sum(COALESCE(t_ptsr.HGT_NET_CMS_MTD,0)) as 普通收入_沪港通净佣金_月累计
+	,sum(COALESCE(t_ptsr.HGT_TRAN_FEE_MTD,0)) as 普通收入_沪港通过户费_月累计
+	,sum(COALESCE(t_ptsr.SGT_CMS_MTD,0)) as 普通收入_深港通佣金_月累计
+	,sum(COALESCE(t_ptsr.SGT_NET_CMS_MTD,0)) as 普通收入_深港通净佣金_月累计
+	,sum(COALESCE(t_ptsr.SGT_TRAN_FEE_MTD,0)) as 普通收入_深港通过户费_月累计
+	,sum(COALESCE(t_ptsr.BGDL_CMS_MTD,0)) as 普通收入_大宗交易佣金_月累计
+	,sum(COALESCE(t_ptsr.NET_CMS_MTD,0)) as 普通收入_净佣金_月累计
+	,sum(COALESCE(t_ptsr.BGDL_NET_CMS_MTD,0)) as 普通收入_大宗交易净佣金_月累计
+	,sum(COALESCE(t_ptsr.BGDL_TRAN_FEE_MTD,0)) as 普通收入_大宗交易过户费_月累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_CMS_MTD,0)) as 普通收入_个股期权佣金_月累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_NET_CMS_MTD,0)) as 普通收入_个股期权净佣金_月累计
+	,sum(COALESCE(t_ptsr.SCDY_CMS_MTD,0)) as 普通收入_二级佣金_月累计
+	,sum(COALESCE(t_ptsr.SCDY_NET_CMS_MTD,0)) as 普通收入_二级净佣金_月累计
+	,sum(COALESCE(t_ptsr.GROSS_CMS_YTD,0)) as 普通收入_毛佣金_年累计
+	,sum(COALESCE(t_ptsr.TRAN_FEE_YTD,0)) as 普通收入_过户费_年累计
+	,sum(COALESCE(t_ptsr.SCDY_TRAN_FEE_YTD,0)) as 普通收入_二级过户费_年累计
+	,sum(COALESCE(t_ptsr.STP_TAX_YTD,0)) as 普通收入_印花税_年累计
+	,sum(COALESCE(t_ptsr.HANDLE_FEE_YTD,0)) as 普通收入_经手费_年累计
+	,sum(COALESCE(t_ptsr.SEC_RGLT_FEE_YTD,0)) as 普通收入_证管费_年累计
+	,sum(COALESCE(t_ptsr.OTH_FEE_YTD,0)) as 普通收入_其他费用_年累计
+	,sum(COALESCE(t_ptsr.STKF_CMS_YTD,0)) as 普通收入_股基佣金_年累计
+	,sum(COALESCE(t_ptsr.STKF_TRAN_FEE_YTD,0)) as 普通收入_股基过户费_年累计
+	,sum(COALESCE(t_ptsr.STKF_NET_CMS_YTD,0)) as 普通收入_股基净佣金_年累计
+	,sum(COALESCE(t_ptsr.BOND_CMS_YTD,0)) as 普通收入_债券佣金_年累计
+	,sum(COALESCE(t_ptsr.BOND_NET_CMS_YTD,0)) as 普通收入_债券净佣金_年累计
+	,sum(COALESCE(t_ptsr.REPQ_CMS_YTD,0)) as 普通收入_报价回购佣金_年累计
+	,sum(COALESCE(t_ptsr.REPQ_NET_CMS_YTD,0)) as 普通收入_报价回购净佣金_年累计
+	,sum(COALESCE(t_ptsr.HGT_CMS_YTD,0)) as 普通收入_沪港通佣金_年累计
+	,sum(COALESCE(t_ptsr.HGT_NET_CMS_YTD,0)) as 普通收入_沪港通净佣金_年累计
+	,sum(COALESCE(t_ptsr.HGT_TRAN_FEE_YTD,0)) as 普通收入_沪港通过户费_年累计
+	,sum(COALESCE(t_ptsr.SGT_CMS_YTD,0)) as 普通收入_深港通佣金_年累计
+	,sum(COALESCE(t_ptsr.SGT_NET_CMS_YTD,0)) as 普通收入_深港通净佣金_年累计
+	,sum(COALESCE(t_ptsr.SGT_TRAN_FEE_YTD,0)) as 普通收入_深港通过户费_年累计
+	,sum(COALESCE(t_ptsr.BGDL_CMS_YTD,0)) as 普通收入_大宗交易佣金_年累计
+	,sum(COALESCE(t_ptsr.NET_CMS_YTD,0)) as 普通收入_净佣金_年累计
+	,sum(COALESCE(t_ptsr.BGDL_NET_CMS_YTD,0)) as 普通收入_大宗交易净佣金_年累计
+	,sum(COALESCE(t_ptsr.BGDL_TRAN_FEE_YTD,0)) as 普通收入_大宗交易过户费_年累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_CMS_YTD,0)) as 普通收入_个股期权佣金_年累计
+	,sum(COALESCE(t_ptsr.PSTK_OPTN_NET_CMS_YTD,0)) as 普通收入_个股期权净佣金_年累计
+	,sum(COALESCE(t_ptsr.SCDY_CMS_YTD,0)) as 普通收入_二级佣金_年累计
+	,sum(COALESCE(t_ptsr.SCDY_NET_CMS_YTD,0)) as 普通收入_二级净佣金_年累计
+	
+	--信用收入
+	,sum(COALESCE(t_xysr.CREDIT_MARG_SPR_INCM_YTD,0)) as 信用收入_融资融券保证金利差收入_年累计
+	,sum(COALESCE(t_xysr.CREDIT_MARG_SPR_INCM_MTD,0)) as 信用收入_融资融券保证金利差收入_月累计
+	,sum(COALESCE(t_xysr.GROSS_CMS_MTD,0)) as 信用收入_毛佣金_月累计
+	,sum(COALESCE(t_xysr.NET_CMS_MTD,0)) as 信用收入_净佣金_月累计
+	,sum(COALESCE(t_xysr.TRAN_FEE_MTD,0)) as 信用收入_过户费_月累计
+	,sum(COALESCE(t_xysr.STP_TAX_MTD,0)) as 信用收入_印花税_月累计
+	,sum(COALESCE(t_xysr.ORDR_FEE_MTD,0)) as 信用收入_委托费_月累计
+	,sum(COALESCE(t_xysr.HANDLE_FEE_MTD,0)) as 信用收入_经手费_月累计
+	,sum(COALESCE(t_xysr.SEC_RGLT_FEE_MTD,0)) as 信用收入_证管费_月累计
+	,sum(COALESCE(t_xysr.OTH_FEE_MTD,0)) as 信用收入_其他费用_月累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_CMS_MTD,0)) as 信用收入_融资融券普通佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_NET_CMS_MTD,0)) as 信用收入_融资融券普通净佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_TRAN_FEE_MTD,0)) as 信用收入_融资融券普通过户费_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_CMS_MTD,0)) as 信用收入_融资融券信用佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_NET_CMS_MTD,0)) as 信用收入_融资融券信用净佣金_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_TRAN_FEE_MTD,0)) as 信用收入_融资融券信用过户费_月累计
+	,sum(COALESCE(t_xysr.STKPLG_CMS_MTD,0)) as 信用收入_股票质押佣金_月累计
+	,sum(COALESCE(t_xysr.STKPLG_NET_CMS_MTD,0)) as 信用收入_股票质押净佣金_月累计
+	,sum(COALESCE(t_xysr.STKPLG_PAIDINT_MTD,0)) as 信用收入_股票质押实收利息_月累计
+	,sum(COALESCE(t_xysr.STKPLG_RECE_INT_MTD,0)) as 信用收入_股票质押应收利息_月累计
+	,sum(COALESCE(t_xysr.APPTBUYB_CMS_MTD,0)) as 信用收入_约定购回佣金_月累计
+	,sum(COALESCE(t_xysr.APPTBUYB_NET_CMS_MTD,0)) as 信用收入_约定购回净佣金_月累计
+	,sum(COALESCE(t_xysr.APPTBUYB_PAIDINT_MTD,0)) as 信用收入_约定购回实收利息_月累计
+	,sum(COALESCE(t_xysr.FIN_PAIDINT_MTD,0)) as 信用收入_融资实收利息_月累计
+	,sum(COALESCE(t_xysr.FIN_IE_MTD,0)) as 信用收入_融资利息支出_月累计
+	,sum(COALESCE(t_xysr.CRDT_STK_IE_MTD,0)) as 信用收入_融券利息支出_月累计
+	,sum(COALESCE(t_xysr.OTH_IE_MTD,0)) as 信用收入_其他利息支出_月累计
+	,sum(COALESCE(t_xysr.FIN_RECE_INT_MTD,0)) as 信用收入_融资应收利息_月累计
+	,sum(COALESCE(t_xysr.FEE_RECE_INT_MTD,0)) as 信用收入_费用应收利息_月累计
+	,sum(COALESCE(t_xysr.OTH_RECE_INT_MTD,0)) as 信用收入_其他应收利息_月累计
+	,sum(COALESCE(t_xysr.CREDIT_CPTL_COST_MTD,0)) as 信用收入_融资融券资金成本_月累计
+	,sum(COALESCE(t_xysr.GROSS_CMS_YTD,0)) as 信用收入_毛佣金_年累计
+	,sum(COALESCE(t_xysr.NET_CMS_YTD,0)) as 信用收入_净佣金_年累计
+	,sum(COALESCE(t_xysr.TRAN_FEE_YTD,0)) as 信用收入_过户费_年累计
+	,sum(COALESCE(t_xysr.STP_TAX_YTD,0)) as 信用收入_印花税_年累计
+	,sum(COALESCE(t_xysr.ORDR_FEE_YTD,0)) as 信用收入_委托费_年累计
+	,sum(COALESCE(t_xysr.HANDLE_FEE_YTD,0)) as 信用收入_经手费_年累计
+	,sum(COALESCE(t_xysr.SEC_RGLT_FEE_YTD,0)) as 信用收入_证管费_年累计
+	,sum(COALESCE(t_xysr.OTH_FEE_YTD,0)) as 信用收入_其他费用_年累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_CMS_YTD,0)) as 信用收入_融资融券普通佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_NET_CMS_YTD,0)) as 信用收入_融资融券普通净佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_ODI_TRAN_FEE_YTD,0)) as 信用收入_融资融券普通过户费_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_CMS_YTD,0)) as 信用收入_融资融券信用佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_NET_CMS_YTD,0)) as 信用收入_融资融券信用净佣金_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CRED_TRAN_FEE_YTD,0)) as 信用收入_融资融券信用过户费_年累计
+	,sum(COALESCE(t_xysr.STKPLG_CMS_YTD,0)) as 信用收入_股票质押佣金_年累计
+	,sum(COALESCE(t_xysr.STKPLG_NET_CMS_YTD,0)) as 信用收入_股票质押净佣金_年累计
+	,sum(COALESCE(t_xysr.STKPLG_PAIDINT_YTD,0)) as 信用收入_股票质押实收利息_年累计
+	,sum(COALESCE(t_xysr.STKPLG_RECE_INT_YTD,0)) as 信用收入_股票质押应收利息_年累计
+	,sum(COALESCE(t_xysr.APPTBUYB_CMS_YTD,0)) as 信用收入_约定购回佣金_年累计
+	,sum(COALESCE(t_xysr.APPTBUYB_NET_CMS_YTD,0)) as 信用收入_约定购回净佣金_年累计
+	,sum(COALESCE(t_xysr.APPTBUYB_PAIDINT_YTD,0)) as 信用收入_约定购回实收利息_年累计
+	,sum(COALESCE(t_xysr.FIN_PAIDINT_YTD,0)) as 信用收入_融资实收利息_年累计
+	,sum(COALESCE(t_xysr.FIN_IE_YTD,0)) as 信用收入_融资利息支出_年累计
+	,sum(COALESCE(t_xysr.CRDT_STK_IE_YTD,0)) as 信用收入_融券利息支出_年累计
+	,sum(COALESCE(t_xysr.OTH_IE_YTD,0)) as 信用收入_其他利息支出_年累计
+	,sum(COALESCE(t_xysr.FIN_RECE_INT_YTD,0)) as 信用收入_融资应收利息_年累计
+	,sum(COALESCE(t_xysr.FEE_RECE_INT_YTD,0)) as 信用收入_费用应收利息_年累计
+	,sum(COALESCE(t_xysr.OTH_RECE_INT_YTD,0)) as 信用收入_其他应收利息_年累计
+	,sum(COALESCE(t_xysr.CREDIT_CPTL_COST_YTD,0)) as 信用收入_融资融券资金成本_年累计	
+	
+	--约定购回
+	,sum(COALESCE(t_ydgh.GUAR_SECU_MVAL_FINAL,0)) as 约定购回_担保证券市值_期末
+	,sum(COALESCE(t_ydgh.APPTBUYB_BAL_FINAL,0)) as 约定购回_约定购回余额_期末
+	,sum(COALESCE(t_ydgh.SH_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_上海担保证券市值_期末
+	,sum(COALESCE(t_ydgh.SZ_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_深圳担保证券市值_期末
+	,sum(COALESCE(t_ydgh.SH_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_上海限售股担保证券市值_期末
+	,sum(COALESCE(t_ydgh.SZ_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 约定购回_深圳限售股担保证券市值_期末
+	,sum(COALESCE(t_ydgh.PROP_FINAC_OUT_SIDE_BAL_FINAL,0)) as 约定购回_自营融出方余额_期末
+	,sum(COALESCE(t_ydgh.ASSM_FINAC_OUT_SIDE_BAL_FINAL,0)) as 约定购回_资管融出方余额_期末
+	,sum(COALESCE(t_ydgh.SM_LOAN_FINAC_OUT_BAL_FINAL,0)) as 约定购回_小额贷融出余额_期末
+	,sum(COALESCE(t_ydgh.GUAR_SECU_MVAL_MDA,0)) as 约定购回_担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.APPTBUYB_BAL_MDA,0)) as 约定购回_约定购回余额_月日均
+	,sum(COALESCE(t_ydgh.SH_GUAR_SECU_MVAL_MDA,0)) as 约定购回_上海担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.SZ_GUAR_SECU_MVAL_MDA,0)) as 约定购回_深圳担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.SH_NOTS_GUAR_SECU_MVAL_MDA,0)) as 约定购回_上海限售股担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.SZ_NOTS_GUAR_SECU_MVAL_MDA,0)) as 约定购回_深圳限售股担保证券市值_月日均
+	,sum(COALESCE(t_ydgh.PROP_FINAC_OUT_SIDE_BAL_MDA,0)) as 约定购回_自营融出方余额_月日均
+	,sum(COALESCE(t_ydgh.ASSM_FINAC_OUT_SIDE_BAL_MDA,0)) as 约定购回_资管融出方余额_月日均
+	,sum(COALESCE(t_ydgh.SM_LOAN_FINAC_OUT_BAL_MDA,0)) as 约定购回_小额贷融出余额_月日均
+	,sum(COALESCE(t_ydgh.GUAR_SECU_MVAL_YDA,0)) as 约定购回_担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.APPTBUYB_BAL_YDA,0)) as 约定购回_约定购回余额_年日均
+	,sum(COALESCE(t_ydgh.SH_GUAR_SECU_MVAL_YDA,0)) as 约定购回_上海担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.SZ_GUAR_SECU_MVAL_YDA,0)) as 约定购回_深圳担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.SH_NOTS_GUAR_SECU_MVAL_YDA,0)) as 约定购回_上海限售股担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.SZ_NOTS_GUAR_SECU_MVAL_YDA,0)) as 约定购回_深圳限售股担保证券市值_年日均
+	,sum(COALESCE(t_ydgh.PROP_FINAC_OUT_SIDE_BAL_YDA,0)) as 约定购回_自营融出方余额_年日均
+	,sum(COALESCE(t_ydgh.ASSM_FINAC_OUT_SIDE_BAL_YDA,0)) as 约定购回_资管融出方余额_年日均
+	,sum(COALESCE(t_ydgh.SM_LOAN_FINAC_OUT_BAL_YDA,0)) as 约定购回_小额贷融出余额_年日均
+	
+	--股票质押
+	,sum(COALESCE(t_gpzy.GUAR_SECU_MVAL_FINAL,0)) as 股票质押_担保证券市值_期末
+	,sum(COALESCE(t_gpzy.STKPLG_FIN_BAL_FINAL,0)) as 股票质押_股票质押融资余额_期末
+	,sum(COALESCE(t_gpzy.SH_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_上海担保证券市值_期末
+	,sum(COALESCE(t_gpzy.SZ_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_深圳担保证券市值_期末
+	,sum(COALESCE(t_gpzy.SH_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_上海限售股担保证券市值_期末
+	,sum(COALESCE(t_gpzy.SZ_NOTS_GUAR_SECU_MVAL_FINAL,0)) as 股票质押_深圳限售股担保证券市值_期末
+	,sum(COALESCE(t_gpzy.PROP_FINAC_OUT_SIDE_BAL_FINAL,0)) as 股票质押_自营融出方余额_期末
+	,sum(COALESCE(t_gpzy.ASSM_FINAC_OUT_SIDE_BAL_FINAL,0)) as 股票质押_资管融出方余额_期末
+	,sum(COALESCE(t_gpzy.SM_LOAN_FINAC_OUT_BAL_FINAL,0)) as 股票质押_小额贷融出余额_期末
+	,sum(COALESCE(t_gpzy.GUAR_SECU_MVAL_MDA,0)) as 股票质押_担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.STKPLG_FIN_BAL_MDA,0)) as 股票质押_股票质押融资余额_月日均
+	,sum(COALESCE(t_gpzy.SH_GUAR_SECU_MVAL_MDA,0)) as 股票质押_上海担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.SZ_GUAR_SECU_MVAL_MDA,0)) as 股票质押_深圳担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.SH_NOTS_GUAR_SECU_MVAL_MDA,0)) as 股票质押_上海限售股担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.SZ_NOTS_GUAR_SECU_MVAL_MDA,0)) as 股票质押_深圳限售股担保证券市值_月日均
+	,sum(COALESCE(t_gpzy.PROP_FINAC_OUT_SIDE_BAL_MDA,0)) as 股票质押_自营融出方余额_月日均
+	,sum(COALESCE(t_gpzy.ASSM_FINAC_OUT_SIDE_BAL_MDA,0)) as 股票质押_资管融出方余额_月日均
+	,sum(COALESCE(t_gpzy.SM_LOAN_FINAC_OUT_BAL_MDA,0)) as 股票质押_小额贷融出余额_月日均
+	,sum(COALESCE(t_gpzy.GUAR_SECU_MVAL_YDA,0)) as 股票质押_担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.STKPLG_FIN_BAL_YDA,0)) as 股票质押_股票质押融资余额_年日均
+	,sum(COALESCE(t_gpzy.SH_GUAR_SECU_MVAL_YDA,0)) as 股票质押_上海担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.SZ_GUAR_SECU_MVAL_YDA,0)) as 股票质押_深圳担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.SH_NOTS_GUAR_SECU_MVAL_YDA,0)) as 股票质押_上海限售股担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.SZ_NOTS_GUAR_SECU_MVAL_YDA,0)) as 股票质押_深圳限售股担保证券市值_年日均
+	,sum(COALESCE(t_gpzy.PROP_FINAC_OUT_SIDE_BAL_YDA,0)) as 股票质押_自营融出方余额_年日均
+	,sum(COALESCE(t_gpzy.ASSM_FINAC_OUT_SIDE_BAL_YDA,0)) as 股票质押_资管融出方余额_年日均
+	,sum(COALESCE(t_gpzy.SM_LOAN_FINAC_OUT_BAL_YDA,0)) as 股票质押_小额贷融出余额_年日均
+	
+	--普通交易
+	,sum(COALESCE(t_ptjy.SCDY_TRD_FREQ_MTD,0)) as 普通交易_二级交易次数				
+	,sum(COALESCE(t_ptjy.SCDY_TRD_QTY_MTD,0)) as 普通交易_二级交易量				
+	,sum(COALESCE(t_ptjy.SCDY_TRD_QTY_YTD,0)) as 普通交易_二级交易量_本年			
+	,sum(COALESCE(t_ptjy.TRD_FREQ_MTD,0)) as 普通交易_交易次数_本年					
+	,sum(COALESCE(t_ptjy.STKF_TRD_QTY_MTD,0)) as 普通交易_股基交易量				
+	,sum(COALESCE(t_ptjy.STKF_TRD_QTY_YTD,0)) as 普通交易_股基交易量_本年			
+	,sum(COALESCE(t_ptjy.S_REPUR_TRD_QTY_MTD,0)) as 普通交易_正回购交易量			
+	,sum(COALESCE(t_ptjy.R_REPUR_TRD_QTY_MTD,0)) as 普通交易_逆回购交易量			
+	,sum(COALESCE(t_ptjy.S_REPUR_TRD_QTY_YTD,0)) as 普通交易_正回购交易量_本年		
+	,sum(COALESCE(t_ptjy.R_REPUR_TRD_QTY_YTD,0)) as 普通交易_逆回购交易量_本年		
+	,sum(COALESCE(t_ptjy.HGT_TRD_QTY_MTD,0)) as 普通交易_沪港通交易量				
+	,sum(COALESCE(t_ptjy.SGT_TRD_QTY_MTD,0)) as 普通交易_深港通交易量				
+	,sum(COALESCE(t_ptjy.SGT_TRD_QTY_YTD,0)) as 普通交易_深港通交易量_本年			
+	,sum(COALESCE(t_ptjy.HGT_TRD_QTY_YTD,0)) as 普通交易_沪港通交易量_本年			
+	,sum(COALESCE(t_ptjy.Y_RCT_STK_TRD_QTY,0)) as 普通交易_近12月股票交易量			
+	,sum(COALESCE(t_ptjy.SCDY_TRD_FREQ_YTD,0)) as 普通交易_二级交易次数_本年		
+	,sum(COALESCE(t_ptjy.TRD_FREQ_MTD,0)) as 普通交易_交易次数						
+	,sum(COALESCE(t_ptjy.APPTBUYB_TRD_QTY_MTD,0)) as 普通交易_约定购回交易量		
+	,sum(COALESCE(t_ptjy.APPTBUYB_TRD_QTY_YTD,0)) as 普通交易_约定购回交易量_本年	
+	,sum(COALESCE(t_ptjy.RCT_TRD_DT_M,0)) as 普通交易_最近交易日期_本月				
+	,sum(COALESCE(t_ptjy.STKPLG_TRD_QTY_MTD,0)) as 普通交易_股票质押交易量			
+	,sum(COALESCE(t_ptjy.STKPLG_TRD_QTY_YTD,0)) as 普通交易_股票质押交易量_本年		
+	,sum(COALESCE(t_ptjy.PSTK_OPTN_TRD_QTY_MTD,0)) as 普通交易_个股期权交易量		
+	,sum(COALESCE(t_ptjy.PSTK_OPTN_TRD_QTY_YTD,0)) as 普通交易_个股期权交易量_本年
+	,sum(COALESCE(t_ptjy.REPQ_TRD_QTY_MTD,0)) as 普通交易_报价回购交易量			
+	,sum(COALESCE(t_ptjy.REPQ_TRD_QTY_YTD,0)) as 普通交易_报价回购交易量_本年		
+	,sum(COALESCE(t_ptjy.BGDL_QTY_MTD,0)) as 普通交易_大宗交易量					
+	,sum(COALESCE(t_ptjy.BGDL_QTY_YTD,0)) as 普通交易_大宗交易量_本年				
+	
+	,sum(COALESCE(t_khsx.融资融券授信额度,0)*t2.JXBL9) as 融资融券授信额度
+	,sum(COALESCE(t_khsx.约定购回授信额度,0)*t2.JXBL9) as 约定购回授信额度
+	,sum(COALESCE(t_khsx.股票质押授信额度,0)*t2.JXBL9) as 股票质押授信额度
+	,@V_BIN_DATE	
+
+	,sum(COALESCE(t_ptjy.SB_TRD_QTY_MTD,0))        			as 三板交易量_本月
+	,sum(COALESCE(t_ptjy.SB_TRD_QTY_YTD,0))        			as 三板交易量_本年
+	,sum(COALESCE(t_ptjy.BOND_TRD_QTY_MTD,0))      			as 债券交易量_本月
+	,sum(COALESCE(t_ptjy.BOND_TRD_QTY_YTD,0))      			as 债券交易量_本年
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_TRD_QTY_MTD,0)) 		as 场内货币基金交易量_本月
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_TRD_QTY_YTD,0)) 		as 场内货币基金交易量_本年
+	,sum(COALESCE(t_ptjy.S_REPUR_NET_CMS_MTD,0))   			as 正回购净佣金_本月
+	,sum(COALESCE(t_ptjy.S_REPUR_NET_CMS_YTD,0))   			as 正回购净佣金_本年
+	,sum(COALESCE(t_ptjy.R_REPUR_NET_CMS_MTD,0))   			as 逆回购净佣金_本月
+	,sum(COALESCE(t_ptjy.R_REPUR_NET_CMS_YTD,0))   			as 逆回购净佣金_本年
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_NET_CMS_MTD,0)) 		as 场内货币基金净佣金_本月
+	,sum(COALESCE(t_ptjy.ITC_CRRC_FUND_NET_CMS_YTD,0)) 		as 场内货币基金净佣金_本年
+from DM.T_AST_EMPCUS_ODI_M_D t1					--员工客户普通资产
+left join DM.T_PUB_ORG t_jg					--机构表
+	on t1.YEAR=t_jg.YEAR and t1.MTH=t_jg.MTH and t1.WH_ORG_ID_EMP=t_jg.WH_ORG_ID
+--20180427修改增加责权表
+left join DBA.t_ddw_serv_relation t2
+	on t1.year=t2.NIAN 
+		and t1.mth=t2.YUE 
+		and t2.KHBH_HS=t1.cust_id 
+		and t1.afa_sec_empid=t2.AFATWO_YGH
+left join 
+(											--客户属性和维度处理
+	select 
+		t1.YEAR
+		,t1.MTH	
+		,t1.CUST_ID
+		,t1.CUST_STAT_NAME as 客户状态
+		,case when t1.TE_OACT_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否月新增
+		,case when t1.TE_OACT_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否年新增
+		,coalesce(t1.IF_VLD,0) as 是否有效
+		,coalesce(t4.IF_SPCA_ACCT,0) as 是否特殊账户
+		,coalesce(t1.IF_PROD_NEW_CUST,0)   as 是否产品新客户
+		,COALESCE(t1.CUST_TYPE_NAME,'0') as 客户类型
+		
+		,coalesce(t3.IF_CREDIT_CUST,0) as 是否融资融券客户
+		,coalesce(t3.IF_CREDIT_EFF_CUST,0) as 是否融资融券有效客户	
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_OPEN_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否融资融券月新增
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_OPEN_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否融资融券年新增		
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_EFF_ACT_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否融资融券月新增有效户
+		,case when t3.IF_CREDIT_CUST=1 and t3.CREDIT_EFF_ACT_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否融资融券年新增有效户
+		
+		,t3.CREDIT_CRED_QUO as 融资融券授信额度
+		,t3.APPTBUYB_CRED_QUO as 约定购回授信额度		
+		,t3.STKPLG_CRED_QUO as 股票质押授信额度
+		
+		,case 
+            when t5.TOT_AST_MDA<100                                     then '00-100以下'
+			when t5.TOT_AST_MDA >= 100      and t5.TOT_AST_MDA<1000     then '01-100_1000'
+			when t5.TOT_AST_MDA >= 1000     and t5.TOT_AST_MDA<2000     then '02-1000_2000'
+			when t5.TOT_AST_MDA >= 2000     and t5.TOT_AST_MDA<5000     then '03-2000_5000'
+			when t5.TOT_AST_MDA >= 5000     and t5.TOT_AST_MDA<10000    then '04-5000_1w'
+			when t5.TOT_AST_MDA >= 10000    and t5.TOT_AST_MDA<50000    then '05-1w_5w'
+			when t5.TOT_AST_MDA >= 50000    and t5.TOT_AST_MDA<100000   then '06-5w_10w'
+            when t5.TOT_AST_MDA >= 100000   and t5.TOT_AST_MDA<200000   then '1-10w_20w'
+    		when t5.TOT_AST_MDA >= 200000   and t5.TOT_AST_MDA<500000   then '2-20w_50w'
+    		when t5.TOT_AST_MDA >= 500000   and t5.TOT_AST_MDA<1000000  then '3-50w_100w'
+    		when t5.TOT_AST_MDA >= 1000000  and t5.TOT_AST_MDA<2000000  then '4-100w_200w'
+    		when t5.TOT_AST_MDA >= 2000000  and t5.TOT_AST_MDA<3000000  then '5-200w_300w'
+    		when t5.TOT_AST_MDA >= 3000000  and t5.TOT_AST_MDA<5000000  then '6-300w_500w'
+    		when t5.TOT_AST_MDA >= 5000000  and t5.TOT_AST_MDA<10000000 then '7-500w_1000w'
+    		when t5.TOT_AST_MDA >= 10000000 and t5.TOT_AST_MDA<30000000 then '8-1000w_3000w'
+			when t5.TOT_AST_MDA >= 30000000                             then '9-大于3000w'
+         end as 资产段	
+	 from DM.T_PUB_CUST t1	 
+	 left join DM.T_PUB_DATE_M t2 on t1.YEAR=t2.YEAR and t1.MTH=t2.MTH
+	 left join DM.T_PUB_CUST_LIMIT_M_D t3 on t1.YEAR=t3.YEAR and t1.MTH=t3.MTH and t1.CUST_ID=t3.CUST_ID
+	 left join DM.T_ACC_CPTL_ACC t4 on t1.YEAR=t4.YEAR and t1.MTH=t4.MTH and t1.MAIN_CPTL_ACCT=t4.CPTL_ACCT
+	 left join DM.T_AST_ODI_M_D t5 on t1.YEAR=t5.YEAR and t1.MTH=t5.MTH and t1.CUST_ID=t5.CUST_ID
+    where  t1.YEAR=@V_YEAR and t1.MTH=@V_MONTH  and 资产段 is not null
+) t_khsx on t1.YEAR=t_khsx.YEAR and t1.MTH=t_khsx.MTH and t1.CUST_ID=t_khsx.CUST_ID
+left join DM.T_AST_EMPCUS_ODI_M_D t_ptzc			--员工客户普通资产
+	on t1.YEAR=t_ptzc.YEAR and t1.MTH=t_ptzc.MTH and t1.CUST_ID=t_ptzc.CUST_ID and t1.AFA_SEC_EMPID=t_ptzc.AFA_SEC_EMPID
+left join DM.T_AST_EMPCUS_CREDIT_M_D t_rzrq		--员工客户融资融券
+	on t1.YEAR=t_rzrq.YEAR and t1.MTH=t_rzrq.MTH and t1.CUST_ID=t_rzrq.CUST_ID and t1.AFA_SEC_EMPID=t_rzrq.AFA_SEC_EMPID
+left join DM.T_AST_EMPCUS_CPTL_CHG_M_D t_zcbd	--员工客户资产变动
+	on t1.YEAR=t_zcbd.YEAR and t1.MTH=t_zcbd.MTH and t1.CUST_ID=t_zcbd.CUST_ID and t1.AFA_SEC_EMPID=t_zcbd.AFA_SEC_EMPID
+left join DM.T_EVT_EMPCUS_ODI_TRD_M_D t_ptjy		--员工客户普通交易
+	on t1.YEAR=t_ptjy.YEAR and t1.MTH=t_ptjy.MTH and t1.CUST_ID=t_ptjy.CUST_ID and t1.AFA_SEC_EMPID=t_ptjy.AFA_SEC_EMPID
+left join DM.T_EVT_EMPCUS_ODI_INCM_M_D t_ptsr	--员工客户普通收入
+	on t1.YEAR=t_ptsr.YEAR and t1.MTH=t_ptsr.MTH and t1.CUST_ID=t_ptsr.CUST_ID and t1.AFA_SEC_EMPID=t_ptsr.AFA_SEC_EMPID
+left join DM.T_EVT_EMPCUS_CRED_INCM_M_D t_xysr	--员工客户信用收入
+	on t1.YEAR=t_xysr.YEAR and t1.MTH=t_xysr.MTH and t1.CUST_ID=t_xysr.CUST_ID and t1.AFA_SEC_EMPID=t_xysr.AFA_SEC_EMPID
+left join DM.T_AST_EMPCUS_APPTBUYB_M_D t_ydgh	--约定购回表
+	on t1.YEAR=t_ydgh.YEAR and t1.MTH=t_ydgh.MTH and t1.CUST_ID=t_ydgh.CUST_ID and t1.AFA_SEC_EMPID=t_ydgh.AFA_SEC_EMPID
+left join
+(
+	select
+		t1.YEAR
+		,t1.MTH
+		,t1.CUST_ID
+		,t1.AFA_SEC_EMPID
+		,sum(COALESCE(t1.GUAR_SECU_MVAL_FINAL,0)) as GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.STKPLG_FIN_BAL_FINAL,0)) as STKPLG_FIN_BAL_FINAL
+		,sum(COALESCE(t1.SH_GUAR_SECU_MVAL_FINAL,0)) as SH_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.SZ_GUAR_SECU_MVAL_FINAL,0)) as SZ_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL_FINAL,0)) as SH_NOTS_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL_FINAL,0)) as SZ_NOTS_GUAR_SECU_MVAL_FINAL
+		,sum(COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL_FINAL,0)) as PROP_FINAC_OUT_SIDE_BAL_FINAL
+		,sum(COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL_FINAL,0)) as ASSM_FINAC_OUT_SIDE_BAL_FINAL
+		,sum(COALESCE(t1.SM_LOAN_FINAC_OUT_BAL_FINAL,0)) as SM_LOAN_FINAC_OUT_BAL_FINAL
+		,sum(COALESCE(t1.GUAR_SECU_MVAL_MDA,0)) as GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.STKPLG_FIN_BAL_MDA,0)) as STKPLG_FIN_BAL_MDA
+		,sum(COALESCE(t1.SH_GUAR_SECU_MVAL_MDA,0)) as SH_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.SZ_GUAR_SECU_MVAL_MDA,0)) as SZ_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL_MDA,0)) as SH_NOTS_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL_MDA,0)) as SZ_NOTS_GUAR_SECU_MVAL_MDA
+		,sum(COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL_MDA,0)) as PROP_FINAC_OUT_SIDE_BAL_MDA
+		,sum(COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL_MDA,0)) as ASSM_FINAC_OUT_SIDE_BAL_MDA
+		,sum(COALESCE(t1.SM_LOAN_FINAC_OUT_BAL_MDA,0)) as SM_LOAN_FINAC_OUT_BAL_MDA
+		,sum(COALESCE(t1.GUAR_SECU_MVAL_YDA,0)) as GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.STKPLG_FIN_BAL_YDA,0)) as STKPLG_FIN_BAL_YDA
+		,sum(COALESCE(t1.SH_GUAR_SECU_MVAL_YDA,0)) as SH_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.SZ_GUAR_SECU_MVAL_YDA,0)) as SZ_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.SH_NOTS_GUAR_SECU_MVAL_YDA,0)) as SH_NOTS_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.SZ_NOTS_GUAR_SECU_MVAL_YDA,0)) as SZ_NOTS_GUAR_SECU_MVAL_YDA
+		,sum(COALESCE(t1.PROP_FINAC_OUT_SIDE_BAL_YDA,0)) as PROP_FINAC_OUT_SIDE_BAL_YDA
+		,sum(COALESCE(t1.ASSM_FINAC_OUT_SIDE_BAL_YDA,0)) as ASSM_FINAC_OUT_SIDE_BAL_YDA
+		,sum(COALESCE(t1.SM_LOAN_FINAC_OUT_BAL_YDA,0)) as SM_LOAN_FINAC_OUT_BAL_YDA
+	from DM.T_AST_EMPCUS_STKPLG_M_D t1
+	group by
+		t1.YEAR
+		,t1.MTH
+		,t1.CUST_ID
+		,t1.AFA_SEC_EMPID
+) t_gpzy 									--股票质押表
+	on t1.YEAR=t_gpzy.YEAR and t1.MTH=t_gpzy.MTH and t1.CUST_ID=t_gpzy.CUST_ID and t1.AFA_SEC_EMPID=t_gpzy.AFA_SEC_EMPID
+where t1.YEAR=@V_YEAR and t1.MTH=@V_MONTH
+ AND t_khsx.是否特殊账户 IS NOT NULL
+ AND t_khsx.是否产品新客户 IS NOT NULL
+ AND t_khsx.CUST_ID IS NOT NULL
+ AND t_jg.WH_ORG_ID IS NOT NULL
+group by
+	t1.YEAR
+	,t1.MTH
+	,t_jg.WH_ORG_ID	
+	,t1.AFA_SEC_EMPID
+	
+	--维度信息
+	,t_khsx.客户状态
+	,t_khsx.是否特殊账户
+	,t_khsx.是否产品新客户
+	,t_khsx.是否月新增
+	,t_khsx.是否年新增	
+	,t_khsx.是否融资融券客户
+	,t_khsx.是否融资融券月新增
+	,t_khsx.是否融资融券年新增
+	,t_khsx.是否融资融券有效客户
+	,t_khsx.是否融资融券月新增有效户
+	,t_khsx.是否融资融券年新增有效户
+	,t_khsx.资产段
+	,t_khsx.客户类型
+	;
+END
+GO
+CREATE PROCEDURE dm.P_EVT_EMP_PROD_M(IN @V_BIN_DATE INT)
+
+
+BEGIN 
+  
+  /******************************************************************
+  程序功能: 在GP中创建员工产品级别月表:带权责
+  编写者: DCY
+  创建日期: 2018-03-26
+  简介：员工产品级别月表
+  *********************************************************************
+  修订记录： 修订日期       版本号    修订人             修改内容简要说明
+           
+  *********************************************************************/
+
+    DECLARE @V_YEAR VARCHAR(4);		-- 年份
+  	DECLARE @V_MONTH VARCHAR(2);	-- 月份
+	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
+	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+
+--PART0 删除当月数据
+  DELETE FROM DM.T_EVT_EMP_PROD_M WHERE YEAR=@V_YEAR AND MTH=@V_MONTH;
+
+  	insert into DM.T_EVT_EMP_PROD_M
+  		(
+  			YEAR
+     ,MTH
+     ,YEAR_MTH
+     ,PROD_CD
+     ,PROD_TYPE
+     ,WH_ORG_ID_EMP
+     ,AFA_SEC_EMPID
+     ,IF_SPCA_ACC
+     ,ITC_RETAIN_AMT_FINAL
+     ,OTC_RETAIN_AMT_FINAL
+     ,ITC_RETAIN_SHAR_FINAL
+     ,OTC_RETAIN_SHAR_FINAL
+     ,ITC_RETAIN_AMT_MDA
+     ,OTC_RETAIN_AMT_MDA
+     ,ITC_RETAIN_SHAR_MDA
+     ,OTC_RETAIN_SHAR_MDA
+     ,ITC_RETAIN_AMT_YDA
+     ,OTC_RETAIN_AMT_YDA
+     ,ITC_RETAIN_SHAR_YDA
+     ,OTC_RETAIN_SHAR_YDA
+     ,ITC_SUBS_AMT_MTD
+     ,ITC_PURS_AMT_MTD
+     ,ITC_BUYIN_AMT_MTD
+     ,ITC_REDP_AMT_MTD
+     ,ITC_SELL_AMT_MTD
+     ,OTC_SUBS_AMT_MTD
+     ,OTC_PURS_AMT_MTD
+     ,OTC_CASTSL_AMT_MTD
+     ,OTC_COVT_IN_AMT_MTD
+     ,OTC_REDP_AMT_MTD
+     ,OTC_COVT_OUT_AMT_MTD
+     ,SALE_AMT_MTD
+     ,TF_SALE_AMT_MTD
+     ,REDP_AMT_MTD
+     ,ITC_SUBS_SHAR_MTD
+     ,ITC_PURS_SHAR_MTD
+     ,ITC_BUYIN_SHAR_MTD
+     ,ITC_REDP_SHAR_MTD
+     ,ITC_SELL_SHAR_MTD
+     ,OTC_SUBS_SHAR_MTD
+     ,OTC_PURS_SHAR_MTD
+     ,OTC_CASTSL_SHAR_MTD
+     ,OTC_COVT_IN_SHAR_MTD
+     ,OTC_REDP_SHAR_MTD
+     ,OTC_COVT_OUT_SHAR_MTD
+     ,ITC_SUBS_CHAG_MTD
+     ,ITC_PURS_CHAG_MTD
+     ,ITC_BUYIN_CHAG_MTD
+     ,ITC_REDP_CHAG_MTD
+     ,ITC_SELL_CHAG_MTD
+     ,OTC_SUBS_CHAG_MTD
+     ,OTC_PURS_CHAG_MTD
+     ,OTC_CASTSL_CHAG_MTD
+     ,OTC_COVT_IN_CHAG_MTD
+     ,OTC_REDP_CHAG_MTD
+     ,OTC_COVT_OUT_CHAG_MTD
+     ,ITC_SUBS_AMT_YTD
+     ,ITC_PURS_AMT_YTD
+     ,ITC_BUYIN_AMT_YTD
+     ,ITC_REDP_AMT_YTD
+     ,ITC_SELL_AMT_YTD
+     ,OTC_SUBS_AMT_YTD
+     ,OTC_PURS_AMT_YTD
+     ,OTC_CASTSL_AMT_YTD
+     ,OTC_COVT_IN_AMT_YTD
+     ,OTC_REDP_AMT_YTD
+     ,OTC_COVT_OUT_AMT_YTD
+     ,SALE_AMT_YTD
+     ,TF_SALE_AMT_YTD
+     ,REDP_AMT_YTD
+     ,ITC_SUBS_SHAR_YTD
+     ,ITC_PURS_SHAR_YTD
+     ,ITC_BUYIN_SHAR_YTD
+     ,ITC_REDP_SHAR_YTD
+     ,ITC_SELL_SHAR_YTD
+     ,OTC_SUBS_SHAR_YTD
+     ,OTC_PURS_SHAR_YTD
+     ,OTC_CASTSL_SHAR_YTD
+     ,OTC_COVT_IN_SHAR_YTD
+     ,OTC_REDP_SHAR_YTD
+     ,OTC_COVT_OUT_SHAR_YTD
+     ,ITC_SUBS_CHAG_YTD
+     ,ITC_PURS_CHAG_YTD
+     ,ITC_BUYIN_CHAG_YTD
+     ,ITC_REDP_CHAG_YTD
+     ,ITC_SELL_CHAG_YTD
+     ,OTC_SUBS_CHAG_YTD
+     ,OTC_PURS_CHAG_YTD
+     ,OTC_CASTSL_CHAG_YTD
+     ,OTC_COVT_IN_CHAG_YTD
+     ,OTC_REDP_CHAG_YTD
+     ,OTC_COVT_OUT_CHAG_YTD
+     ,CONTD_SALE_SHAR_MTD
+     ,CONTD_SALE_AMT_MTD
+     ,CONTD_SALE_SHAR_YTD
+     ,CONTD_SALE_AMT_YTD
+     ,LOAD_DT            
+  		)
+	select 
+		t1.YEAR as 年
+		,t1.MTH as 月
+		,t1.YEAR_MTH as 年月
+		,t1.PROD_CD as 产品代码
+		,t1.PROD_TYPE as 产品类型
+		,t1.WH_ORG_ID_EMP as 仓库机构编码_员工
+		,t1.AFA_SEC_EMPID as AFA二期员工号
+		
+		--维度信息
+		--	,t_khsx.客户状态
+		,t_khsx.是否特殊账户
+	--	,t_khsx.是否产品新客户
+	--	,t_khsx.是否月新增
+	--	,t_khsx.是否年新增	
+	--	,t_khsx.资产段
+	--	,t_khsx.客户类型
+		
+		,sum(COALESCE(t1.ITC_RETAIN_AMT_FINAL,0)) as 场内保有金额_期末
+		,sum(COALESCE(t1.OTC_RETAIN_AMT_FINAL,0)) as 场外保有金额_期末
+		,sum(COALESCE(t1.ITC_RETAIN_SHAR_FINAL,0)) as 场内保有份额_期末
+		,sum(COALESCE(t1.OTC_RETAIN_SHAR_FINAL,0)) as 场外保有份额_期末
+		,sum(COALESCE(t1.ITC_RETAIN_AMT_MDA,0)) as 场内保有金额_月日均
+		,sum(COALESCE(t1.OTC_RETAIN_AMT_MDA,0)) as 场外保有金额_月日均
+		,sum(COALESCE(t1.ITC_RETAIN_SHAR_MDA,0)) as 场内保有份额_月日均
+		,sum(COALESCE(t1.OTC_RETAIN_SHAR_MDA,0)) as 场外保有份额_月日均
+		,sum(COALESCE(t1.ITC_RETAIN_AMT_YDA,0)) as 场内保有金额_年日均
+		,sum(COALESCE(t1.OTC_RETAIN_AMT_YDA,0)) as 场外保有金额_年日均
+		,sum(COALESCE(t1.ITC_RETAIN_SHAR_YDA,0)) as 场内保有份额_年日均
+		,sum(COALESCE(t1.OTC_RETAIN_SHAR_YDA,0)) as 场外保有份额_年日均
+		
+		,sum(COALESCE(t1.ITC_SUBS_AMT_MTD,0)) as 场内认购金额_月累计
+		,sum(COALESCE(t1.ITC_PURS_AMT_MTD,0)) as 场内申购金额_月累计
+		,sum(COALESCE(t1.ITC_BUYIN_AMT_MTD,0)) as 场内买入金额_月累计
+		,sum(COALESCE(t1.ITC_REDP_AMT_MTD,0)) as 场内赎回金额_月累计
+		,sum(COALESCE(t1.ITC_SELL_AMT_MTD,0)) as 场内卖出金额_月累计
+		,sum(COALESCE(t1.OTC_SUBS_AMT_MTD,0)) as 场外认购金额_月累计
+		,sum(COALESCE(t1.OTC_PURS_AMT_MTD,0)) as 场外申购金额_月累计
+		,sum(COALESCE(t1.OTC_CASTSL_AMT_MTD,0)) as 场外定投金额_月累计
+		,sum(COALESCE(t1.OTC_COVT_IN_AMT_MTD,0)) as 场外转换入金额_月累计
+		,sum(COALESCE(t1.OTC_REDP_AMT_MTD,0)) as 场外赎回金额_月累计
+		,sum(COALESCE(t1.OTC_COVT_OUT_AMT_MTD,0)) as 场外转换出金额_月累计
+		
+		--销售金额：场内认购金额、场内认购手续费、场外认购金额、场外申购金额、场外定投金额、场外转换入金额、续作销售金额、转托管入金额
+		,sum(COALESCE(t1.ITC_SUBS_AMT_MTD,0)	--场内认购金额_月累计
+			+COALESCE(t1.ITC_SUBS_CHAG_MTD,0)	--场内认购手续费_月累计
+			+COALESCE(t1.OTC_SUBS_AMT_MTD,0)	--场外认购金额_月累计
+			+COALESCE(t1.OTC_PURS_AMT_MTD,0)	--场外申购金额_月累计
+			+COALESCE(t1.OTC_CASTSL_AMT_MTD,0)	--场外定投金额_月累计		
+			+COALESCE(t1.OTC_COVT_IN_AMT_MTD,0)	--场外转换入金额_月累计
+			+COALESCE(t1.CONTD_SALE_AMT_MTD,0)	--续作销售金额_月累计				
+			) as 销售金额_月累计
+			
+		--首发销售金额：场内认购金额、场内认购手续费、场外认购金额
+		,sum(COALESCE(t1.ITC_SUBS_AMT_MTD,0)	--场内认购金额_月累计		
+			+COALESCE(t1.ITC_SUBS_CHAG_MTD,0)	--场内认购手续费_月累计
+			+COALESCE(t1.OTC_SUBS_AMT_MTD,0)	--场外认购金额_月累计		
+			) as 首发销售金额_月累计		
+			
+		--赎回金额：场外赎回金额、场外转换出金额、转托管出金额
+		,sum(		
+			COALESCE(t1.OTC_REDP_AMT_MTD,0)		--场外赎回金额_月累计		
+			+COALESCE(t1.OTC_COVT_OUT_AMT_MTD,0)--场外转换出金额_月累计	
+			) as 赎回金额_月累计
+				
+		,sum(COALESCE(t1.ITC_SUBS_SHAR_MTD,0)) as 场内认购份额_月累计
+		,sum(COALESCE(t1.ITC_PURS_SHAR_MTD,0)) as 场内申购份额_月累计
+		,sum(COALESCE(t1.ITC_BUYIN_SHAR_MTD,0)) as 场内买入份额_月累计
+		,sum(COALESCE(t1.ITC_REDP_SHAR_MTD,0)) as 场内赎回份额_月累计
+		,sum(COALESCE(t1.ITC_SELL_SHAR_MTD,0)) as 场内卖出份额_月累计
+		,sum(COALESCE(t1.OTC_SUBS_SHAR_MTD,0)) as 场外认购份额_月累计
+		,sum(COALESCE(t1.OTC_PURS_SHAR_MTD,0)) as 场外申购份额_月累计
+		,sum(COALESCE(t1.OTC_CASTSL_SHAR_MTD,0)) as 场外定投份额_月累计
+		,sum(COALESCE(t1.OTC_COVT_IN_SHAR_MTD,0)) as 场外转换入份额_月累计
+		,sum(COALESCE(t1.OTC_REDP_SHAR_MTD,0)) as 场外赎回份额_月累计
+		,sum(COALESCE(t1.OTC_COVT_OUT_SHAR_MTD,0)) as 场外转换出份额_月累计
+		,sum(COALESCE(t1.ITC_SUBS_CHAG_MTD,0)) as 场内认购手续费_月累计
+		,sum(COALESCE(t1.ITC_PURS_CHAG_MTD,0)) as 场内申购手续费_月累计
+		,sum(COALESCE(t1.ITC_BUYIN_CHAG_MTD,0)) as 场内买入手续费_月累计
+		,sum(COALESCE(t1.ITC_REDP_CHAG_MTD,0)) as 场内赎回手续费_月累计
+		,sum(COALESCE(t1.ITC_SELL_CHAG_MTD,0)) as 场内卖出手续费_月累计
+		,sum(COALESCE(t1.OTC_SUBS_CHAG_MTD,0)) as 场外认购手续费_月累计
+		,sum(COALESCE(t1.OTC_PURS_CHAG_MTD,0)) as 场外申购手续费_月累计
+		,sum(COALESCE(t1.OTC_CASTSL_CHAG_MTD,0)) as 场外定投手续费_月累计
+		,sum(COALESCE(t1.OTC_COVT_IN_CHAG_MTD,0)) as 场外转换入手续费_月累计
+		,sum(COALESCE(t1.OTC_REDP_CHAG_MTD,0)) as 场外赎回手续费_月累计
+		,sum(COALESCE(t1.OTC_COVT_OUT_CHAG_MTD,0)) as 场外转换出手续费_月累计
+		,sum(COALESCE(t1.ITC_SUBS_AMT_YTD,0)) as 场内认购金额_年累计
+		,sum(COALESCE(t1.ITC_PURS_AMT_YTD,0)) as 场内申购金额_年累计
+		,sum(COALESCE(t1.ITC_BUYIN_AMT_YTD,0)) as 场内买入金额_年累计
+		,sum(COALESCE(t1.ITC_REDP_AMT_YTD,0)) as 场内赎回金额_年累计
+		,sum(COALESCE(t1.ITC_SELL_AMT_YTD,0)) as 场内卖出金额_年累计
+		,sum(COALESCE(t1.OTC_SUBS_AMT_YTD,0)) as 场外认购金额_年累计
+		,sum(COALESCE(t1.OTC_PURS_AMT_YTD,0)) as 场外申购金额_年累计
+		,sum(COALESCE(t1.OTC_CASTSL_AMT_YTD,0)) as 场外定投金额_年累计
+		,sum(COALESCE(t1.OTC_COVT_IN_AMT_YTD,0)) as 场外转换入金额_年累计
+		,sum(COALESCE(t1.OTC_REDP_AMT_YTD,0)) as 场外赎回金额_年累计
+		,sum(COALESCE(t1.OTC_COVT_OUT_AMT_YTD,0)) as 场外转换出金额_年累计
+		
+		--销售金额：场内认购金额、场内认购手续费、场外认购金额、场外申购金额、场外定投金额、场外转换入金额、续作销售金额、转托管入金额
+		,sum(COALESCE(t1.ITC_SUBS_AMT_YTD,0)	--场内认购金额_年累计		
+			+COALESCE(t1.ITC_SUBS_CHAG_YTD,0)	--场内认购手续费_年累计
+			+COALESCE(t1.OTC_SUBS_AMT_YTD,0)	--场外认购金额_年累计
+			+COALESCE(t1.OTC_PURS_AMT_YTD,0)	--场外申购金额_年累计
+			+COALESCE(t1.OTC_CASTSL_AMT_YTD,0)	--场外定投金额_年累计		
+			+COALESCE(t1.OTC_COVT_IN_AMT_YTD,0)	--场外转换入金额_年累计
+			+COALESCE(t1.CONTD_SALE_AMT_YTD,0)	--续作销售金额_年累计	
+			) as 销售金额_年累计
+			
+		--首发销售金额：场内认购金额、场内认购手续费、场外认购金额
+		,sum(COALESCE(t1.ITC_SUBS_AMT_YTD,0)	--场内认购金额_年累计	
+			+COALESCE(t1.ITC_SUBS_CHAG_YTD,0)	--场内认购手续费_年累计	
+			+COALESCE(t1.OTC_SUBS_AMT_YTD,0)	--场外认购金额_年累计		
+			) as 首发销售金额_年累计				
+		
+		--赎回金额：场外赎回金额、场外转换出金额、转托管出金额
+		,sum(COALESCE(t1.OTC_REDP_AMT_YTD,0)	--场外赎回金额_年累计		
+			+COALESCE(t1.OTC_COVT_OUT_AMT_YTD,0)--场外转换出金额_年累计	
+			) as 赎回金额_年累计	
+			
+		,sum(COALESCE(t1.ITC_SUBS_SHAR_YTD,0)) as 场内认购份额_年累计
+		,sum(COALESCE(t1.ITC_PURS_SHAR_YTD,0)) as 场内申购份额_年累计
+		,sum(COALESCE(t1.ITC_BUYIN_SHAR_YTD,0)) as 场内买入份额_年累计
+		,sum(COALESCE(t1.ITC_REDP_SHAR_YTD,0)) as 场内赎回份额_年累计
+		,sum(COALESCE(t1.ITC_SELL_SHAR_YTD,0)) as 场内卖出份额_年累计
+		,sum(COALESCE(t1.OTC_SUBS_SHAR_YTD,0)) as 场外认购份额_年累计
+		,sum(COALESCE(t1.OTC_PURS_SHAR_YTD,0)) as 场外申购份额_年累计
+		,sum(COALESCE(t1.OTC_CASTSL_SHAR_YTD,0)) as 场外定投份额_年累计
+		,sum(COALESCE(t1.OTC_COVT_IN_SHAR_YTD,0)) as 场外转换入份额_年累计
+		,sum(COALESCE(t1.OTC_REDP_SHAR_YTD,0)) as 场外赎回份额_年累计
+		,sum(COALESCE(t1.OTC_COVT_OUT_SHAR_YTD,0)) as 场外转换出份额_年累计
+		,sum(COALESCE(t1.ITC_SUBS_CHAG_YTD,0)) as 场内认购手续费_年累计
+		,sum(COALESCE(t1.ITC_PURS_CHAG_YTD,0)) as 场内申购手续费_年累计
+		,sum(COALESCE(t1.ITC_BUYIN_CHAG_YTD,0)) as 场内买入手续费_年累计
+		,sum(COALESCE(t1.ITC_REDP_CHAG_YTD,0)) as 场内赎回手续费_年累计
+		,sum(COALESCE(t1.ITC_SELL_CHAG_YTD,0)) as 场内卖出手续费_年累计
+		,sum(COALESCE(t1.OTC_SUBS_CHAG_YTD,0)) as 场外认购手续费_年累计
+		,sum(COALESCE(t1.OTC_PURS_CHAG_YTD,0)) as 场外申购手续费_年累计
+		,sum(COALESCE(t1.OTC_CASTSL_CHAG_YTD,0)) as 场外定投手续费_年累计
+		,sum(COALESCE(t1.OTC_COVT_IN_CHAG_YTD,0)) as 场外转换入手续费_年累计
+		,sum(COALESCE(t1.OTC_REDP_CHAG_YTD,0)) as 场外赎回手续费_年累计
+		,sum(COALESCE(t1.OTC_COVT_OUT_CHAG_YTD,0)) as 场外转换出手续费_年累计
+		--续作销售
+		,sum(COALESCE(t1.CONTD_SALE_SHAR_MTD,0)) as 续作销售份额_月累计
+		,sum(COALESCE(t1.CONTD_SALE_AMT_MTD,0)) as 续作销售金额_月累计
+		,sum(COALESCE(t1.CONTD_SALE_SHAR_YTD,0)) as 续作销售份额_年累计
+		,sum(COALESCE(t1.CONTD_SALE_AMT_YTD,0)) as 续作销售金额_年累计
+		,@V_BIN_DATE
+	from DM.T_EVT_EMPCUS_PROD_TRD_M_D t1
+	left join 
+	(											--客户属性和维度处理
+		select 
+			t1.YEAR
+			,t1.MTH	
+			,t1.CUST_ID
+			,t1.CUST_STAT as 客户状态
+			,case when t1.TE_OACT_DT>=t2.NATRE_DAY_MTHBEG then 1 else 0 end as 是否月新增
+			,case when t1.TE_OACT_DT>=t2.NATRE_DAY_YEARBGN then 1 else 0 end as 是否年新增
+			,coalesce(t1.IF_VLD,0) as 是否有效
+			,coalesce(CONVERT(VARCHAR,t4.IF_SPCA_ACCT),'0') as 是否特殊账户
+			,coalesce(convert(varchar,t1.IF_PROD_NEW_CUST),'0') as 是否产品新客户
+			,t1.CUST_TYPE as 客户类型
+			
+		,case 
+            when t5.TOT_AST_MDA<100                                     then '00-100以下'
+			when t5.TOT_AST_MDA >= 100      and t5.TOT_AST_MDA<1000     then '01-100_1000'
+			when t5.TOT_AST_MDA >= 1000     and t5.TOT_AST_MDA<2000     then '02-1000_2000'
+			when t5.TOT_AST_MDA >= 2000     and t5.TOT_AST_MDA<5000     then '03-2000_5000'
+			when t5.TOT_AST_MDA >= 5000     and t5.TOT_AST_MDA<10000    then '04-5000_1w'
+			when t5.TOT_AST_MDA >= 10000    and t5.TOT_AST_MDA<50000    then '05-1w_5w'
+			when t5.TOT_AST_MDA >= 50000    and t5.TOT_AST_MDA<100000   then '06-5w_10w'
+            when t5.TOT_AST_MDA >= 100000   and t5.TOT_AST_MDA<200000   then '1-10w_20w'
+    		when t5.TOT_AST_MDA >= 200000   and t5.TOT_AST_MDA<500000   then '2-20w_50w'
+    		when t5.TOT_AST_MDA >= 500000   and t5.TOT_AST_MDA<1000000  then '3-50w_100w'
+    		when t5.TOT_AST_MDA >= 1000000  and t5.TOT_AST_MDA<2000000  then '4-100w_200w'
+    		when t5.TOT_AST_MDA >= 2000000  and t5.TOT_AST_MDA<3000000  then '5-200w_300w'
+    		when t5.TOT_AST_MDA >= 3000000  and t5.TOT_AST_MDA<5000000  then '6-300w_500w'
+    		when t5.TOT_AST_MDA >= 5000000  and t5.TOT_AST_MDA<10000000 then '7-500w_1000w'
+    		when t5.TOT_AST_MDA >= 10000000 and t5.TOT_AST_MDA<30000000 then '8-1000w_3000w'
+			when t5.TOT_AST_MDA >= 30000000                             then '9-大于3000w'
+         end as 资产段			
+		 from DM.T_PUB_CUST t1	 
+		 left join DM.T_PUB_DATE_M t2 on t1.YEAR=t2.YEAR and t1.MTH=t2.MTH
+		 left join DM.T_PUB_CUST_LIMIT_M_D t3 on t1.YEAR=t3.YEAR and t1.MTH=t3.MTH and t1.CUST_ID=t3.CUST_ID
+		 left join DM.T_ACC_CPTL_ACC t4 on t1.YEAR=t4.YEAR and t1.MTH=t4.MTH and t1.MAIN_CPTL_ACCT=t4.CPTL_ACCT
+		 left join DM.T_AST_ODI_M_D t5 on t1.YEAR=t5.YEAR and t1.MTH=t5.MTH and t1.CUST_ID=t5.CUST_ID
+     WHERE t1.YEAR= @V_YEAR 
+        and t1.MTH= @V_MONTH 
+        AND 资产段 IS NOT NULL
+	) t_khsx on t1.YEAR=t_khsx.YEAR and t1.MTH=t_khsx.MTH and t1.CUST_ID=t_khsx.CUST_ID
+ WHERE  t1.YEAR=@V_YEAR and t1.MTH=@V_MONTH
+    and t_khsx.是否特殊账户 IS NOT NULL 
+    AND t_khsx.CUST_ID IS NOT NULL
+    and t1.AFA_SEC_EMPID IS NOT NULL
+    AND t1.WH_ORG_ID_EMP IS NOT NULL
+    AND t1.AFA_SEC_EMPID IS NOT NULL
+	group by
+		t1.YEAR
+		,t1.MTH 
+		,t1.YEAR_MTH
+		,t1.PROD_CD
+		,t1.PROD_TYPE
+		,t1.WH_ORG_ID_EMP
+		,t1.AFA_SEC_EMPID
+		,t_khsx.是否特殊账户
+	;
+
+END
 GO
 CREATE PROCEDURE dm.P_EVT_EMPCUS_CRED_INCM_M_D(IN @V_BIN_DATE INT)
 
@@ -7466,11 +10718,11 @@ LEFT JOIN #TEMP_SUM 	T_NIAN
 		AND T2.HS_CUST_ID=T_NIAN.CUST_ID 
 WHERE T2.OCCUR_DT=@V_BIN_DATE
        AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T2.HS_CUST_ID AND YEAR=T2.YEAR AND MTH=T2.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
-	   AND T2.HS_CUST_ID NOT IN ('448999999',
+	   /*AND T2.HS_CUST_ID NOT IN ('448999999',
 				'440000001',
 				'999900000001',
 				'440000011',
-				'440000015')--20180314 排除"总部专用账户"
+				'440000015')*/ --20180314 排除"总部专用账户"   ---20180525 不排除
 ;
 END
 GO
@@ -7522,8 +10774,9 @@ BEGIN
 	FROM DBA.T_EDW_UF2_CLIENT  			OUC   --所有客户信息
     LEFT JOIN DBA.T_edw_UF2_FUNDACCOUNT OUF ON OUC.CLIENT_ID=OUF.CLIENT_ID AND OUF.LOAD_DT=OUC.LOAD_dT AND OUF.ASSET_PROP='0' AND OUF.MAIN_FLAG='1'  --普通账户主资金账号
 	LEFT JOIN DBA.T_DIM_ORG_HIS  		DOH ON CONVERT(VARCHAR,OUC.BRANCH_NO)=DOH.BRANCH_NO AND DOH.RQ=OUC.LOAD_dT AND DOH.BRANCH_NO IS NOT NULL  AND DOH.HR_NAME IS NOT NULL    --有重复值
-	WHERE OUC.BRANCH_NO NOT IN (5,55,51,44,9999)--20180207 新增：排除"总部专用账户"
-      AND OUC.LOAD_DT=@V_BIN_DATE;
+	WHERE -- OUC.BRANCH_NO NOT IN (5,55,51,44,9999)--20180207 新增：排除"总部专用账户"   ---20180525 不做剔除
+      --AND 
+     OUC.LOAD_DT=@V_BIN_DATE;
 
     -- 业务数据临时表
     SELECT 
@@ -7539,8 +10792,8 @@ BEGIN
 		INTO #TEMP_T1
 	FROM #T_PUB_CUST T1
 	WHERE T1.OCCUR_DT=@V_BIN_DATE
-	       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH) --20180207 ZQ:有责权关系的客户必须要有资金账户
-		   AND T1.HS_ORG_ID NOT IN ('5','55','51','44','9999'); --20180314 排除"总部专用账户"
+	       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH); --20180207 ZQ:有责权关系的客户必须要有资金账户
+		   --AND T1.HS_ORG_ID NOT IN ('5','55','51','44','9999'); --20180314 排除"总部专用账户"   ---20180525 不做剔除
 		  
   
     ---汇总日责权汇总表---剔除部分客户再分配责权2条记录情况
@@ -7729,11 +10982,11 @@ BEGIN
  	LEFT JOIN DM.T_EVT_ODI_INCM_M_D T2 ON T1.CUST_ID=T2.CUST_ID AND T1.YEAR=T2.YEAR AND T1.OCCUR_DT>=T2.OCCUR_DT
 	WHERE T1.OCCUR_DT=@V_BIN_DATE
        AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
-	   AND T1.CUST_ID NOT IN ('448999999',
+	  /* AND T1.CUST_ID NOT IN ('448999999',
 				'440000001',
 				'999900000001',
 				'440000011',
-				'440000015')--20180314 排除"总部专用账户"
+				'440000015')*/ --20180314 排除"总部专用账户"   ---20180525 不做剔除
  	GROUP BY
  		T1.YEAR
  		,T1.MTH
@@ -7902,11 +11155,11 @@ SELECT
  		AND T1.CUST_ID=T2.HS_CUST_ID   
  WHERE T2.OCCUR_DT=@V_BIN_DATE
        AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T2.HS_CUST_ID AND YEAR=T2.YEAR AND MTH=T2.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
-	   AND T2.HS_CUST_ID NOT IN ('448999999',
+	   /*AND T2.HS_CUST_ID NOT IN ('448999999',
 				'440000001',
 				'999900000001',
 				'440000011',
-				'440000015')--20180314 排除"总部专用账户"
+				'440000015')*/ --20180314 排除"总部专用账户"  ---20180525 不做剔除
 ;
 
 END
@@ -7977,112 +11230,265 @@ BEGIN
 	 
 INSERT INTO DM.T_EVT_EMPCUS_ODI_TRD_M_D 
 (
-	 YEAR                --年  
-	,MTH                 --月
-	,OCCUR_DT            --业务日期
-	,CUST_ID             --客户编码
-	,AFA_SEC_EMPID       --AFA_二期员工号
-	,YEAR_MTH            --年月
-	,MAIN_CPTL_ACCT      --主资金账号
-	,YEAR_MTH_CUST_ID    --年月客户编码
-	,YEAR_MTH_PSN_JNO    --年月员工号
-	,WH_ORG_ID_CUST      --仓库机构编码_客户
-	,WH_ORG_ID_EMP       --仓库机构编码_员工
-	,EQT_CLAS_KEPP_PERCN --权益类持仓占比
-	,SCDY_TRD_FREQ       --二级交易次数
-	,RCT_TRD_DT_GT       --最近交易日期_累计
-	,SCDY_TRD_QTY        --二级交易量
-	,SCDY_TRD_QTY_TY     --二级交易量_本年
-	,TRD_FREQ_TY         --交易次数_本年
-	,STKF_TRD_QTY        --股基交易量
-	,STKF_TRD_QTY_TY     --股基交易量_本年
-	,S_REPUR_TRD_QTY     --正回购交易量
-	,R_REPUR_TRD_QTY     --逆回购交易量
-	,S_REPUR_TRD_QTY_TY  --正回购交易量_本年
-	,R_REPUR_TRD_QTY_TY  --逆回购交易量_本年
-	,HGT_TRD_QTY         --沪港通交易量
-	,SGT_TRD_QTY         --深港通交易量
-	,SGT_TRD_QTY_TY      --深港通交易量_本年
-	,HGT_TRD_QTY_TY      --沪港通交易量_本年
-	,Y_RCT_STK_TRD_QTY   --近12月股票交易量
-	,SCDY_TRD_FREQ_TY    --二级交易次数_本年
-	,TRD_FREQ            --交易次数
-	,APPTBUYB_TRD_QTY    --约定购回交易量
-	,APPTBUYB_TRD_QTY_TY --约定购回交易量_本年
-	,RCT_TRD_DT_M        --最近交易日期_本月
-	,STKPLG_TRD_QTY      --股票质押交易量
-	,STKPLG_TRD_QTY_TY   --股票质押交易量_本年
-	,PSTK_OPTN_TRD_QTY   --个股期权交易量
-	,PSTK_OPTN_TRD_QTY_TY--个股期权交易量_本年
-	,GROSS_CMS           --毛佣金
-	,NET_CMS             --净佣金
-	,REPQ_TRD_QTY        --报价回购交易量
-	,REPQ_TRD_QTY_TY     --报价回购交易量_本年
-	,BGDL_QTY            --大宗交易量
-	,BGDL_QTY_TY         --大宗交易量_本年
-	,LOAD_DT             --清洗日期
-
+	 YEAR                 				--年
+	,MTH                  				--月
+	,YEAR_MTH             				--年月
+	,occur_dt                           --业务日期
+	,CUST_ID              				--客户编号
+	,MAIN_CPTL_ACCT       				--主资金账号
+	,YEAR_MTH_CUST_ID     				--年月客户编号
+	,AFA_SEC_EMPID        				--AFA员工编号
+	,YEAR_MTH_PSN_JNO     				--年月员工编号
+	,WH_ORG_ID_CUST       				--仓库机构编码_客户
+	,WH_ORG_ID_EMP        				--仓库机构编码_员工
+	,EQT_CLAS_KEPP_PERCN  				--权益类持仓占比
+	,SCDY_TRD_FREQ_MTD    				--二级交易次数_月累计
+	,RCT_TRD_DT_GT        				--最近交易日期_累计
+	,SCDY_TRD_QTY_YTD     				--二级交易量_年累计
+	,TRD_FREQ_YTD         				--交易次数_年累计
+	,STKF_TRD_QTY_MDA     				--股基交易量_月日均
+	,STKF_TRD_QTY_YDA     				--股基交易量_年日均
+	,S_REPUR_TRD_QTY_MDA  				--正回购交易量_月日均
+	,R_REPUR_TRD_QTY_MDA  				--逆回购交易量_月日均
+	,S_REPUR_TRD_QTY_YDA  				--正回购交易量_年日均
+	,R_REPUR_TRD_QTY_YDA  				--逆回购交易量_年日均
+	,HGT_TRD_QTY_MTD      				--沪港通交易量_月累计
+	,SGT_TRD_QTY_MTD      				--深港通交易量_月累计
+	,SGT_TRD_QTY_YTD      				--深港通交易量_年累计
+	,HGT_TRD_QTY_YTD      				--沪港通交易量_年累计
+	,Y_RCT_STK_TRD_QTY    				--近12月股票交易量
+	,SCDY_TRD_FREQ_YTD    				--二级交易次数_年累计
+	,TRD_FREQ_MTD         				--交易次数_月累计
+	,APPTBUYB_TRD_QTY_MTD 				--约定购回交易量_月累计
+	,APPTBUYB_TRD_QTY_YTD 				--约定购回交易量_年累计
+	,RCT_TRD_DT_M         				--最近交易日期_本月
+	,STKPLG_TRD_QTY_MTD   				--股票质押交易量_月累计
+	,STKPLG_TRD_QTY_YTD   				--股票质押交易量_年累计
+	,PSTK_OPTN_TRD_QTY_MTD				--个股期权交易量_月累计
+	,PSTK_OPTN_TRD_QTY_YTD				--个股期权交易量_年累计
+	,REPQ_TRD_QTY_MTD     				--报价回购交易量_月累计
+	,REPQ_TRD_QTY_YTD     				--报价回购交易量_年累计
+	,BGDL_QTY_MTD         				--大宗交易量_月累计
+	,BGDL_QTY_YTD         				--大宗交易量_年累计
+	,LOAD_DT              				--清洗日期
+	,NATRE_DAYS_MTH       				--自然天数_月
+	,NATRE_DAYS_YEAR      				--自然天数_年
+	,CREDIT_ODI_TRD_QTY_MDA 			--信用账户普通交易量_月日均
+	,CREDIT_CRED_TRD_QTY_MDA			--信用账户信用交易量_月日均
+	,STKF_TRD_QTY_MTD     				--股基交易量_月累计
+	,SCDY_TRD_QTY_MTD     				--二级交易量_月累计
+	,SCDY_TRD_QTY_MDA     				--二级交易量_月日均
+	,S_REPUR_TRD_QTY_MTD  				--正回购交易量_月累计
+	,R_REPUR_TRD_QTY_MTD  				--逆回购交易量_月累计
+	,CREDIT_TRD_QTY_MTD   				--融资融券交易量_月累计
+	,OFFUND_TRD_QTY_MTD   				--场内基金交易量_月累计
+	,OPFUND_TRD_QTY_MTD   				--场外基金交易量_月累计
+	,BANK_CHRM_TRD_QTY_MTD 				--银行理财交易量_月累计
+	,SECU_CHRM_TRD_QTY_MTD 				--证券理财交易量_月累计
+	,CREDIT_ODI_TRD_QTY_MTD 			--信用账户普通交易量_月累计
+	,CREDIT_CRED_TRD_QTY_MTD 			--信用账户信用交易量_月累计
+	,FIN_AMT_MTD          				--融资金额_月累计
+	,CRDT_STK_AMT_MTD     				--融券金额_月累计
+	,STKPLG_BUYB_AMT_MTD  				--股票质押购回金额_月累计
+	,GROSS_CMS_MTD        				--毛佣金_月累计
+	,NET_CMS_MTD          				--净佣金_月累计
+	,STKPLG_BUYB_CNT_MTD  				--股票质押购回笔数_月累计
+	,CCB_AMT_MTD          				--融资买入金额_月累计
+	,CCB_CNT_MTD          				--融资买入笔数_月累计
+	,FIN_SELL_AMT_MTD     				--融资卖出金额_月累计
+	,FIN_SELL_CNT_MTD     				--融资卖出笔数_月累计
+	,CRDT_STK_BUYIN_AMT_MTD 			--融券买入金额_月累计
+	,CRDT_STK_BUYIN_CNT_MTD 			--融券买入笔数_月累计
+	,CSS_AMT_MTD          				--融券卖出金额_月累计
+	,CSS_CNT_MTD          				--融券卖出笔数_月累计
+	,FIN_RTN_AMT_MTD      				--融资归还金额_月累计
+	,APPTBUYB_REP_AMT_MTD 				--约定购回还款金额_月累计
+	,APPTBUYB_BUYB_AMT_MTD				--约定购回购回金额_月累计
+	,APPTBUYB_TRD_AMT_MTD 				--约定购回交易金额_月累计
+	,SCDY_TRD_QTY_YDA     				--二级交易量_年日均
+	,CREDIT_ODI_TRD_QTY_YDA 			--信用账户普通交易量_年日均
+	,CREDIT_CRED_TRD_QTY_YDA 			--信用账户信用交易量_年日均
+	,STKF_TRD_QTY_YTD     				--股基交易量_年累计
+	,S_REPUR_TRD_QTY_YTD  				--正回购交易量_年累计
+	,R_REPUR_TRD_QTY_YTD  				--逆回购交易量_年累计
+	,CREDIT_TRD_QTY_YTD   				--融资融券交易量_年累计
+	,OFFUND_TRD_QTY_YTD   				--场内基金交易量_年累计
+	,OPFUND_TRD_QTY_YTD   				--场外基金交易量_年累计
+	,BANK_CHRM_TRD_QTY_YTD 				--银行理财交易量_年累计
+	,SECU_CHRM_TRD_QTY_YTD 				--证券理财交易量_年累计
+	,CREDIT_ODI_TRD_QTY_YTD 			--信用账户普通交易量_年累计
+	,CREDIT_CRED_TRD_QTY_YTD 			--信用账户信用交易量_年累计
+	,FIN_AMT_YTD          				--融资金额_年累计
+	,CRDT_STK_AMT_YTD     				--融券金额_年累计
+	,STKPLG_BUYB_AMT_YTD  				--股票质押购回金额_年累计
+	,GROSS_CMS_YTD        				--毛佣金_年累计
+	,NET_CMS_YTD          				--净佣金_年累计
+	,STKPLG_BUYB_CNT_YTD  				--股票质押购回笔数_年累计
+	,CCB_AMT_YTD          				--融资买入金额_年累计
+	,CCB_CNT_YTD          				--融资买入笔数_年累计
+	,FIN_SELL_AMT_YTD     				--融资卖出金额_年累计
+	,FIN_SELL_CNT_YTD     				--融资卖出笔数_年累计
+	,CRDT_STK_BUYIN_AMT_YTD 			--融券买入金额_年累计
+	,CRDT_STK_BUYIN_CNT_YTD 			--融券买入笔数_年累计
+	,CSS_AMT_YTD          				--融券卖出金额_年累计
+	,CSS_CNT_YTD          				--融券卖出笔数_年累计
+	,FIN_RTN_AMT_YTD      				--融资归还金额_年累计
+	,APPTBUYB_REP_AMT_YTD 				--约定购回还款金额_年累计
+	,APPTBUYB_BUYB_AMT_YTD				--约定购回购回金额_年累计
+	,APPTBUYB_TRD_AMT_YTD 				--约定购回交易金额_年累计
+	,SB_TRD_QTY_MTD       				--三板交易量_月累计
+	,SB_TRD_QTY_YTD       				--三板交易量_年累计
+	,BOND_TRD_QTY_MTD     				--债券交易量_月累计
+	,BOND_TRD_QTY_YTD     				--债券交易量_年累计
+	,ITC_CRRC_FUND_TRD_QTY_MTD 			--场内货币基金交易量_月累计
+	,ITC_CRRC_FUND_TRD_QTY_YTD 			--场内货币基金交易量_年累计
+	,S_REPUR_NET_CMS_MTD  				--正回购净佣金_月累计
+	,S_REPUR_NET_CMS_YTD  				--正回购净佣金_年累计
+	,R_REPUR_NET_CMS_MTD  				--逆回购净佣金_月累计
+	,R_REPUR_NET_CMS_YTD  				--逆回购净佣金_年累计
+	,ITC_CRRC_FUND_NET_CMS_MTD 			--场内货币基金净佣金_月累计
+	,ITC_CRRC_FUND_NET_CMS_YTD 			--场内货币基金净佣金_年累计
+	,PB_TRD_QTY_MTD       				--PB交易量_月累计
 )
 SELECT 
-	T1.YEAR AS 年
-	,T1.MTH AS 月
-	,T1.OCCUR_DT
-	,T1.CUST_ID AS 客户编码
-	,T2.AFA_SEC_EMPID AS AFA_二期员工号
-	,T1.YEAR||T1.MTH AS 年月
-	,T1.MAIN_CPTL_ACCT AS 主资金账号
-	,T1.YEAR||T1.MTH||T1.CUST_ID AS 年月客户编号
-	,T1.YEAR||T1.MTH||T2.AFA_SEC_EMPID AS 年月员工号
-	,T2.WH_ORG_ID_CUST AS 仓库机构编码_客户
-	,T2.WH_ORG_ID_EMP AS 仓库机构编码_员工
-	
-	,T1.EQT_CLAS_KEPP_PERCN*PERFM_RATI3 AS 权益类持仓占比
-	,T1.SCDY_TRD_FREQ*PERFM_RATI3 AS 二级交易次数
-	,T1.RCT_TRD_DT_GT*PERFM_RATI3 AS 最近交易日期_累计
-	,T1.SCDY_TRD_QTY*PERFM_RATI3 AS 二级交易量
-	,T1.SCDY_TRD_QTY_TY*PERFM_RATI3 AS 二级交易量_本年
-	,T1.TRD_FREQ_TY*PERFM_RATI3 AS 交易次数_本年
-	,T1.STKF_TRD_QTY*PERFM_RATI3 AS 股基交易量
-	,T1.STKF_TRD_QTY_TY*PERFM_RATI3 AS 股基交易量_本年
-	,T1.S_REPUR_TRD_QTY*PERFM_RATI3 AS 正回购交易量
-	,T1.R_REPUR_TRD_QTY*PERFM_RATI3 AS 逆回购交易量
-	,T1.S_REPUR_TRD_QTY_TY*PERFM_RATI3 AS 正回购交易量_本年
-	,T1.R_REPUR_TRD_QTY_TY*PERFM_RATI3 AS 逆回购交易量_本年
-	,T1.HGT_TRD_QTY*PERFM_RATI3 AS 沪港通交易量
-	,T1.SGT_TRD_QTY*PERFM_RATI3 AS 深港通交易量
-	,T1.SGT_TRD_QTY_TY*PERFM_RATI3 AS 深港通交易量_本年
-	,T1.HGT_TRD_QTY_TY*PERFM_RATI3 AS 沪港通交易量_本年
-	,T1.Y_RCT_STK_TRD_QTY*PERFM_RATI3 AS 近12月股票交易量
-	,T1.SCDY_TRD_FREQ_TY*PERFM_RATI3 AS 二级交易次数_本年
-	,T1.TRD_FREQ*PERFM_RATI3 AS 交易次数
-	,T1.APPTBUYB_TRD_QTY*PERFM_RATI3 AS 约定购回交易量
-	,T1.APPTBUYB_TRD_QTY_TY*PERFM_RATI3 AS 约定购回交易量_本年
-	,T1.RCT_TRD_DT_M*PERFM_RATI3 AS 最近交易日期_本月
-	,T1.STKPLG_TRD_QTY*PERFM_RATI3 AS 股票质押交易量
-	,T1.STKPLG_TRD_QTY_TY*PERFM_RATI3 AS 股票质押交易量_本年
-	,T1.PSTK_OPTN_TRD_QTY*PERFM_RATI3 AS 个股期权交易量
-	,T1.PSTK_OPTN_TRD_QTY_TY*PERFM_RATI3 AS 个股期权交易量_本年
-	,T1.GROSS_CMS*PERFM_RATI3 AS 毛佣金
-	,T1.NET_CMS*PERFM_RATI3 AS 净佣金
-	,T1.REPQ_TRD_QTY*PERFM_RATI3 AS 报价回购交易量
-	,T1.REPQ_TRD_QTY_TY*PERFM_RATI3 AS 报价回购交易量_本年
-	,T1.BGDL_QTY*PERFM_RATI3 AS 大宗交易量
-	,T1.BGDL_QTY_TY*PERFM_RATI3 AS 大宗交易量_本年
-	,@V_BIN_DATE
- FROM DM.T_EVT_CUS_ODI_TRD_M_D T1
- LEFT JOIN #T_PUB_SER_RELA T2 ON T1.occur_dt=t2.occur_dt AND T1.CUST_ID=T2.HS_CUST_ID 
- WHERE T1.OCCUR_DT=@V_BIN_DATE
-       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T1.CUST_ID AND YEAR=T1.YEAR AND MTH=T1.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
-	    AND T1.CUST_ID NOT IN ('448999999',
+	 T2.YEAR														AS 年
+	,T2.MTH 														AS 月
+	,T2.YEAR||T2.MTH 												AS 年月
+	,T2.OCCUR_DT                                                    AS 业务日期
+	,T2.HS_CUST_ID													AS 客户编码
+	,T2.CPTL_ACCT 													AS 主资金账号
+	,T2.YEAR||T2.MTH||T2.HS_CUST_ID 								AS 年月客户编号
+	,T2.AFA_SEC_EMPID 												AS AFA_二期员工号
+	,T2.YEAR||T2.MTH||T2.AFA_SEC_EMPID 							    AS 年月员工号
+	,T2.WH_ORG_ID_CUST											    AS 仓库机构编码_客户
+	,T2.WH_ORG_ID_EMP 											    AS 仓库机构编码_员工
+	,COALESCE(T1.EQT_CLAS_KEPP_PERCN,0)			* COALESCE(T2.PERFM_RATI3,0)	AS EQT_CLAS_KEPP_PERCN  			--权益类持仓占比		
+	,COALESCE(T1.SCDY_TRD_FREQ_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS SCDY_TRD_FREQ_MTD    			--二级交易次数_月累计		
+	,COALESCE(T1.RCT_TRD_DT_GT,0)				* COALESCE(T2.PERFM_RATI3,0)	AS RCT_TRD_DT_GT        			--最近交易日期_累计	
+	,COALESCE(T1.SCDY_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS SCDY_TRD_QTY_YTD     			--二级交易量_年累计	
+	,COALESCE(T1.TRD_FREQ_YTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS TRD_FREQ_YTD         			--交易次数_年累计
+	,COALESCE(T1.STKF_TRD_QTY_MDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKF_TRD_QTY_MDA     			--股基交易量_月日均	
+	,COALESCE(T1.STKF_TRD_QTY_YDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKF_TRD_QTY_YDA     			--股基交易量_年日均	
+	,COALESCE(T1.S_REPUR_TRD_QTY_MDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS S_REPUR_TRD_QTY_MDA  			--正回购交易量_月日均		
+	,COALESCE(T1.R_REPUR_TRD_QTY_MDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS R_REPUR_TRD_QTY_MDA  			--逆回购交易量_月日均		
+	,COALESCE(T1.S_REPUR_TRD_QTY_YDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS S_REPUR_TRD_QTY_YDA  			--正回购交易量_年日均		
+	,COALESCE(T1.R_REPUR_TRD_QTY_YDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS R_REPUR_TRD_QTY_YDA  			--逆回购交易量_年日均		
+	,COALESCE(T1.HGT_TRD_QTY_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS HGT_TRD_QTY_MTD      			--沪港通交易量_月累计	
+	,COALESCE(T1.SGT_TRD_QTY_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS SGT_TRD_QTY_MTD      			--深港通交易量_月累计	
+	,COALESCE(T1.SGT_TRD_QTY_YTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS SGT_TRD_QTY_YTD      			--深港通交易量_年累计	
+	,COALESCE(T1.HGT_TRD_QTY_YTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS HGT_TRD_QTY_YTD      			--沪港通交易量_年累计	
+	,COALESCE(T1.Y_RCT_STK_TRD_QTY,0)			* COALESCE(T2.PERFM_RATI3,0)	AS Y_RCT_STK_TRD_QTY    			--近12月股票交易量		
+	,COALESCE(T1.SCDY_TRD_FREQ_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS SCDY_TRD_FREQ_YTD    			--二级交易次数_年累计		
+	,COALESCE(T1.TRD_FREQ_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS TRD_FREQ_MTD         			--交易次数_月累计
+	,COALESCE(T1.APPTBUYB_TRD_QTY_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_TRD_QTY_MTD 			--约定购回交易量_月累计		
+	,COALESCE(T1.APPTBUYB_TRD_QTY_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_TRD_QTY_YTD 			--约定购回交易量_年累计		
+	,COALESCE(T1.RCT_TRD_DT_M,0)				* COALESCE(T2.PERFM_RATI3,0)	AS RCT_TRD_DT_M         			--最近交易日期_本月
+	,COALESCE(T1.STKPLG_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKPLG_TRD_QTY_MTD   			--股票质押交易量_月累计		
+	,COALESCE(T1.STKPLG_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKPLG_TRD_QTY_YTD   			--股票质押交易量_年累计		
+	,COALESCE(T1.PSTK_OPTN_TRD_QTY_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS PSTK_OPTN_TRD_QTY_MTD			--个股期权交易量_月累计			
+	,COALESCE(T1.PSTK_OPTN_TRD_QTY_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS PSTK_OPTN_TRD_QTY_YTD			--个股期权交易量_年累计			
+	,COALESCE(T1.REPQ_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS REPQ_TRD_QTY_MTD     			--报价回购交易量_月累计	
+	,COALESCE(T1.REPQ_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS REPQ_TRD_QTY_YTD     			--报价回购交易量_年累计	
+	,COALESCE(T1.BGDL_QTY_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS BGDL_QTY_MTD         			--大宗交易量_月累计
+	,COALESCE(T1.BGDL_QTY_YTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS BGDL_QTY_YTD         			--大宗交易量_年累计
+	,@V_BIN_DATE																AS LOAD_DT              			--清洗日期
+	,COALESCE(T1.NATRE_DAYS_MTH,0)				* COALESCE(T2.PERFM_RATI3,0)	AS NATRE_DAYS_MTH       			--自然天数_月	
+	,COALESCE(T1.NATRE_DAYS_YEAR,0)				* COALESCE(T2.PERFM_RATI3,0)	AS NATRE_DAYS_YEAR      			--自然天数_年	
+	,COALESCE(T1.CREDIT_ODI_TRD_QTY_MDA,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_ODI_TRD_QTY_MDA 		    --信用账户普通交易量_月日均			
+	,COALESCE(T1.CREDIT_CRED_TRD_QTY_MDA,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_CRED_TRD_QTY_MDA		    --信用账户信用交易量_月日均			
+	,COALESCE(T1.STKF_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKF_TRD_QTY_MTD     			--股基交易量_月累计	
+	,COALESCE(T1.SCDY_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS SCDY_TRD_QTY_MTD     			--二级交易量_月累计	
+	,COALESCE(T1.SCDY_TRD_QTY_MDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS SCDY_TRD_QTY_MDA     			--二级交易量_月日均	
+	,COALESCE(T1.S_REPUR_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS S_REPUR_TRD_QTY_MTD  			--正回购交易量_月累计		
+	,COALESCE(T1.R_REPUR_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS R_REPUR_TRD_QTY_MTD  			--逆回购交易量_月累计		
+	,COALESCE(T1.CREDIT_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_TRD_QTY_MTD   			--融资融券交易量_月累计		
+	,COALESCE(T1.OFFUND_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS OFFUND_TRD_QTY_MTD   			--场内基金交易量_月累计		
+	,COALESCE(T1.OPFUND_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS OPFUND_TRD_QTY_MTD   			--场外基金交易量_月累计		
+	,COALESCE(T1.BANK_CHRM_TRD_QTY_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS BANK_CHRM_TRD_QTY_MTD 			--银行理财交易量_月累计			
+	,COALESCE(T1.SECU_CHRM_TRD_QTY_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS SECU_CHRM_TRD_QTY_MTD 			--证券理财交易量_月累计			
+	,COALESCE(T1.CREDIT_ODI_TRD_QTY_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_ODI_TRD_QTY_MTD 		    --信用账户普通交易量_月累计			
+	,COALESCE(T1.CREDIT_CRED_TRD_QTY_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_CRED_TRD_QTY_MTD 		    --信用账户信用交易量_月累计			
+	,COALESCE(T1.FIN_AMT_MTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS FIN_AMT_MTD          			--融资金额_月累计
+	,COALESCE(T1.CRDT_STK_AMT_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS CRDT_STK_AMT_MTD     			--融券金额_月累计	
+	,COALESCE(T1.STKPLG_BUYB_AMT_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKPLG_BUYB_AMT_MTD  			--股票质押购回金额_月累计		
+	,COALESCE(T1.GROSS_CMS_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS GROSS_CMS_MTD        			--毛佣金_月累计	
+	,COALESCE(T1.NET_CMS_MTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS NET_CMS_MTD          			--净佣金_月累计
+	,COALESCE(T1.STKPLG_BUYB_CNT_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKPLG_BUYB_CNT_MTD  			--股票质押购回笔数_月累计		
+	,COALESCE(T1.CCB_AMT_MTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CCB_AMT_MTD          			--融资买入金额_月累计
+	,COALESCE(T1.CCB_CNT_MTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CCB_CNT_MTD          			--融资买入笔数_月累计
+	,COALESCE(T1.FIN_SELL_AMT_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS FIN_SELL_AMT_MTD     			--融资卖出金额_月累计	
+	,COALESCE(T1.FIN_SELL_CNT_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS FIN_SELL_CNT_MTD     			--融资卖出笔数_月累计	
+	,COALESCE(T1.CRDT_STK_BUYIN_AMT_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CRDT_STK_BUYIN_AMT_MTD 		    --融券买入金额_月累计			
+	,COALESCE(T1.CRDT_STK_BUYIN_CNT_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CRDT_STK_BUYIN_CNT_MTD 		    --融券买入笔数_月累计			
+	,COALESCE(T1.CSS_AMT_MTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CSS_AMT_MTD          			--融券卖出金额_月累计
+	,COALESCE(T1.CSS_CNT_MTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CSS_CNT_MTD          			--融券卖出笔数_月累计
+	,COALESCE(T1.FIN_RTN_AMT_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS FIN_RTN_AMT_MTD      			--融资归还金额_月累计	
+	,COALESCE(T1.APPTBUYB_REP_AMT_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_REP_AMT_MTD 			--约定购回还款金额_月累计		
+	,COALESCE(T1.APPTBUYB_BUYB_AMT_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_BUYB_AMT_MTD			--约定购回购回金额_月累计			
+	,COALESCE(T1.APPTBUYB_TRD_AMT_MTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_TRD_AMT_MTD 			--约定购回交易金额_月累计		
+	,COALESCE(T1.SCDY_TRD_QTY_YDA,0)			* COALESCE(T2.PERFM_RATI3,0)	AS SCDY_TRD_QTY_YDA     			--二级交易量_年日均	
+	,COALESCE(T1.CREDIT_ODI_TRD_QTY_YDA,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_ODI_TRD_QTY_YDA 		    --信用账户普通交易量_年日均			
+	,COALESCE(T1.CREDIT_CRED_TRD_QTY_YDA,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_CRED_TRD_QTY_YDA 		    --信用账户信用交易量_年日均			
+	,COALESCE(T1.STKF_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKF_TRD_QTY_YTD     			--股基交易量_年累计	
+	,COALESCE(T1.S_REPUR_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS S_REPUR_TRD_QTY_YTD  			--正回购交易量_年累计		
+	,COALESCE(T1.R_REPUR_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS R_REPUR_TRD_QTY_YTD  			--逆回购交易量_年累计		
+	,COALESCE(T1.CREDIT_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_TRD_QTY_YTD   			--融资融券交易量_年累计		
+	,COALESCE(T1.OFFUND_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS OFFUND_TRD_QTY_YTD   			--场内基金交易量_年累计		
+	,COALESCE(T1.OPFUND_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS OPFUND_TRD_QTY_YTD   			--场外基金交易量_年累计		
+	,COALESCE(T1.BANK_CHRM_TRD_QTY_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS BANK_CHRM_TRD_QTY_YTD 			--银行理财交易量_年累计			
+	,COALESCE(T1.SECU_CHRM_TRD_QTY_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS SECU_CHRM_TRD_QTY_YTD 			--证券理财交易量_年累计			
+	,COALESCE(T1.CREDIT_ODI_TRD_QTY_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_ODI_TRD_QTY_YTD 		    --信用账户普通交易量_年累计			
+	,COALESCE(T1.CREDIT_CRED_TRD_QTY_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CREDIT_CRED_TRD_QTY_YTD 		    --信用账户信用交易量_年累计			
+	,COALESCE(T1.FIN_AMT_YTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS FIN_AMT_YTD          			--融资金额_年累计
+	,COALESCE(T1.CRDT_STK_AMT_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS CRDT_STK_AMT_YTD     			--融券金额_年累计	
+	,COALESCE(T1.STKPLG_BUYB_AMT_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKPLG_BUYB_AMT_YTD  			--股票质押购回金额_年累计		
+	,COALESCE(T1.GROSS_CMS_YTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS GROSS_CMS_YTD        			--毛佣金_年累计	
+	,COALESCE(T1.NET_CMS_YTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS NET_CMS_YTD          			--净佣金_年累计
+	,COALESCE(T1.STKPLG_BUYB_CNT_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS STKPLG_BUYB_CNT_YTD  			--股票质押购回笔数_年累计		
+	,COALESCE(T1.CCB_AMT_YTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CCB_AMT_YTD          			--融资买入金额_年累计
+	,COALESCE(T1.CCB_CNT_YTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CCB_CNT_YTD          			--融资买入笔数_年累计
+	,COALESCE(T1.FIN_SELL_AMT_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS FIN_SELL_AMT_YTD     			--融资卖出金额_年累计	
+	,COALESCE(T1.FIN_SELL_CNT_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS FIN_SELL_CNT_YTD     			--融资卖出笔数_年累计	
+	,COALESCE(T1.CRDT_STK_BUYIN_AMT_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CRDT_STK_BUYIN_AMT_YTD 		    --融券买入金额_年累计			
+	,COALESCE(T1.CRDT_STK_BUYIN_CNT_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS CRDT_STK_BUYIN_CNT_YTD 		    --融券买入笔数_年累计			
+	,COALESCE(T1.CSS_AMT_YTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CSS_AMT_YTD          			--融券卖出金额_年累计
+	,COALESCE(T1.CSS_CNT_YTD,0)					* COALESCE(T2.PERFM_RATI3,0)	AS CSS_CNT_YTD          			--融券卖出笔数_年累计
+	,COALESCE(T1.FIN_RTN_AMT_YTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS FIN_RTN_AMT_YTD      			--融资归还金额_年累计	
+	,COALESCE(T1.APPTBUYB_REP_AMT_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_REP_AMT_YTD 			--约定购回还款金额_年累计		
+	,COALESCE(T1.APPTBUYB_BUYB_AMT_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_BUYB_AMT_YTD			--约定购回购回金额_年累计			
+	,COALESCE(T1.APPTBUYB_TRD_AMT_YTD,0)		* COALESCE(T2.PERFM_RATI3,0)	AS APPTBUYB_TRD_AMT_YTD 			--约定购回交易金额_年累计		
+	,COALESCE(T1.SB_TRD_QTY_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS SB_TRD_QTY_MTD       			--三板交易量_月累计	
+	,COALESCE(T1.SB_TRD_QTY_YTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS SB_TRD_QTY_YTD       			--三板交易量_年累计	
+	,COALESCE(T1.BOND_TRD_QTY_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS BOND_TRD_QTY_MTD     			--债券交易量_月累计	
+	,COALESCE(T1.BOND_TRD_QTY_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS BOND_TRD_QTY_YTD     			--债券交易量_年累计	
+	,COALESCE(T1.ITC_CRRC_FUND_TRD_QTY_MTD,0)	* COALESCE(T2.PERFM_RATI3,0)	AS ITC_CRRC_FUND_TRD_QTY_MTD 		--场内货币基金交易量_月累计				
+	,COALESCE(T1.ITC_CRRC_FUND_TRD_QTY_YTD,0)	* COALESCE(T2.PERFM_RATI3,0)	AS ITC_CRRC_FUND_TRD_QTY_YTD 		--场内货币基金交易量_年累计				
+	,COALESCE(T1.S_REPUR_NET_CMS_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS S_REPUR_NET_CMS_MTD  			--正回购净佣金_月累计		
+	,COALESCE(T1.S_REPUR_NET_CMS_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS S_REPUR_NET_CMS_YTD  			--正回购净佣金_年累计		
+	,COALESCE(T1.R_REPUR_NET_CMS_MTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS R_REPUR_NET_CMS_MTD  			--逆回购净佣金_月累计		
+	,COALESCE(T1.R_REPUR_NET_CMS_YTD,0)			* COALESCE(T2.PERFM_RATI3,0)	AS R_REPUR_NET_CMS_YTD  			--逆回购净佣金_年累计		
+	,COALESCE(T1.ITC_CRRC_FUND_NET_CMS_MTD,0)	* COALESCE(T2.PERFM_RATI3,0)	AS ITC_CRRC_FUND_NET_CMS_MTD 		--场内货币基金净佣金_月累计				
+	,COALESCE(T1.ITC_CRRC_FUND_NET_CMS_YTD,0)	* COALESCE(T2.PERFM_RATI3,0)	AS ITC_CRRC_FUND_NET_CMS_YTD 		--场内货币基金净佣金_年累计				
+	,COALESCE(T1.PB_TRD_QTY_MTD,0)				* COALESCE(T2.PERFM_RATI3,0)	AS PB_TRD_QTY_MTD       			--PB交易量_月累计	   		
+ FROM #T_PUB_SER_RELA T2
+ LEFT JOIN DM.T_EVT_CUS_TRD_M_D T1 
+ 	ON T1.load_dt=t2.occur_dt 
+ 		AND T1.CUST_ID=T2.HS_CUST_ID 
+ WHERE T2.OCCUR_DT=@V_BIN_DATE
+       AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T2.HS_CUST_ID AND YEAR=T2.YEAR AND MTH=T2.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
+	    /*AND T2.HS_CUST_ID NOT IN ('448999999',
 				'440000001',
 				'999900000001',
 				'440000011',
-				'440000015')--20180314 排除"总部专用账户"
+				'440000015')*/ --20180314 排除"总部专用账户"  --20180525 不做剔除
 ;
 
 END
 GO
 CREATE PROCEDURE dm.P_EVT_EMPCUS_PROD_TRD_M_D(IN @V_BIN_DATE INT)
+
+
+
 
 BEGIN 
   
@@ -8350,11 +11756,11 @@ LEFT JOIN DM.T_EVT_PROD_TRD_M_D T1
 		AND T1.CUST_ID=T2.HS_CUST_ID                                  
 WHERE T2.OCCUR_DT=@V_BIN_DATE
        AND EXISTS(SELECT 1 FROM DM.T_ACC_CPTL_ACC WHERE CUST_ID=T2.HS_CUST_ID AND YEAR=T2.YEAR AND MTH=T2.MTH)--20180207 ZQ:有责权关系的客户必须要有资金账户
-	   AND T2.HS_CUST_ID NOT IN ('448999999',
+	   /*AND T2.HS_CUST_ID NOT IN ('448999999',
 				'440000001',
 				'999900000001',
 				'440000011',
-				'440000015')--20180314 排除"总部专用账户"
+				'440000015')*/--20180314 排除"总部专用账户"   --20180525 不做剔除
 		AND T1.PROD_CD IS NOT NULL
 ;
 
@@ -8780,6 +12186,7 @@ BEGIN
 
   /******************************************************************
   程序功能: 员工收入事实表（日表）
+  
   编写者: 叶宏冰
   创建日期: 2018-04-11
   简介：员工收入统计
@@ -8895,62 +12302,62 @@ BEGIN
 	--更新分配后的各项指标
 	UPDATE #TMP_T_EVT_INCM_D_EMP
 		SET 
-			 NET_CMS              	=  	COALESCE(B1.NET_CMS,0)					* 	C.PERFM_RATIO_4		--净佣金				
-			,GROSS_CMS            	=  	COALESCE(B1.GROSS_CMS,0)				* 	C.PERFM_RATIO_4		--毛佣金				
-			,SCDY_CMS             	=  	COALESCE(B1.SCDY_CMS,0)					* 	C.PERFM_RATIO_4		--二级佣金				
-			,SCDY_NET_CMS         	=  	COALESCE(B1.SCDY_NET_CMS,0)				* 	C.PERFM_RATIO_4		--二级净佣金				
-			,SCDY_TRAN_FEE        	=  	COALESCE(B1.SCDY_TRAN_FEE,0)			* 	C.PERFM_RATIO_4		--二级过户费				
-			,ODI_TRD_TRAN_FEE     	=  	COALESCE(B1.ODI_TRD_TRAN_FEE,0)			* 	C.PERFM_RATIO_4		--普通交易过户费				
-			,ODI_TRD_STP_TAX      	=  	COALESCE(B1.ODI_TRD_STP_TAX,0)			* 	C.PERFM_RATIO_4		--普通交易印花税				
-			,ODI_TRD_HANDLE_FEE   	=  	COALESCE(B1.ODI_TRD_HANDLE_FEE,0)		* 	C.PERFM_RATIO_4		--普通交易经手费					
-			,ODI_TRD_SEC_RGLT_FEE 	=  	COALESCE(B1.ODI_TRD_SEC_RGLT_FEE,0)		* 	C.PERFM_RATIO_4		--普通交易证管费 					
-			--,ODI_TRD_ORDR_FEE     	=  	COALESCE(B1.ODI_TRD_ORDR_FEE,0)			* 	C.PERFM_RATIO_4		--普通交易委托费				
-			,ODI_TRD_OTH_FEE      	=  	COALESCE(B1.ODI_TRD_OTH_FEE,0)			* 	C.PERFM_RATIO_4		--普通交易其他费用					
-			,CRED_TRD_TRAN_FEE    	=  	COALESCE(B2.CRED_TRD_TRAN_FEE,0)		* 	C.PERFM_RATIO_4		--信用交易过户费					
-			,CRED_TRD_STP_TAX     	=  	COALESCE(B2.CRED_TRD_STP_TAX,0)			* 	C.PERFM_RATIO_4		--信用交易印花税				
-			,CRED_TRD_HANDLE_FEE  	=  	COALESCE(B2.CRED_TRD_HANDLE_FEE,0)		* 	C.PERFM_RATIO_4		--信用交易经手费					
-			,CRED_TRD_SEC_RGLT_FEE	=  	COALESCE(B2.CRED_TRD_SEC_RGLT_FEE,0)	* 	C.PERFM_RATIO_4		--信用交易证管费						
-			,CRED_TRD_ORDR_FEE    	=  	COALESCE(B2.CRED_TRD_ORDR_FEE,0)		* 	C.PERFM_RATIO_4		--信用交易委托费					
-			,CRED_TRD_OTH_FEE     	=  	COALESCE(B2.CRED_TRD_OTH_FEE,0)			* 	C.PERFM_RATIO_4		--信用交易其他费用					
-			,STKF_CMS             	=  	COALESCE(B1.STKF_CMS,0)					* 	C.PERFM_RATIO_4		--股基佣金				
-			,STKF_TRAN_FEE        	=  	COALESCE(B1.STKF_TRAN_FEE,0)			* 	C.PERFM_RATIO_4		--股基过户费				
-			,STKF_NET_CMS         	=  	COALESCE(B1.STKF_NET_CMS,0)				* 	C.PERFM_RATIO_4		--股基净佣金				
-			,BOND_CMS             	=  	COALESCE(B1.BOND_CMS,0)					* 	C.PERFM_RATIO_4		--债券佣金				
-			,BOND_NET_CMS         	=  	COALESCE(B1.BOND_NET_CMS,0)				* 	C.PERFM_RATIO_4		--债券净佣金				
-			,REPQ_CMS             	=  	COALESCE(B1.REPQ_CMS,0)					* 	C.PERFM_RATIO_4		--报价回购佣金				
-			,REPQ_NET_CMS         	=  	COALESCE(B1.REPQ_NET_CMS,0)				* 	C.PERFM_RATIO_4		--报价回购净佣金				
-			,HGT_CMS              	=  	COALESCE(B1.HGT_CMS,0)					* 	C.PERFM_RATIO_4		--沪港通佣金				
-			,HGT_NET_CMS          	=  	COALESCE(B1.HGT_NET_CMS,0)				* 	C.PERFM_RATIO_4		--沪港通净佣金				
-			,HGT_TRAN_FEE         	=  	COALESCE(B1.HGT_TRAN_FEE,0)				* 	C.PERFM_RATIO_4		--沪港通过户费				
-			,SGT_CMS              	=  	COALESCE(B1.SGT_CMS,0)					* 	C.PERFM_RATIO_4		--深港通佣金				
-			,SGT_NET_CMS          	=  	COALESCE(B1.SGT_NET_CMS,0)				* 	C.PERFM_RATIO_4		--深港通净佣金				
-			,SGT_TRAN_FEE         	=  	COALESCE(B1.SGT_TRAN_FEE,0)				* 	C.PERFM_RATIO_4		--深港通过户费				
-			,BGDL_CMS             	=  	COALESCE(B1.BGDL_CMS,0)					* 	C.PERFM_RATIO_4		--大宗交易佣金				
-			,BGDL_NET_CMS         	=  	COALESCE(B1.BGDL_NET_CMS,0)				* 	C.PERFM_RATIO_4		--大宗交易净佣金				
-			,BGDL_TRAN_FEE        	=  	COALESCE(B1.BGDL_TRAN_FEE,0)			* 	C.PERFM_RATIO_4		--大宗交易过户费				
-			,PSTK_OPTN_CMS        	=  	COALESCE(B1.PSTK_OPTN_CMS,0)			* 	C.PERFM_RATIO_4		--个股期权佣金				
-			,PSTK_OPTN_NET_CMS    	=  	COALESCE(B1.PSTK_OPTN_NET_CMS,0)		* 	C.PERFM_RATIO_4		--个股期权净佣金					
-			,CREDIT_ODI_CMS       	=  	COALESCE(B2.CREDIT_ODI_CMS,0)			* 	C.PERFM_RATIO_4		--融资融券普通佣金				
-			,CREDIT_ODI_NET_CMS   	=  	COALESCE(B2.CREDIT_ODI_NET_CMS,0)		* 	C.PERFM_RATIO_4		--融资融券普通净佣金						
-			,CREDIT_ODI_TRAN_FEE  	=  	COALESCE(B2.CREDIT_ODI_TRAN_FEE,0)		* 	C.PERFM_RATIO_4		--融资融券普通过户费						
-			,CREDIT_CRED_CMS      	=  	COALESCE(B2.CREDIT_CRED_CMS,0)			* 	C.PERFM_RATIO_4		--融资融券信用佣金					
-			,CREDIT_CRED_NET_CMS  	=  	COALESCE(B2.CREDIT_CRED_NET_CMS,0)		* 	C.PERFM_RATIO_4		--融资融券信用净佣金						
-			,CREDIT_CRED_TRAN_FEE 	=  	COALESCE(B2.CREDIT_CRED_TRAN_FEE,0)		* 	C.PERFM_RATIO_4		--融资融券信用过户费					
-			,FIN_RECE_INT         	=  	COALESCE(B2.FIN_RECE_INT,0)				* 	C.PERFM_RATIO_4		--融资应收利息				
-			,FIN_PAIDINT          	=  	COALESCE(B2.FIN_PAIDINT,0)				* 	C.PERFM_RATIO_4		--融资实收利息				
-			,STKPLG_CMS           	=  	COALESCE(B2.STKPLG_CMS,0)				* 	C.PERFM_RATIO_4		--股票质押佣金				
-			,STKPLG_NET_CMS       	=  	COALESCE(B2.STKPLG_NET_CMS,0)			* 	C.PERFM_RATIO_4		--股票质押净佣金				
-			,STKPLG_PAIDINT       	=  	COALESCE(B2.STKPLG_PAIDINT,0)			* 	C.PERFM_RATIO_4		--股票质押实收利息				
-			,STKPLG_RECE_INT      	=  	COALESCE(B2.STKPLG_RECE_INT,0)			* 	C.PERFM_RATIO_4		--股票质押应收利息					
-			,APPTBUYB_CMS         	=  	COALESCE(B2.APPTBUYB_CMS,0)				* 	C.PERFM_RATIO_4		--约定购回佣金				
-			,APPTBUYB_NET_CMS     	=  	COALESCE(B2.APPTBUYB_NET_CMS,0)			* 	C.PERFM_RATIO_4		--约定购回净佣金				
-			,APPTBUYB_PAIDINT     	=  	COALESCE(B2.APPTBUYB_PAIDINT,0)			* 	C.PERFM_RATIO_4		--约定购回实收利息					
-			,FIN_IE               	=  	COALESCE(B2.FIN_IE,0)					* 	C.PERFM_RATIO_4		--融资利息支出				
-			,CRDT_STK_IE          	=  	COALESCE(B2.CRDT_STK_IE,0)				* 	C.PERFM_RATIO_4		--融券利息支出				
-			,OTH_IE               	=  	COALESCE(B2.OTH_IE,0)					* 	C.PERFM_RATIO_4		--其他利息支出				
-			,FEE_RECE_INT         	=  	COALESCE(B2.FEE_RECE_INT,0)				* 	C.PERFM_RATIO_4		--费用应收利息				
-			,OTH_RECE_INT         	=  	COALESCE(B2.OTH_RECE_INT,0)				* 	C.PERFM_RATIO_4		--其他应收利息				
-			,CREDIT_CPTL_COST     	=  	COALESCE(B2.CREDIT_CPTL_COST,0)			* 	C.PERFM_RATIO_4		--融资融券资金成本									
+			 NET_CMS              	=  	COALESCE(B1.NET_CMS,0)					* 	C.PERFM_RATIO_2		--净佣金				
+			,GROSS_CMS            	=  	COALESCE(B1.GROSS_CMS,0)				* 	C.PERFM_RATIO_2		--毛佣金				
+			,SCDY_CMS             	=  	COALESCE(B1.SCDY_CMS,0)					* 	C.PERFM_RATIO_2		--二级佣金				
+			,SCDY_NET_CMS         	=  	COALESCE(B1.SCDY_NET_CMS,0)				* 	C.PERFM_RATIO_2		--二级净佣金				
+			,SCDY_TRAN_FEE        	=  	COALESCE(B1.SCDY_TRAN_FEE,0)			* 	C.PERFM_RATIO_2		--二级过户费				
+			,ODI_TRD_TRAN_FEE     	=  	COALESCE(B1.ODI_TRD_TRAN_FEE,0)			* 	C.PERFM_RATIO_2		--普通交易过户费				
+			,ODI_TRD_STP_TAX      	=  	COALESCE(B1.ODI_TRD_STP_TAX,0)			* 	C.PERFM_RATIO_2		--普通交易印花税				
+			,ODI_TRD_HANDLE_FEE   	=  	COALESCE(B1.ODI_TRD_HANDLE_FEE,0)		* 	C.PERFM_RATIO_2		--普通交易经手费					
+			,ODI_TRD_SEC_RGLT_FEE 	=  	COALESCE(B1.ODI_TRD_SEC_RGLT_FEE,0)		* 	C.PERFM_RATIO_2		--普通交易证管费 					
+			--,ODI_TRD_ORDR_FEE     	=  	COALESCE(B1.ODI_TRD_ORDR_FEE,0)			* 	C.PERFM_RATIO_2		--普通交易委托费				
+			,ODI_TRD_OTH_FEE      	=  	COALESCE(B1.ODI_TRD_OTH_FEE,0)			* 	C.PERFM_RATIO_2		--普通交易其他费用					
+			,CRED_TRD_TRAN_FEE    	=  	COALESCE(B2.CRED_TRD_TRAN_FEE,0)		* 	C.PERFM_RATIO_9		--信用交易过户费					
+			,CRED_TRD_STP_TAX     	=  	COALESCE(B2.CRED_TRD_STP_TAX,0)			* 	C.PERFM_RATIO_9		--信用交易印花税				
+			,CRED_TRD_HANDLE_FEE  	=  	COALESCE(B2.CRED_TRD_HANDLE_FEE,0)		* 	C.PERFM_RATIO_9		--信用交易经手费					
+			,CRED_TRD_SEC_RGLT_FEE	=  	COALESCE(B2.CRED_TRD_SEC_RGLT_FEE,0)	* 	C.PERFM_RATIO_9		--信用交易证管费						
+			,CRED_TRD_ORDR_FEE    	=  	COALESCE(B2.CRED_TRD_ORDR_FEE,0)		* 	C.PERFM_RATIO_9		--信用交易委托费					
+			,CRED_TRD_OTH_FEE     	=  	COALESCE(B2.CRED_TRD_OTH_FEE,0)			* 	C.PERFM_RATIO_9		--信用交易其他费用					
+			,STKF_CMS             	=  	COALESCE(B1.STKF_CMS,0)					* 	C.PERFM_RATIO_2		--股基佣金				
+			,STKF_TRAN_FEE        	=  	COALESCE(B1.STKF_TRAN_FEE,0)			* 	C.PERFM_RATIO_2		--股基过户费				
+			,STKF_NET_CMS         	=  	COALESCE(B1.STKF_NET_CMS,0)				* 	C.PERFM_RATIO_2		--股基净佣金				
+			,BOND_CMS             	=  	COALESCE(B1.BOND_CMS,0)					* 	C.PERFM_RATIO_2		--债券佣金				
+			,BOND_NET_CMS         	=  	COALESCE(B1.BOND_NET_CMS,0)				* 	C.PERFM_RATIO_2		--债券净佣金				
+			,REPQ_CMS             	=  	COALESCE(B1.REPQ_CMS,0)					* 	C.PERFM_RATIO_2		--报价回购佣金				
+			,REPQ_NET_CMS         	=  	COALESCE(B1.REPQ_NET_CMS,0)				* 	C.PERFM_RATIO_2		--报价回购净佣金				
+			,HGT_CMS              	=  	COALESCE(B1.HGT_CMS,0)					* 	C.PERFM_RATIO_2		--沪港通佣金				
+			,HGT_NET_CMS          	=  	COALESCE(B1.HGT_NET_CMS,0)				* 	C.PERFM_RATIO_2		--沪港通净佣金				
+			,HGT_TRAN_FEE         	=  	COALESCE(B1.HGT_TRAN_FEE,0)				* 	C.PERFM_RATIO_2		--沪港通过户费				
+			,SGT_CMS              	=  	COALESCE(B1.SGT_CMS,0)					* 	C.PERFM_RATIO_2		--深港通佣金				
+			,SGT_NET_CMS          	=  	COALESCE(B1.SGT_NET_CMS,0)				* 	C.PERFM_RATIO_2		--深港通净佣金				
+			,SGT_TRAN_FEE         	=  	COALESCE(B1.SGT_TRAN_FEE,0)				* 	C.PERFM_RATIO_2		--深港通过户费				
+			,BGDL_CMS             	=  	COALESCE(B1.BGDL_CMS,0)					* 	C.PERFM_RATIO_2		--大宗交易佣金				
+			,BGDL_NET_CMS         	=  	COALESCE(B1.BGDL_NET_CMS,0)				* 	C.PERFM_RATIO_2		--大宗交易净佣金				
+			,BGDL_TRAN_FEE        	=  	COALESCE(B1.BGDL_TRAN_FEE,0)			* 	C.PERFM_RATIO_2		--大宗交易过户费				
+			,PSTK_OPTN_CMS        	=  	COALESCE(B1.PSTK_OPTN_CMS,0)			* 	C.PERFM_RATIO_2		--个股期权佣金				
+			,PSTK_OPTN_NET_CMS    	=  	COALESCE(B1.PSTK_OPTN_NET_CMS,0)		* 	C.PERFM_RATIO_2		--个股期权净佣金					
+			,CREDIT_ODI_CMS       	=  	COALESCE(B2.CREDIT_ODI_CMS,0)			* 	C.PERFM_RATIO_9		--融资融券普通佣金				
+			,CREDIT_ODI_NET_CMS   	=  	COALESCE(B2.CREDIT_ODI_NET_CMS,0)		* 	C.PERFM_RATIO_9		--融资融券普通净佣金						
+			,CREDIT_ODI_TRAN_FEE  	=  	COALESCE(B2.CREDIT_ODI_TRAN_FEE,0)		* 	C.PERFM_RATIO_9		--融资融券普通过户费						
+			,CREDIT_CRED_CMS      	=  	COALESCE(B2.CREDIT_CRED_CMS,0)			* 	C.PERFM_RATIO_9		--融资融券信用佣金					
+			,CREDIT_CRED_NET_CMS  	=  	COALESCE(B2.CREDIT_CRED_NET_CMS,0)		* 	C.PERFM_RATIO_9		--融资融券信用净佣金						
+			,CREDIT_CRED_TRAN_FEE 	=  	COALESCE(B2.CREDIT_CRED_TRAN_FEE,0)		* 	C.PERFM_RATIO_9		--融资融券信用过户费					
+			,FIN_RECE_INT         	=  	COALESCE(B2.FIN_RECE_INT,0)				* 	C.PERFM_RATIO_9		--融资应收利息				
+			,FIN_PAIDINT          	=  	COALESCE(B2.FIN_PAIDINT,0)				* 	C.PERFM_RATIO_9		--融资实收利息				
+			,STKPLG_CMS           	=  	COALESCE(B2.STKPLG_CMS,0)				* 	C.PERFM_RATIO_2		--股票质押佣金				
+			,STKPLG_NET_CMS       	=  	COALESCE(B2.STKPLG_NET_CMS,0)			* 	C.PERFM_RATIO_2		--股票质押净佣金				
+			,STKPLG_PAIDINT       	=  	COALESCE(B2.STKPLG_PAIDINT,0)			* 	C.PERFM_RATIO_2		--股票质押实收利息				
+			,STKPLG_RECE_INT      	=  	COALESCE(B2.STKPLG_RECE_INT,0)			* 	C.PERFM_RATIO_2		--股票质押应收利息					
+			,APPTBUYB_CMS         	=  	COALESCE(B2.APPTBUYB_CMS,0)				* 	C.PERFM_RATIO_2		--约定购回佣金				
+			,APPTBUYB_NET_CMS     	=  	COALESCE(B2.APPTBUYB_NET_CMS,0)			* 	C.PERFM_RATIO_2		--约定购回净佣金				
+			,APPTBUYB_PAIDINT     	=  	COALESCE(B2.APPTBUYB_PAIDINT,0)			* 	C.PERFM_RATIO_2		--约定购回实收利息					
+			,FIN_IE               	=  	COALESCE(B2.FIN_IE,0)					* 	C.PERFM_RATIO_9		--融资利息支出				
+			,CRDT_STK_IE          	=  	COALESCE(B2.CRDT_STK_IE,0)				* 	C.PERFM_RATIO_9		--融券利息支出				
+			,OTH_IE               	=  	COALESCE(B2.OTH_IE,0)					* 	C.PERFM_RATIO_9		--其他利息支出				
+			,FEE_RECE_INT         	=  	COALESCE(B2.FEE_RECE_INT,0)				* 	C.PERFM_RATIO_9		--费用应收利息				
+			,OTH_RECE_INT         	=  	COALESCE(B2.OTH_RECE_INT,0)				* 	C.PERFM_RATIO_9		--其他应收利息				
+			,CREDIT_CPTL_COST     	=  	COALESCE(B2.CREDIT_CPTL_COST,0)			* 	C.PERFM_RATIO_9		--融资融券资金成本									
 		FROM #TMP_T_EVT_INCM_D_EMP A
 		--关联客户普通交易日表
 		LEFT JOIN (
@@ -9393,56 +12800,56 @@ BEGIN
 		,CREDIT_CPTL_COST_YTD 		--融资融券资金成本_年累计
 	)		
 	SELECT 
-		 T1.YEAR                 				AS    YEAR                 			--年
-		,T1.MTH                  				AS    MTH                  			--月
-		,T1.BRH_ID              				AS    BRH_ID              	    	--营业部编码
-		,T1.OCCUR_DT             				AS    OCCUR_DT             			--发生日期
-		,T1.NET_CMS_MTD          				AS    NET_CMS_MTD          			--净佣金_月累计
-		,T1.GROSS_CMS_MTD        				AS    GROSS_CMS_MTD        			--毛佣金_月累计
-		,T1.SCDY_CMS_MTD         				AS    SCDY_CMS_MTD         			--二级佣金_月累计
-		,T1.SCDY_NET_CMS_MTD     				AS    SCDY_NET_CMS_MTD     			--二级净佣金_月累计
-		,T1.SCDY_TRAN_FEE_MTD    				AS    SCDY_TRAN_FEE_MTD    			--二级过户费_月累计
-		,T1.ODI_TRD_TRAN_FEE_MTD 				AS    ODI_TRD_TRAN_FEE_MTD 			--普通交易过户费_月累计
-		,T1.CRED_TRD_TRAN_FEE_MTD				AS    CRED_TRD_TRAN_FEE_MTD			--信用交易过户费_月累计
-		,T1.STKF_CMS_MTD         				AS    STKF_CMS_MTD         			--股基佣金_月累计
-		,T1.STKF_TRAN_FEE_MTD    				AS    STKF_TRAN_FEE_MTD    			--股基过户费_月累计
-		,T1.STKF_NET_CMS_MTD     				AS    STKF_NET_CMS_MTD     			--股基净佣金_月累计
-		,T1.BOND_CMS_MTD         				AS    BOND_CMS_MTD         			--债券佣金_月累计
-		,T1.BOND_NET_CMS_MTD     				AS    BOND_NET_CMS_MTD     			--债券净佣金_月累计
-		,T1.REPQ_CMS_MTD         				AS    REPQ_CMS_MTD         			--报价回购佣金_月累计
-		,T1.REPQ_NET_CMS_MTD     				AS    REPQ_NET_CMS_MTD     			--报价回购净佣金_月累计
-		,T1.HGT_CMS_MTD          				AS    HGT_CMS_MTD          			--沪港通佣金_月累计
-		,T1.HGT_NET_CMS_MTD      				AS    HGT_NET_CMS_MTD      			--沪港通净佣金_月累计
-		,T1.HGT_TRAN_FEE_MTD     				AS    HGT_TRAN_FEE_MTD     			--沪港通过户费_月累计
-		,T1.SGT_CMS_MTD          				AS    SGT_CMS_MTD          			--深港通佣金_月累计
-		,T1.SGT_NET_CMS_MTD      				AS    SGT_NET_CMS_MTD      			--深港通净佣金_月累计
-		,T1.SGT_TRAN_FEE_MTD     				AS    SGT_TRAN_FEE_MTD     			--深港通过户费_月累计
-		,T1.BGDL_CMS_MTD         				AS    BGDL_CMS_MTD         			--大宗交易佣金_月累计
-		,T1.BGDL_NET_CMS_MTD     				AS    BGDL_NET_CMS_MTD     			--大宗交易净佣金_月累计
-		,T1.BGDL_TRAN_FEE_MTD    				AS    BGDL_TRAN_FEE_MTD    			--大宗交易过户费_月累计
-		,T1.PSTK_OPTN_CMS_MTD    				AS    PSTK_OPTN_CMS_MTD    			--个股期权佣金_月累计
-		,T1.PSTK_OPTN_NET_CMS_MTD 				AS    PSTK_OPTN_NET_CMS_MTD 		--个股期权净佣金_月累计
-		,T1.CREDIT_ODI_CMS_MTD   				AS    CREDIT_ODI_CMS_MTD   			--融资融券普通佣金_月累计
-		,T1.CREDIT_ODI_NET_CMS_MTD 				AS    CREDIT_ODI_NET_CMS_MTD 		--融资融券普通净佣金_月累计
-		,T1.CREDIT_ODI_TRAN_FEE_MTD 			AS    CREDIT_ODI_TRAN_FEE_MTD 		--融资融券普通过户费_月累计
-		,T1.CREDIT_CRED_CMS_MTD  				AS    CREDIT_CRED_CMS_MTD  			--融资融券信用佣金_月累计
-		,T1.CREDIT_CRED_NET_CMS_MTD 			AS    CREDIT_CRED_NET_CMS_MTD 		--融资融券信用净佣金_月累计
-		,T1.CREDIT_CRED_TRAN_FEE_MTD 			AS    CREDIT_CRED_TRAN_FEE_MTD 		--融资融券信用过户费_月累计
-		,T1.FIN_RECE_INT_MTD     				AS    FIN_RECE_INT_MTD     			--融资应收利息_月累计
-		,T1.FIN_PAIDINT_MTD      				AS    FIN_PAIDINT_MTD      			--融资实收利息_月累计
-		,T1.STKPLG_CMS_MTD       				AS    STKPLG_CMS_MTD       			--股票质押佣金_月累计
-		,T1.STKPLG_NET_CMS_MTD   				AS    STKPLG_NET_CMS_MTD   			--股票质押净佣金_月累计
-		,T1.STKPLG_PAIDINT_MTD   				AS    STKPLG_PAIDINT_MTD   			--股票质押实收利息_月累计
-		,T1.STKPLG_RECE_INT_MTD  				AS    STKPLG_RECE_INT_MTD  			--股票质押应收利息_月累计
-		,T1.APPTBUYB_CMS_MTD     				AS    APPTBUYB_CMS_MTD     			--约定购回佣金_月累计
-		,T1.APPTBUYB_NET_CMS_MTD 				AS    APPTBUYB_NET_CMS_MTD 			--约定购回净佣金_月累计
-		,T1.APPTBUYB_PAIDINT_MTD 				AS    APPTBUYB_PAIDINT_MTD 			--约定购回实收利息_月累计
-		,T1.FIN_IE_MTD           				AS    FIN_IE_MTD           			--融资利息支出_月累计
-		,T1.CRDT_STK_IE_MTD      				AS    CRDT_STK_IE_MTD      			--融券利息支出_月累计
-		,T1.OTH_IE_MTD           				AS    OTH_IE_MTD           			--其他利息支出_月累计
-		,T1.FEE_RECE_INT_MTD     				AS    FEE_RECE_INT_MTD     			--费用应收利息_月累计
-		,T1.OTH_RECE_INT_MTD     				AS    OTH_RECE_INT_MTD     			--其他应收利息_月累计
-		,T1.CREDIT_CPTL_COST_MTD 				AS    CREDIT_CPTL_COST_MTD 			--融资融券资金成本_月累计
+		 T2.YEAR                 				AS    YEAR                 			--年
+		,T2.MTH                  				AS    MTH                  			--月
+		,T2.BRH_ID              				AS    BRH_ID              	    	--营业部编码
+		,T2.OCCUR_DT             				AS    OCCUR_DT             			--发生日期
+		,COALESCE(T1.NET_CMS_MTD          			,0)	AS    NET_CMS_MTD          			--净佣金_月累计
+		,COALESCE(T1.GROSS_CMS_MTD        			,0)	AS    GROSS_CMS_MTD        			--毛佣金_月累计
+		,COALESCE(T1.SCDY_CMS_MTD         			,0)	AS    SCDY_CMS_MTD         			--二级佣金_月累计
+		,COALESCE(T1.SCDY_NET_CMS_MTD     			,0)	AS    SCDY_NET_CMS_MTD     			--二级净佣金_月累计
+		,COALESCE(T1.SCDY_TRAN_FEE_MTD    			,0)	AS    SCDY_TRAN_FEE_MTD    			--二级过户费_月累计
+		,COALESCE(T1.ODI_TRD_TRAN_FEE_MTD 			,0)	AS    ODI_TRD_TRAN_FEE_MTD 			--普通交易过户费_月累计
+		,COALESCE(T1.CRED_TRD_TRAN_FEE_MTD			,0)	AS    CRED_TRD_TRAN_FEE_MTD			--信用交易过户费_月累计
+		,COALESCE(T1.STKF_CMS_MTD         			,0)	AS    STKF_CMS_MTD         			--股基佣金_月累计
+		,COALESCE(T1.STKF_TRAN_FEE_MTD    			,0)	AS    STKF_TRAN_FEE_MTD    			--股基过户费_月累计
+		,COALESCE(T1.STKF_NET_CMS_MTD     			,0)	AS    STKF_NET_CMS_MTD     			--股基净佣金_月累计
+		,COALESCE(T1.BOND_CMS_MTD         			,0)	AS    BOND_CMS_MTD         			--债券佣金_月累计
+		,COALESCE(T1.BOND_NET_CMS_MTD     			,0)	AS    BOND_NET_CMS_MTD     			--债券净佣金_月累计
+		,COALESCE(T1.REPQ_CMS_MTD         			,0)	AS    REPQ_CMS_MTD         			--报价回购佣金_月累计
+		,COALESCE(T1.REPQ_NET_CMS_MTD     			,0)	AS    REPQ_NET_CMS_MTD     			--报价回购净佣金_月累计
+		,COALESCE(T1.HGT_CMS_MTD          			,0)	AS    HGT_CMS_MTD          			--沪港通佣金_月累计
+		,COALESCE(T1.HGT_NET_CMS_MTD      			,0)	AS    HGT_NET_CMS_MTD      			--沪港通净佣金_月累计
+		,COALESCE(T1.HGT_TRAN_FEE_MTD     			,0)	AS    HGT_TRAN_FEE_MTD     			--沪港通过户费_月累计
+		,COALESCE(T1.SGT_CMS_MTD          			,0)	AS    SGT_CMS_MTD          			--深港通佣金_月累计
+		,COALESCE(T1.SGT_NET_CMS_MTD      			,0)	AS    SGT_NET_CMS_MTD      			--深港通净佣金_月累计
+		,COALESCE(T1.SGT_TRAN_FEE_MTD     			,0)	AS    SGT_TRAN_FEE_MTD     			--深港通过户费_月累计
+		,COALESCE(T1.BGDL_CMS_MTD         			,0)	AS    BGDL_CMS_MTD         			--大宗交易佣金_月累计
+		,COALESCE(T1.BGDL_NET_CMS_MTD     			,0)	AS    BGDL_NET_CMS_MTD     			--大宗交易净佣金_月累计
+		,COALESCE(T1.BGDL_TRAN_FEE_MTD    			,0)	AS    BGDL_TRAN_FEE_MTD    			--大宗交易过户费_月累计
+		,COALESCE(T1.PSTK_OPTN_CMS_MTD    			,0)	AS    PSTK_OPTN_CMS_MTD    			--个股期权佣金_月累计
+		,COALESCE(T1.PSTK_OPTN_NET_CMS_MTD 			,0)	AS    PSTK_OPTN_NET_CMS_MTD 		--个股期权净佣金_月累计
+		,COALESCE(T1.CREDIT_ODI_CMS_MTD   			,0)	AS    CREDIT_ODI_CMS_MTD   			--融资融券普通佣金_月累计
+		,COALESCE(T1.CREDIT_ODI_NET_CMS_MTD 		,0)		AS    CREDIT_ODI_NET_CMS_MTD 		--融资融券普通净佣金_月累计
+		,COALESCE(T1.CREDIT_ODI_TRAN_FEE_MTD 		,0)	AS    CREDIT_ODI_TRAN_FEE_MTD 		--融资融券普通过户费_月累计
+		,COALESCE(T1.CREDIT_CRED_CMS_MTD  			,0)	AS    CREDIT_CRED_CMS_MTD  			--融资融券信用佣金_月累计
+		,COALESCE(T1.CREDIT_CRED_NET_CMS_MTD 		,0)	AS    CREDIT_CRED_NET_CMS_MTD 		--融资融券信用净佣金_月累计
+		,COALESCE(T1.CREDIT_CRED_TRAN_FEE_MTD 	,0)		AS    CREDIT_CRED_TRAN_FEE_MTD 		--融资融券信用过户费_月累计
+		,COALESCE(T1.FIN_RECE_INT_MTD     			,0)	AS    FIN_RECE_INT_MTD     			--融资应收利息_月累计
+		,COALESCE(T1.FIN_PAIDINT_MTD      			,0)	AS    FIN_PAIDINT_MTD      			--融资实收利息_月累计
+		,COALESCE(T1.STKPLG_CMS_MTD       			,0)	AS    STKPLG_CMS_MTD       			--股票质押佣金_月累计
+		,COALESCE(T1.STKPLG_NET_CMS_MTD   			,0)	AS    STKPLG_NET_CMS_MTD   			--股票质押净佣金_月累计
+		,COALESCE(T1.STKPLG_PAIDINT_MTD   			,0)	AS    STKPLG_PAIDINT_MTD   			--股票质押实收利息_月累计
+		,COALESCE(T1.STKPLG_RECE_INT_MTD  			,0)	AS    STKPLG_RECE_INT_MTD  			--股票质押应收利息_月累计
+		,COALESCE(T1.APPTBUYB_CMS_MTD     			,0)	AS    APPTBUYB_CMS_MTD     			--约定购回佣金_月累计
+		,COALESCE(T1.APPTBUYB_NET_CMS_MTD 			,0)	AS    APPTBUYB_NET_CMS_MTD 			--约定购回净佣金_月累计
+		,COALESCE(T1.APPTBUYB_PAIDINT_MTD 			,0)	AS    APPTBUYB_PAIDINT_MTD 			--约定购回实收利息_月累计
+		,COALESCE(T1.FIN_IE_MTD           			,0)	AS    FIN_IE_MTD           			--融资利息支出_月累计
+		,COALESCE(T1.CRDT_STK_IE_MTD      			,0)	AS    CRDT_STK_IE_MTD      			--融券利息支出_月累计
+		,COALESCE(T1.OTH_IE_MTD           			,0)	AS    OTH_IE_MTD           			--其他利息支出_月累计
+		,COALESCE(T1.FEE_RECE_INT_MTD     			,0)	AS    FEE_RECE_INT_MTD     			--费用应收利息_月累计
+		,COALESCE(T1.OTH_RECE_INT_MTD     			,0)	AS    OTH_RECE_INT_MTD     			--其他应收利息_月累计
+		,COALESCE(T1.CREDIT_CPTL_COST_MTD 			,0)	AS    CREDIT_CPTL_COST_MTD 			--融资融券资金成本_月累计
 		,T2.NET_CMS_YTD          				AS    NET_CMS_YTD          			--净佣金_年累计
 		,T2.GROSS_CMS_YTD        				AS    GROSS_CMS_YTD        			--毛佣金_年累计
 		,T2.SCDY_CMS_YTD         				AS    SCDY_CMS_YTD         			--二级佣金_年累计
@@ -9489,8 +12896,8 @@ BEGIN
 		,T2.FEE_RECE_INT_YTD     				AS    FEE_RECE_INT_YTD     			--费用应收利息_年累计
 		,T2.OTH_RECE_INT_YTD     				AS    OTH_RECE_INT_YTD     			--其他应收利息_年累计
 		,T2.CREDIT_CPTL_COST_YTD 				AS    CREDIT_CPTL_COST_YTD 			--融资融券资金成本_年累计	
-	FROM #TMP_T_EVT_INCM_D_BRH_MTH T1,#TMP_T_EVT_INCM_D_BRH_YEAR T2
-	WHERE T1.BRH_ID = T2.BRH_ID AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #TMP_T_EVT_INCM_D_BRH_YEAR T2
+	left join #TMP_T_EVT_INCM_D_BRH_MTH T1 on T1.BRH_ID = T2.BRH_ID AND T1.OCCUR_DT = T2.OCCUR_DT;
 	COMMIT;
 END
 GO
@@ -9775,65 +13182,65 @@ BEGIN
 		,CREDIT_CPTL_COST_YTD 		--融资融券资金成本_年累计
 	)		
 	SELECT 
-		 T1.YEAR                 				AS    YEAR                 			--年
-		,T1.MTH                  				AS    MTH                  			--月
-		,T1.EMP_ID               				AS    EMP_ID               			--员工编码
-		,T1.OCCUR_DT             				AS    OCCUR_DT             			--发生日期
-		,T1.NET_CMS_MTD          				AS    NET_CMS_MTD          			--净佣金_月累计
-		,T1.GROSS_CMS_MTD        				AS    GROSS_CMS_MTD        			--毛佣金_月累计
-		,T1.SCDY_CMS_MTD         				AS    SCDY_CMS_MTD         			--二级佣金_月累计
-		,T1.SCDY_NET_CMS_MTD     				AS    SCDY_NET_CMS_MTD     			--二级净佣金_月累计
-		,T1.SCDY_TRAN_FEE_MTD    				AS    SCDY_TRAN_FEE_MTD    			--二级过户费_月累计
-		,T1.ODI_TRD_TRAN_FEE_MTD 				AS    ODI_TRD_TRAN_FEE_MTD 			--普通交易过户费_月累计
-		,T1.ODI_TRD_STP_TAX_MTD  				AS    ODI_TRD_STP_TAX_MTD  			--普通交易印花税_月累计
-		,T1.ODI_TRD_HANDLE_FEE_MTD 				AS    ODI_TRD_HANDLE_FEE_MTD 		--普通交易经手费_月累计
-		,T1.ODI_TRD_SEC_RGLT_FEE_MTD 			AS    ODI_TRD_SEC_RGLT_FEE_MTD 		--普通交易证管费 _月累计
-		,T1.ODI_TRD_ORDR_FEE_MTD 				AS    ODI_TRD_ORDR_FEE_MTD 			--普通交易委托费_月累计
-		,T1.ODI_TRD_OTH_FEE_MTD  				AS    ODI_TRD_OTH_FEE_MTD  			--普通交易其他费用_月累计
-		,T1.CRED_TRD_TRAN_FEE_MTD				AS    CRED_TRD_TRAN_FEE_MTD			--信用交易过户费_月累计
-		,T1.CRED_TRD_STP_TAX_MTD 				AS    CRED_TRD_STP_TAX_MTD 			--信用交易印花税_月累计
-		,T1.CRED_TRD_HANDLE_FEE_MTD 			AS    CRED_TRD_HANDLE_FEE_MTD 		--信用交易经手费_月累计
-		,T1.CRED_TRD_SEC_RGLT_FEE_MTD 			AS    CRED_TRD_SEC_RGLT_FEE_MTD 	--信用交易证管费_月累计
-		,T1.CRED_TRD_ORDR_FEE_MTD 				AS    CRED_TRD_ORDR_FEE_MTD 		--信用交易委托费_月累计
-		,T1.CRED_TRD_OTH_FEE_MTD 				AS    CRED_TRD_OTH_FEE_MTD 			--信用交易其他费用_月累计
-		,T1.STKF_CMS_MTD         				AS    STKF_CMS_MTD         			--股基佣金_月累计
-		,T1.STKF_TRAN_FEE_MTD    				AS    STKF_TRAN_FEE_MTD    			--股基过户费_月累计
-		,T1.STKF_NET_CMS_MTD     				AS    STKF_NET_CMS_MTD     			--股基净佣金_月累计
-		,T1.BOND_CMS_MTD         				AS    BOND_CMS_MTD         			--债券佣金_月累计
-		,T1.BOND_NET_CMS_MTD     				AS    BOND_NET_CMS_MTD     			--债券净佣金_月累计
-		,T1.REPQ_CMS_MTD         				AS    REPQ_CMS_MTD         			--报价回购佣金_月累计
-		,T1.REPQ_NET_CMS_MTD     				AS    REPQ_NET_CMS_MTD     			--报价回购净佣金_月累计
-		,T1.HGT_CMS_MTD          				AS    HGT_CMS_MTD          			--沪港通佣金_月累计
-		,T1.HGT_NET_CMS_MTD      				AS    HGT_NET_CMS_MTD      			--沪港通净佣金_月累计
-		,T1.HGT_TRAN_FEE_MTD     				AS    HGT_TRAN_FEE_MTD     			--沪港通过户费_月累计
-		,T1.SGT_CMS_MTD          				AS    SGT_CMS_MTD          			--深港通佣金_月累计
-		,T1.SGT_NET_CMS_MTD      				AS    SGT_NET_CMS_MTD      			--深港通净佣金_月累计
-		,T1.SGT_TRAN_FEE_MTD     				AS    SGT_TRAN_FEE_MTD     			--深港通过户费_月累计
-		,T1.BGDL_CMS_MTD         				AS    BGDL_CMS_MTD         			--大宗交易佣金_月累计
-		,T1.BGDL_NET_CMS_MTD     				AS    BGDL_NET_CMS_MTD     			--大宗交易净佣金_月累计
-		,T1.BGDL_TRAN_FEE_MTD    				AS    BGDL_TRAN_FEE_MTD    			--大宗交易过户费_月累计
-		,T1.PSTK_OPTN_CMS_MTD    				AS    PSTK_OPTN_CMS_MTD    			--个股期权佣金_月累计
-		,T1.PSTK_OPTN_NET_CMS_MTD 				AS    PSTK_OPTN_NET_CMS_MTD 		--个股期权净佣金_月累计
-		,T1.CREDIT_ODI_CMS_MTD   				AS    CREDIT_ODI_CMS_MTD   			--融资融券普通佣金_月累计
-		,T1.CREDIT_ODI_NET_CMS_MTD 				AS    CREDIT_ODI_NET_CMS_MTD 		--融资融券普通净佣金_月累计
-		,T1.CREDIT_ODI_TRAN_FEE_MTD 			AS    CREDIT_ODI_TRAN_FEE_MTD 		--融资融券普通过户费_月累计
-		,T1.CREDIT_CRED_CMS_MTD  				AS    CREDIT_CRED_CMS_MTD  			--融资融券信用佣金_月累计
-		,T1.CREDIT_CRED_NET_CMS_MTD 			AS    CREDIT_CRED_NET_CMS_MTD 		--融资融券信用净佣金_月累计
-		,T1.CREDIT_CRED_TRAN_FEE_MTD 			AS    CREDIT_CRED_TRAN_FEE_MTD 		--融资融券信用过户费_月累计
-		,T1.FIN_RECE_INT_MTD     				AS    FIN_RECE_INT_MTD     			--融资应收利息_月累计
-		,T1.FIN_PAIDINT_MTD      				AS    FIN_PAIDINT_MTD      			--融资实收利息_月累计
-		,T1.STKPLG_CMS_MTD       				AS    STKPLG_CMS_MTD       			--股票质押佣金_月累计
-		,T1.STKPLG_NET_CMS_MTD   				AS    STKPLG_NET_CMS_MTD   			--股票质押净佣金_月累计
-		,T1.STKPLG_PAIDINT_MTD   				AS    STKPLG_PAIDINT_MTD   			--股票质押实收利息_月累计
-		,T1.STKPLG_RECE_INT_MTD  				AS    STKPLG_RECE_INT_MTD  			--股票质押应收利息_月累计
-		,T1.APPTBUYB_CMS_MTD     				AS    APPTBUYB_CMS_MTD     			--约定购回佣金_月累计
-		,T1.APPTBUYB_NET_CMS_MTD 				AS    APPTBUYB_NET_CMS_MTD 			--约定购回净佣金_月累计
-		,T1.APPTBUYB_PAIDINT_MTD 				AS    APPTBUYB_PAIDINT_MTD 			--约定购回实收利息_月累计
-		,T1.FIN_IE_MTD           				AS    FIN_IE_MTD           			--融资利息支出_月累计
-		,T1.CRDT_STK_IE_MTD      				AS    CRDT_STK_IE_MTD      			--融券利息支出_月累计
-		,T1.OTH_IE_MTD           				AS    OTH_IE_MTD           			--其他利息支出_月累计
-		,T1.FEE_RECE_INT_MTD     				AS    FEE_RECE_INT_MTD     			--费用应收利息_月累计
-		,T1.OTH_RECE_INT_MTD     				AS    OTH_RECE_INT_MTD     			--其他应收利息_月累计
+		 T2.YEAR                 				AS    YEAR                 			--年
+		,T2.MTH                  				AS    MTH                  			--月
+		,T2.EMP_ID               				AS    EMP_ID               			--员工编码
+		,T2.OCCUR_DT             				AS    OCCUR_DT             			--发生日期
+		,COALESCE(T1.NET_CMS_MTD          		,0)		AS    NET_CMS_MTD          			--净佣金_月累计
+		,COALESCE(T1.GROSS_CMS_MTD        		,0)		AS    GROSS_CMS_MTD        			--毛佣金_月累计
+		,COALESCE(T1.SCDY_CMS_MTD         		,0)		AS    SCDY_CMS_MTD         			--二级佣金_月累计
+		,COALESCE(T1.SCDY_NET_CMS_MTD     		,0)		AS    SCDY_NET_CMS_MTD     			--二级净佣金_月累计
+		,COALESCE(T1.SCDY_TRAN_FEE_MTD    		,0)		AS    SCDY_TRAN_FEE_MTD    			--二级过户费_月累计
+		,COALESCE(T1.ODI_TRD_TRAN_FEE_MTD 		,0)		AS    ODI_TRD_TRAN_FEE_MTD 			--普通交易过户费_月累计
+		,COALESCE(T1.ODI_TRD_STP_TAX_MTD  		,0)		AS    ODI_TRD_STP_TAX_MTD  			--普通交易印花税_月累计
+		,COALESCE(T1.ODI_TRD_HANDLE_FEE_MTD 	,0)		AS    ODI_TRD_HANDLE_FEE_MTD 		--普通交易经手费_月累计
+		,COALESCE(T1.ODI_TRD_SEC_RGLT_FEE_MTD ,0)		AS    ODI_TRD_SEC_RGLT_FEE_MTD 		--普通交易证管费 _月累计
+		,COALESCE(T1.ODI_TRD_ORDR_FEE_MTD 		,0)		AS    ODI_TRD_ORDR_FEE_MTD 			--普通交易委托费_月累计
+		,COALESCE(T1.ODI_TRD_OTH_FEE_MTD  		,0)		AS    ODI_TRD_OTH_FEE_MTD  			--普通交易其他费用_月累计
+		,COALESCE(T1.CRED_TRD_TRAN_FEE_MTD		,0)		AS    CRED_TRD_TRAN_FEE_MTD			--信用交易过户费_月累计
+		,COALESCE(T1.CRED_TRD_STP_TAX_MTD 		,0)		AS    CRED_TRD_STP_TAX_MTD 			--信用交易印花税_月累计
+		,COALESCE(T1.CRED_TRD_HANDLE_FEE_MTD 	,0)		AS    CRED_TRD_HANDLE_FEE_MTD 		--信用交易经手费_月累计
+		,COALESCE(T1.CRED_TRD_SEC_RGLT_FEE_MTD,0) 	AS    CRED_TRD_SEC_RGLT_FEE_MTD 	--信用交易证管费_月累计
+		,COALESCE(T1.CRED_TRD_ORDR_FEE_MTD 		,0)		AS    CRED_TRD_ORDR_FEE_MTD 		--信用交易委托费_月累计
+		,COALESCE(T1.CRED_TRD_OTH_FEE_MTD 		,0)		AS    CRED_TRD_OTH_FEE_MTD 			--信用交易其他费用_月累计
+		,COALESCE(T1.STKF_CMS_MTD         		,0)		AS    STKF_CMS_MTD         			--股基佣金_月累计
+		,COALESCE(T1.STKF_TRAN_FEE_MTD    		,0)		AS    STKF_TRAN_FEE_MTD    			--股基过户费_月累计
+		,COALESCE(T1.STKF_NET_CMS_MTD     		,0)		AS    STKF_NET_CMS_MTD     			--股基净佣金_月累计
+		,COALESCE(T1.BOND_CMS_MTD         		,0)		AS    BOND_CMS_MTD         			--债券佣金_月累计
+		,COALESCE(T1.BOND_NET_CMS_MTD     		,0)		AS    BOND_NET_CMS_MTD     			--债券净佣金_月累计
+		,COALESCE(T1.REPQ_CMS_MTD         		,0)		AS    REPQ_CMS_MTD         			--报价回购佣金_月累计
+		,COALESCE(T1.REPQ_NET_CMS_MTD     		,0)		AS    REPQ_NET_CMS_MTD     			--报价回购净佣金_月累计
+		,COALESCE(T1.HGT_CMS_MTD          		,0)		AS    HGT_CMS_MTD          			--沪港通佣金_月累计
+		,COALESCE(T1.HGT_NET_CMS_MTD      		,0)		AS    HGT_NET_CMS_MTD      			--沪港通净佣金_月累计
+		,COALESCE(T1.HGT_TRAN_FEE_MTD     		,0)		AS    HGT_TRAN_FEE_MTD     			--沪港通过户费_月累计
+		,COALESCE(T1.SGT_CMS_MTD          		,0)		AS    SGT_CMS_MTD          			--深港通佣金_月累计
+		,COALESCE(T1.SGT_NET_CMS_MTD      		,0)		AS    SGT_NET_CMS_MTD      			--深港通净佣金_月累计
+		,COALESCE(T1.SGT_TRAN_FEE_MTD     		,0)		AS    SGT_TRAN_FEE_MTD     			--深港通过户费_月累计
+		,COALESCE(T1.BGDL_CMS_MTD         		,0)		AS    BGDL_CMS_MTD         			--大宗交易佣金_月累计
+		,COALESCE(T1.BGDL_NET_CMS_MTD     		,0)		AS    BGDL_NET_CMS_MTD     			--大宗交易净佣金_月累计
+		,COALESCE(T1.BGDL_TRAN_FEE_MTD    		,0)		AS    BGDL_TRAN_FEE_MTD    			--大宗交易过户费_月累计
+		,COALESCE(T1.PSTK_OPTN_CMS_MTD    		,0)		AS    PSTK_OPTN_CMS_MTD    			--个股期权佣金_月累计
+		,COALESCE(T1.PSTK_OPTN_NET_CMS_MTD 		,0)		AS    PSTK_OPTN_NET_CMS_MTD 		--个股期权净佣金_月累计
+		,COALESCE(T1.CREDIT_ODI_CMS_MTD   		,0)		AS    CREDIT_ODI_CMS_MTD   			--融资融券普通佣金_月累计
+		,COALESCE(T1.CREDIT_ODI_NET_CMS_MTD 	,0)		AS    CREDIT_ODI_NET_CMS_MTD 		--融资融券普通净佣金_月累计
+		,COALESCE(T1.CREDIT_ODI_TRAN_FEE_MTD 	,0)		AS    CREDIT_ODI_TRAN_FEE_MTD 		--融资融券普通过户费_月累计
+		,COALESCE(T1.CREDIT_CRED_CMS_MTD  		,0)		AS    CREDIT_CRED_CMS_MTD  			--融资融券信用佣金_月累计
+		,COALESCE(T1.CREDIT_CRED_NET_CMS_MTD 	,0)		AS    CREDIT_CRED_NET_CMS_MTD 		--融资融券信用净佣金_月累计
+		,COALESCE(T1.CREDIT_CRED_TRAN_FEE_MTD ,0)		AS    CREDIT_CRED_TRAN_FEE_MTD 		--融资融券信用过户费_月累计
+		,COALESCE(T1.FIN_RECE_INT_MTD     		,0)		AS    FIN_RECE_INT_MTD     			--融资应收利息_月累计
+		,COALESCE(T1.FIN_PAIDINT_MTD      		,0)		AS    FIN_PAIDINT_MTD      			--融资实收利息_月累计
+		,COALESCE(T1.STKPLG_CMS_MTD       		,0)		AS    STKPLG_CMS_MTD       			--股票质押佣金_月累计
+		,COALESCE(T1.STKPLG_NET_CMS_MTD   		,0)		AS    STKPLG_NET_CMS_MTD   			--股票质押净佣金_月累计
+		,COALESCE(T1.STKPLG_PAIDINT_MTD   		,0)		AS    STKPLG_PAIDINT_MTD   			--股票质押实收利息_月累计
+		,COALESCE(T1.STKPLG_RECE_INT_MTD  		,0)		AS    STKPLG_RECE_INT_MTD  			--股票质押应收利息_月累计
+		,COALESCE(T1.APPTBUYB_CMS_MTD     		,0)		AS    APPTBUYB_CMS_MTD     			--约定购回佣金_月累计
+		,COALESCE(T1.APPTBUYB_NET_CMS_MTD 		,0)		AS    APPTBUYB_NET_CMS_MTD 			--约定购回净佣金_月累计
+		,COALESCE(T1.APPTBUYB_PAIDINT_MTD 		,0)		AS    APPTBUYB_PAIDINT_MTD 			--约定购回实收利息_月累计
+		,COALESCE(T1.FIN_IE_MTD           		,0)		AS    FIN_IE_MTD           			--融资利息支出_月累计
+		,COALESCE(T1.CRDT_STK_IE_MTD      		,0)		AS    CRDT_STK_IE_MTD      			--融券利息支出_月累计
+		,COALESCE(T1.OTH_IE_MTD           		,0)		AS    OTH_IE_MTD           			--其他利息支出_月累计
+		,COALESCE(T1.FEE_RECE_INT_MTD     		,0)		AS    FEE_RECE_INT_MTD     			--费用应收利息_月累计
+		,COALESCE(T1.OTH_RECE_INT_MTD     		,0)		AS    OTH_RECE_INT_MTD     			--其他应收利息_月累计
 		,T1.CREDIT_CPTL_COST_MTD 				AS    CREDIT_CPTL_COST_MTD 			--融资融券资金成本_月累计
 		,T2.NET_CMS_YTD          				AS    NET_CMS_YTD          			--净佣金_年累计
 		,T2.GROSS_CMS_YTD        				AS    GROSS_CMS_YTD        			--毛佣金_年累计
@@ -9842,15 +13249,15 @@ BEGIN
 		,T2.SCDY_TRAN_FEE_YTD    				AS    SCDY_TRAN_FEE_YTD    			--二级过户费_年累计
 		,T2.ODI_TRD_TRAN_FEE_YTD 				AS    ODI_TRD_TRAN_FEE_YTD 			--普通交易过户费_年累计
 		,T2.ODI_TRD_STP_TAX_YTD  				AS    ODI_TRD_STP_TAX_YTD  			--普通交易印花税_年累计
-		,T2.ODI_TRD_HANDLE_FEE_YTD 				AS    ODI_TRD_HANDLE_FEE_YTD 		--普通交易经手费_年累计	
-		,T2.ODI_TRD_SEC_RGLT_FEE_YTD 			AS    ODI_TRD_SEC_RGLT_FEE_YTD 		--普通交易证管费 _年累计
+		,T2.ODI_TRD_HANDLE_FEE_YTD 			AS    ODI_TRD_HANDLE_FEE_YTD 		--普通交易经手费_年累计	
+		,T2.ODI_TRD_SEC_RGLT_FEE_YTD 		AS    ODI_TRD_SEC_RGLT_FEE_YTD 		--普通交易证管费 _年累计
 		,T2.ODI_TRD_ORDR_FEE_YTD 				AS    ODI_TRD_ORDR_FEE_YTD 			--普通交易委托费_年累计
 		,T2.ODI_TRD_OTH_FEE_YTD  				AS    ODI_TRD_OTH_FEE_YTD  			--普通交易其他费用_年累计
 		,T2.CRED_TRD_TRAN_FEE_YTD				AS    CRED_TRD_TRAN_FEE_YTD			--信用交易过户费_年累计
 		,T2.CRED_TRD_STP_TAX_YTD 				AS    CRED_TRD_STP_TAX_YTD 			--信用交易印花税_年累计
-		,T2.CRED_TRD_HANDLE_FEE_YTD 			AS    CRED_TRD_HANDLE_FEE_YTD 		--信用交易经手费_年累计
-		,T2.CRED_TRD_SEC_RGLT_FEE_YTD 			AS    CRED_TRD_SEC_RGLT_FEE_YTD 	--信用交易证管费_年累计
-		,T2.CRED_TRD_ORDR_FEE_YTD 				AS    CRED_TRD_ORDR_FEE_YTD 		--信用交易委托费_年累计
+		,T2.CRED_TRD_HANDLE_FEE_YTD 		AS    CRED_TRD_HANDLE_FEE_YTD 		--信用交易经手费_年累计
+		,T2.CRED_TRD_SEC_RGLT_FEE_YTD 	AS    CRED_TRD_SEC_RGLT_FEE_YTD 	--信用交易证管费_年累计
+		,T2.CRED_TRD_ORDR_FEE_YTD 			AS    CRED_TRD_ORDR_FEE_YTD 		--信用交易委托费_年累计
 		,T2.CRED_TRD_OTH_FEE_YTD 				AS    CRED_TRD_OTH_FEE_YTD 			--信用交易其他费用_年累计
 		,T2.STKF_CMS_YTD         				AS    STKF_CMS_YTD         			--股基佣金_年累计
 		,T2.STKF_TRAN_FEE_YTD    				AS    STKF_TRAN_FEE_YTD    			--股基过户费_年累计
@@ -9859,7 +13266,7 @@ BEGIN
 		,T2.BOND_NET_CMS_YTD     				AS    BOND_NET_CMS_YTD     			--债券净佣金_年累计
 		,T2.REPQ_CMS_YTD         				AS    REPQ_CMS_YTD         			--报价回购佣金_年累计
 		,T2.REPQ_NET_CMS_YTD     				AS    REPQ_NET_CMS_YTD     			--报价回购净佣金_年累计
-		,T2.HGT_CMS_YTD   						AS    HGT_CMS_YTD   				--沪港通佣金_年累计
+		,T2.HGT_CMS_YTD   							AS    HGT_CMS_YTD   				--沪港通佣金_年累计
 		,T2.HGT_NET_CMS_YTD      				AS    HGT_NET_CMS_YTD       		--沪港通净佣金_年累计
 		,T2.HGT_TRAN_FEE_YTD     				AS    HGT_TRAN_FEE_YTD     			--沪港通过户费_年累计
 		,T2.SGT_CMS_YTD          				AS    SGT_CMS_YTD          			--深港通佣金_年累计
@@ -9871,11 +13278,11 @@ BEGIN
 		,T2.PSTK_OPTN_CMS_YTD    				AS    PSTK_OPTN_CMS_YTD    			--个股期权佣金_年累计
 		,T2.PSTK_OPTN_NET_CMS_YTD				AS    PSTK_OPTN_NET_CMS_YTD			--个股期权净佣金_年累计
 		,T2.CREDIT_ODI_CMS_YTD   				AS    CREDIT_ODI_CMS_YTD   			--融资融券普通佣金_年累计
-		,T2.CREDIT_ODI_NET_CMS_YTD 				AS    CREDIT_ODI_NET_CMS_YTD 		--融资融券普通净佣金_年累计	
-		,T2.CREDIT_ODI_TRAN_FEE_YTD 			AS    CREDIT_ODI_TRAN_FEE_YTD 		--融资融券普通过户费_年累计
+		,T2.CREDIT_ODI_NET_CMS_YTD 			AS    CREDIT_ODI_NET_CMS_YTD 		--融资融券普通净佣金_年累计	
+		,T2.CREDIT_ODI_TRAN_FEE_YTD 		AS    CREDIT_ODI_TRAN_FEE_YTD 		--融资融券普通过户费_年累计
 		,T2.CREDIT_CRED_CMS_YTD  				AS    CREDIT_CRED_CMS_YTD  			--融资融券信用佣金_年累计
-		,T2.CREDIT_CRED_NET_CMS_YTD 			AS    CREDIT_CRED_NET_CMS_YTD 		--融资融券信用净佣金_年累计
-		,T2.CREDIT_CRED_TRAN_FEE_YTD 			AS    CREDIT_CRED_TRAN_FEE_YTD 		--融资融券信用过户费_年累计
+		,T2.CREDIT_CRED_NET_CMS_YTD 		AS    CREDIT_CRED_NET_CMS_YTD 		--融资融券信用净佣金_年累计
+		,T2.CREDIT_CRED_TRAN_FEE_YTD 		AS    CREDIT_CRED_TRAN_FEE_YTD 		--融资融券信用过户费_年累计
 		,T2.FIN_RECE_INT_YTD     				AS    FIN_RECE_INT_YTD     			--融资应收利息_年累计
 		,T2.FIN_PAIDINT_YTD      				AS    FIN_PAIDINT_YTD      			--融资实收利息_年累计
 		,T2.STKPLG_CMS_YTD       				AS    STKPLG_CMS_YTD       			--股票质押佣金_年累计
@@ -9891,8 +13298,9 @@ BEGIN
 		,T2.FEE_RECE_INT_YTD     				AS    FEE_RECE_INT_YTD     			--费用应收利息_年累计
 		,T2.OTH_RECE_INT_YTD     				AS    OTH_RECE_INT_YTD     			--其他应收利息_年累计
 		,T2.CREDIT_CPTL_COST_YTD 				AS    CREDIT_CPTL_COST_YTD 			--融资融券资金成本_年累计	
-	FROM #TMP_T_EVT_INCM_D_EMP_MTH T1,#TMP_T_EVT_INCM_D_EMP_YEAR T2
-	WHERE T1.EMP_ID = T2.EMP_ID AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #TMP_T_EVT_INCM_D_EMP_YEAR T2 
+	LEFT JOIN  #TMP_T_EVT_INCM_D_EMP_MTH T1
+		ON T1.EMP_ID = T2.EMP_ID;
 	COMMIT;
 END
 GO
@@ -10331,7 +13739,7 @@ begin
     select distinct client_id, a.load_dt as occur_dt,@v_bin_year,@v_bin_mth, fund_account,a.load_dt as rq
       from dba.t_edw_uf2_fundaccount a
      where load_dt = @v_bin_date
-       and fundacct_status = '0'
+       -- and fundacct_status = '0'	-- 20180525 计算年累计，不能排除销户
        and main_flag='1'
        and asset_prop='0';
     commit;
@@ -11468,7 +14876,7 @@ begin
         WHERE a.load_dt = @v_date
           AND a.stock_type_cd IN ('19', '1A')
         GROUP BY a.fund_acct, a.stock_cd
-    ) b ON a.MAIN_CPTL_ACCT=b.zjzh
+    ) b ON a.MAIN_CPTL_ACCT=b.zjzh and a.prod_cd=b.jjdm
     where a.OCCUR_DT=@v_date;
     
     -- TODO: 续做销售份额(CONTD_SALE_SHAR) 续做销售金额(CONTD_SALE_AMT)
@@ -12280,22 +15688,47 @@ BEGIN
   简介：产品交易统计
   *********************************************************************
   修订记录： 修订日期       版本号    修订人             修改内容简要说明
+  					20180522										zq							修正月日均指标计算问题
   *********************************************************************/
   	DECLARE @V_YEAR VARCHAR(4);		-- 年份
   	DECLARE @V_MONTH VARCHAR(2);	-- 月份
  	DECLARE @V_BEGIN_TRAD_DATE INT;	-- 本月开始交易日
  	DECLARE @V_YEAR_START_DATE INT; -- 本年开始交易日
- 	DECLARE @V_ACCU_MDAYS INT;		-- 月累计天数
- 	DECLARE @V_ACCU_YDAYS INT;		-- 年累计天数
+ 	
+  DECLARE @V_BIN_NATRE_DAY_MTHBEG  INT ;    --自然日_月初
+  DECLARE @V_BIN_NATRE_DAY_MTHEND  INT ;    --自然日_月末
+  DECLARE @V_BIN_TRD_DAY_MTHBEG    INT ;    --交易日_月初
+  DECLARE @V_BIN_TRD_DAY_MTHEND    INT ;    --交易日_月末
+  DECLARE @V_BIN_NATRE_DAY_YEARBGN INT ;    --自然日_年初
+  DECLARE @V_BIN_TRD_DAY_YEARBGN   INT ;    --交易日_年初
+  DECLARE @V_BIN_NATRE_DAYS_MTH    INT ;    --自然天数_月
+  DECLARE @V_BIN_TRD_DAYS_MTH      INT ;    --交易天数_月
+  DECLARE @V_BIN_NATRE_DAYS_YEAR   INT ;    --自然天数_年
+  DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年
   
 	COMMIT;
 	
 	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_DATE),1,4);
 	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_DATE),5,2);
 	SET @V_BEGIN_TRAD_DATE = (SELECT MIN(RQ) FROM DBA.T_DDW_D_RQ WHERE SFJRBZ='1' AND NIAN=@V_YEAR AND YUE=@V_MONTH);
-    SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
-    SET @V_ACCU_MDAYS=(SELECT TM_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
-    SET @V_ACCU_YDAYS=(SELECT TY_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
+  SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
+  
+  SET @V_BIN_NATRE_DAY_MTHBEG  =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_NATRE_DAY_MTHEND  =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_TRD_DAY_MTHBEG    =(SELECT MIN(DT)	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR  );
+  SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+                     									
+  SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+
+  SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
 
 	DELETE FROM DM.T_EVT_PROD_TRD_M_BRH WHERE YEAR=@V_YEAR AND MTH=@V_MONTH;
 
@@ -12307,48 +15740,49 @@ BEGIN
 		,PROD_CD								AS    PROD_CD					--产品代码 
 		,PROD_TYPE 							    AS    PROD_TYPE 				--产品类别
 		,@V_DATE 								AS    OCCUR_DT 		 			--发生日期
-		,SUM(ITC_RETAIN_AMT)/@V_ACCU_MDAYS 		AS	  ITC_RETAIN_AMT_MDA  		--场内保有金额_月日均
-		,SUM(OTC_RETAIN_AMT)/@V_ACCU_MDAYS  	AS 	  OTC_RETAIN_AMT_MDA  		--场外保有金额_月日均
-		,SUM(ITC_RETAIN_SHAR)/@V_ACCU_MDAYS 	AS 	  ITC_RETAIN_SHAR_MDA 		--场内保有份额_月日均
-		,SUM(OTC_RETAIN_SHAR)/@V_ACCU_MDAYS 	AS 	  OTC_RETAIN_SHAR_MDA 		--场外保有份额_月日均  
-		,SUM(ITC_SUBS_AMT)      				AS	  OTC_SUBS_AMT_M			--场外认购金额_本月
-		,SUM(ITC_PURS_AMT)      				AS	  ITC_PURS_AMT_M			--场内申购金额_本月
-		,SUM(ITC_BUYIN_AMT)     				AS	  ITC_BUYIN_AMT_M    		--场内买入金额_本月
-		,SUM(ITC_REDP_AMT)      				AS	  ITC_REDP_AMT_M     		--场内赎回金额_本月
-		,SUM(ITC_SELL_AMT)      				AS	  ITC_SELL_AMT_M     		--场内卖出金额_本月
-		,SUM(OTC_PURS_AMT)      				AS	  OTC_PURS_AMT_M     		--场外申购金额_本月
-		,SUM(OTC_CASTSL_AMT)    				AS	  OTC_CASTSL_AMT_M   		--场外定投金额_本月
-		,SUM(OTC_COVT_IN_AMT)   				AS	  OTC_COVT_IN_AMT_M  		--场外转换入金额_本月
-		,SUM(OTC_REDP_AMT)      				AS	  OTC_REDP_AMT_M     		--场外赎回金额_本月
-		,SUM(OTC_COVT_OUT_AMT)  				AS	  OTC_COVT_OUT_AMT_M 		--场外转换出金额_本月
-		,SUM(ITC_SUBS_SHAR)     				AS	  ITC_SUBS_SHAR_M    		--场内认购份额_本月
-		,SUM(ITC_PURS_SHAR)     				AS	  ITC_PURS_SHAR_M    		--场内申购份额_本月
-		,SUM(ITC_BUYIN_SHAR)    				AS	  ITC_BUYIN_SHAR_M   		--场内买入份额_本月
-		,SUM(ITC_REDP_SHAR)     				AS	  ITC_REDP_SHAR_M    		--场内赎回份额_本月
-		,SUM(ITC_SELL_SHAR)     				AS	  ITC_SELL_SHAR_M    		--场内卖出份额_本月
-		,SUM(OTC_SUBS_SHAR)     				AS	  OTC_SUBS_SHAR_M    		--场外认购份额_本月
-		,SUM(OTC_PURS_SHAR)     				AS	  OTC_PURS_SHAR_M    		--场外申购份额_本月
-		,SUM(OTC_CASTSL_SHAR)   				AS	  OTC_CASTSL_SHAR_M 		--场外定投份额_本月
-		,SUM(OTC_COVT_IN_SHAR)  				AS	  OTC_COVT_IN_SHAR_M 		--场外转换入份额_本月
-		,SUM(OTC_REDP_SHAR)     				AS	  OTC_REDP_SHAR_M    		--场外赎回份额_本月
-		,SUM(OTC_COVT_OUT_SHAR) 				AS	  OTC_COVT_OUT_SHAR_M		--场外转换出份额_本月
-		,SUM(ITC_SUBS_CHAG)     				AS	  ITC_SUBS_CHAG_M    		--场内认购手续费_本月
-		,SUM(ITC_PURS_CHAG)     				AS	  ITC_PURS_CHAG_M    		--场内申购手续费_本月
-		,SUM(ITC_BUYIN_CHAG)    				AS	  ITC_BUYIN_CHAG_M   		--场内买入手续费_本月
-		,SUM(ITC_REDP_CHAG)     				AS	  ITC_REDP_CHAG_M    		--场内赎回手续费_本月
-		,SUM(ITC_SELL_CHAG)     				AS	  ITC_SELL_CHAG_M    		--场内卖出手续费_本月
-		,SUM(OTC_SUBS_CHAG)     				AS	  OTC_SUBS_CHAG_M    		--场外认购手续费_本月
-		,SUM(OTC_PURS_CHAG)     				AS	  OTC_PURS_CHAG_M    		--场外申购手续费_本月
-		,SUM(OTC_CASTSL_CHAG)   				AS	  OTC_CASTSL_CHAG_M  		--场外定投手续费_本月
-		,SUM(OTC_COVT_IN_CHAG)  				AS	  OTC_COVT_IN_CHAG_M 		--场外转换入手续费_本月
-		,SUM(OTC_REDP_CHAG)    					AS	  OTC_REDP_CHAG_M    		--场外赎回手续费_本月
-		,SUM(OTC_COVT_OUT_CHAG) 				AS	  OTC_COVT_OUT_CHAG_M		--场外转换出手续费_本月
-		,SUM(CONTD_SALE_SHAR)   				AS	  CONTD_SALE_SHAR_M  		--续作销售份额_本月
-		,SUM(CONTD_SALE_AMT)    				AS	  CONTD_SALE_AMT_M  		--续作销售金额_本月
+		,SUM(ITC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_MTH 		AS	  ITC_RETAIN_AMT_MDA  		--场内保有金额_月日均
+		,SUM(OTC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_MTH  	AS 	  OTC_RETAIN_AMT_MDA  		--场外保有金额_月日均
+		,SUM(ITC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_MTH 	AS 	  ITC_RETAIN_SHAR_MDA 		--场内保有份额_月日均
+		,SUM(OTC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_MTH 	AS 	  OTC_RETAIN_SHAR_MDA 		--场外保有份额_月日均  
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_AMT ELSE 0 END)      				AS	  OTC_SUBS_AMT_M			--场外认购金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_AMT ELSE 0 END)      				AS	  ITC_PURS_AMT_M			--场内申购金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_AMT ELSE 0 END)     				AS	  ITC_BUYIN_AMT_M    		--场内买入金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_AMT ELSE 0 END)      				AS	  ITC_REDP_AMT_M     		--场内赎回金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_AMT ELSE 0 END)      				AS	  ITC_SELL_AMT_M     		--场内卖出金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_AMT ELSE 0 END)      				AS	  OTC_PURS_AMT_M     		--场外申购金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_AMT ELSE 0 END)    				AS	  OTC_CASTSL_AMT_M   		--场外定投金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_AMT ELSE 0 END)   				AS	  OTC_COVT_IN_AMT_M  		--场外转换入金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_AMT ELSE 0 END)      				AS	  OTC_REDP_AMT_M     		--场外赎回金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_AMT ELSE 0 END)  				AS	  OTC_COVT_OUT_AMT_M 		--场外转换出金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_SHAR ELSE 0 END)     				AS	  ITC_SUBS_SHAR_M    		--场内认购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_SHAR ELSE 0 END)     				AS	  ITC_PURS_SHAR_M    		--场内申购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_SHAR ELSE 0 END)    				AS	  ITC_BUYIN_SHAR_M   		--场内买入份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_SHAR ELSE 0 END)     				AS	  ITC_REDP_SHAR_M    		--场内赎回份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_SHAR ELSE 0 END)     				AS	  ITC_SELL_SHAR_M    		--场内卖出份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_SHAR ELSE 0 END)     				AS	  OTC_SUBS_SHAR_M    		--场外认购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_SHAR ELSE 0 END)     				AS	  OTC_PURS_SHAR_M    		--场外申购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_SHAR ELSE 0 END)   				AS	  OTC_CASTSL_SHAR_M 		--场外定投份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_SHAR ELSE 0 END)  				AS	  OTC_COVT_IN_SHAR_M 		--场外转换入份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_SHAR ELSE 0 END)     				AS	  OTC_REDP_SHAR_M    		--场外赎回份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_SHAR ELSE 0 END) 				AS	  OTC_COVT_OUT_SHAR_M		--场外转换出份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_CHAG ELSE 0 END)     				AS	  ITC_SUBS_CHAG_M    		--场内认购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_CHAG ELSE 0 END)     				AS	  ITC_PURS_CHAG_M    		--场内申购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_CHAG ELSE 0 END)    				AS	  ITC_BUYIN_CHAG_M   		--场内买入手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_CHAG ELSE 0 END)     				AS	  ITC_REDP_CHAG_M    		--场内赎回手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_CHAG ELSE 0 END)     				AS	  ITC_SELL_CHAG_M    		--场内卖出手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_CHAG ELSE 0 END)     				AS	  OTC_SUBS_CHAG_M    		--场外认购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_CHAG ELSE 0 END)     				AS	  OTC_PURS_CHAG_M    		--场外申购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_CHAG ELSE 0 END)   				AS	  OTC_CASTSL_CHAG_M  		--场外定投手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_CHAG ELSE 0 END)  				AS	  OTC_COVT_IN_CHAG_M 		--场外转换入手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_CHAG ELSE 0 END)    					AS	  OTC_REDP_CHAG_M    		--场外赎回手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_CHAG ELSE 0 END) 				AS	  OTC_COVT_OUT_CHAG_M		--场外转换出手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_SHAR ELSE 0 END)   				AS	  CONTD_SALE_SHAR_M  		--续作销售份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_AMT ELSE 0 END)    				AS	  CONTD_SALE_AMT_M  		--续作销售金额_本月
 	INTO #T_EVT_PROD_TRD_M_BRH_MTH
-	FROM DM.T_EVT_PROD_TRD_D_BRH T 
-	WHERE T.OCCUR_DT BETWEEN @V_BEGIN_TRAD_DATE AND @V_DATE
-	   GROUP BY T.BRH_ID,T.PROD_CD,T.PROD_TYPE;
+	FROM DM.T_EVT_PROD_TRD_D_BRH T1
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_MTHBEG AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.BRH_ID,T1.PROD_CD,T1.PROD_TYPE;
 
 	-- 统计年指标
 	SELECT 
@@ -12358,48 +15792,49 @@ BEGIN
 		,PROD_CD								AS    PROD_CD					--产品代码 
 		,PROD_TYPE 							    AS    PROD_TYPE 				--产品类别
 		,@V_DATE 								AS    OCCUR_DT 		 			--发生日期	
-		,SUM(ITC_RETAIN_AMT)/@V_ACCU_YDAYS 		AS	  ITC_RETAIN_AMT_YDA  		--场内保有金额_年日均
-		,SUM(OTC_RETAIN_AMT)/@V_ACCU_YDAYS  	AS 	  OTC_RETAIN_AMT_YDA  		--场外保有金额_年日均
-		,SUM(ITC_RETAIN_SHAR)/@V_ACCU_YDAYS 	AS 	  ITC_RETAIN_SHAR_YDA 		--场内保有份额_年日均
-		,SUM(OTC_RETAIN_SHAR)/@V_ACCU_YDAYS 	AS 	  OTC_RETAIN_SHAR_YDA 		--场外保有份额_年日均  
-		,SUM(OTC_SUBS_AMT)      				AS	  OTC_SUBS_AMT_TY			--场外认购金额_本年
-		,SUM(ITC_PURS_AMT)      				AS	  ITC_PURS_AMT_TY			--场内申购金额_本年
-		,SUM(ITC_BUYIN_AMT)     				AS	  ITC_BUYIN_AMT_TY    		--场内买入金额_本年
-		,SUM(ITC_REDP_AMT)      				AS	  ITC_REDP_AMT_TY     		--场内赎回金额_本年
-		,SUM(ITC_SELL_AMT)      				AS	  ITC_SELL_AMT_TY     		--场内卖出金额_本年
-		,SUM(OTC_PURS_AMT)      				AS	  OTC_PURS_AMT_TY     		--场外申购金额_本年
-		,SUM(OTC_CASTSL_AMT)    				AS	  OTC_CASTSL_AMT_TY   		--场外定投金额_本年
-		,SUM(OTC_COVT_IN_AMT)   				AS	  OTC_COVT_IN_AMT_TY  		--场外转换入金额_本年
-		,SUM(OTC_REDP_AMT)      				AS	  OTC_REDP_AMT_TY     		--场外赎回金额_本年
-		,SUM(OTC_COVT_OUT_AMT)  				AS	  OTC_COVT_OUT_AMT_TY 		--场外转换出金额_本年
-		,SUM(ITC_SUBS_SHAR)     				AS	  ITC_SUBS_SHAR_TY    		--场内认购份额_本年
-		,SUM(ITC_PURS_SHAR)     				AS	  ITC_PURS_SHAR_TY    		--场内申购份额_本年
-		,SUM(ITC_BUYIN_SHAR)    				AS	  ITC_BUYIN_SHAR_TY   		--场内买入份额_本年
-		,SUM(ITC_REDP_SHAR)     				AS	  ITC_REDP_SHAR_TY    		--场内赎回份额_本年
-		,SUM(ITC_SELL_SHAR)     				AS	  ITC_SELL_SHAR_TY    		--场内卖出份额_本年
-		,SUM(OTC_SUBS_SHAR)     				AS	  OTC_SUBS_SHAR_TY    		--场外认购份额_本年
-		,SUM(OTC_PURS_SHAR)     				AS	  OTC_PURS_SHAR_TY    		--场外申购份额_本年
-		,SUM(OTC_CASTSL_SHAR)   				AS	  OTC_CASTSL_SHAR_TY		--场外定投份额_本年
-		,SUM(OTC_COVT_IN_SHAR)  				AS	  OTC_COVT_IN_SHAR_TY 		--场外转换入份额_本年
-		,SUM(OTC_REDP_SHAR)     				AS	  OTC_REDP_SHAR_TY    		--场外赎回份额_本年
-		,SUM(OTC_COVT_OUT_SHAR) 				AS	  OTC_COVT_OUT_SHAR_TY		--场外转换出份额_本年
-		,SUM(ITC_SUBS_CHAG)     				AS	  ITC_SUBS_CHAG_TY    		--场内认购手续费_本年
-		,SUM(ITC_PURS_CHAG)     				AS	  ITC_PURS_CHAG_TY    		--场内申购手续费_本年
-		,SUM(ITC_BUYIN_CHAG)    				AS	  ITC_BUYIN_CHAG_TY   		--场内买入手续费_本年
-		,SUM(ITC_REDP_CHAG)     				AS	  ITC_REDP_CHAG_TY    		--场内赎回手续费_本年
-		,SUM(ITC_SELL_CHAG)     				AS	  ITC_SELL_CHAG_TY    		--场内卖出手续费_本年
-		,SUM(OTC_SUBS_CHAG)     				AS	  OTC_SUBS_CHAG_TY    		--场外认购手续费_本年
-		,SUM(OTC_PURS_CHAG)     				AS	  OTC_PURS_CHAG_TY    		--场外申购手续费_本年
-		,SUM(OTC_CASTSL_CHAG)   				AS	  OTC_CASTSL_CHAG_TY  		--场外定投手续费_本年
-		,SUM(OTC_COVT_IN_CHAG)  				AS	  OTC_COVT_IN_CHAG_TY 		--场外转换入手续费_本年
-		,SUM(OTC_REDP_CHAG)    					AS	  OTC_REDP_CHAG_TY    		--场外赎回手续费_本年
-		,SUM(OTC_COVT_OUT_CHAG) 				AS	  OTC_COVT_OUT_CHAG_TY		--场外转换出手续费_本年
-		,SUM(CONTD_SALE_SHAR)   				AS	  CONTD_SALE_SHAR_TY  		--续作销售份额_本年
-		,SUM(CONTD_SALE_AMT)    				AS	  CONTD_SALE_AMT_TY  		--续作销售金额_本年
+		,SUM(ITC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_YEAR 		AS	  ITC_RETAIN_AMT_YDA  		--场内保有金额_年日均
+		,SUM(OTC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_YEAR  	AS 	  OTC_RETAIN_AMT_YDA  		--场外保有金额_年日均
+		,SUM(ITC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_YEAR 	AS 	  ITC_RETAIN_SHAR_YDA 		--场内保有份额_年日均
+		,SUM(OTC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_YEAR 	AS 	  OTC_RETAIN_SHAR_YDA 		--场外保有份额_年日均  
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_AMT ELSE 0 END)      				AS	  OTC_SUBS_AMT_TY			--场外认购金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_AMT ELSE 0 END)      				AS	  ITC_PURS_AMT_TY			--场内申购金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_AMT ELSE 0 END)     				AS	  ITC_BUYIN_AMT_TY    		--场内买入金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_AMT ELSE 0 END)      				AS	  ITC_REDP_AMT_TY     		--场内赎回金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_AMT ELSE 0 END)      				AS	  ITC_SELL_AMT_TY     		--场内卖出金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_AMT ELSE 0 END)      				AS	  OTC_PURS_AMT_TY     		--场外申购金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_AMT ELSE 0 END)    				AS	  OTC_CASTSL_AMT_TY   		--场外定投金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_AMT ELSE 0 END)   				AS	  OTC_COVT_IN_AMT_TY  		--场外转换入金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_AMT ELSE 0 END)      				AS	  OTC_REDP_AMT_TY     		--场外赎回金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_AMT ELSE 0 END)  				AS	  OTC_COVT_OUT_AMT_TY 		--场外转换出金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_SHAR ELSE 0 END)     				AS	  ITC_SUBS_SHAR_TY    		--场内认购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_SHAR ELSE 0 END)     				AS	  ITC_PURS_SHAR_TY    		--场内申购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_SHAR ELSE 0 END)    				AS	  ITC_BUYIN_SHAR_TY   		--场内买入份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_SHAR ELSE 0 END)     				AS	  ITC_REDP_SHAR_TY    		--场内赎回份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_SHAR ELSE 0 END)     				AS	  ITC_SELL_SHAR_TY    		--场内卖出份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_SHAR ELSE 0 END)     				AS	  OTC_SUBS_SHAR_TY    		--场外认购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_SHAR ELSE 0 END)     				AS	  OTC_PURS_SHAR_TY    		--场外申购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_SHAR ELSE 0 END)   				AS	  OTC_CASTSL_SHAR_TY		--场外定投份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_SHAR ELSE 0 END)  				AS	  OTC_COVT_IN_SHAR_TY 		--场外转换入份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_SHAR ELSE 0 END)     				AS	  OTC_REDP_SHAR_TY    		--场外赎回份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_SHAR ELSE 0 END) 				AS	  OTC_COVT_OUT_SHAR_TY		--场外转换出份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_CHAG ELSE 0 END)     				AS	  ITC_SUBS_CHAG_TY    		--场内认购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_CHAG ELSE 0 END)     				AS	  ITC_PURS_CHAG_TY    		--场内申购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_CHAG ELSE 0 END)    				AS	  ITC_BUYIN_CHAG_TY   		--场内买入手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_CHAG ELSE 0 END)     				AS	  ITC_REDP_CHAG_TY    		--场内赎回手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_CHAG ELSE 0 END)     				AS	  ITC_SELL_CHAG_TY    		--场内卖出手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_CHAG ELSE 0 END)     				AS	  OTC_SUBS_CHAG_TY    		--场外认购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_CHAG ELSE 0 END)     				AS	  OTC_PURS_CHAG_TY    		--场外申购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_CHAG ELSE 0 END)   				AS	  OTC_CASTSL_CHAG_TY  		--场外定投手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_CHAG ELSE 0 END)  				AS	  OTC_COVT_IN_CHAG_TY 		--场外转换入手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_CHAG ELSE 0 END)    					AS	  OTC_REDP_CHAG_TY    		--场外赎回手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_CHAG ELSE 0 END) 				AS	  OTC_COVT_OUT_CHAG_TY		--场外转换出手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_SHAR ELSE 0 END)   				AS	  CONTD_SALE_SHAR_TY  		--续作销售份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_AMT ELSE 0 END)    				AS	  CONTD_SALE_AMT_TY  		--续作销售金额_本年
 	INTO #T_EVT_PROD_TRD_M_BRH_YEAR
-	FROM DM.T_EVT_PROD_TRD_D_BRH T 
-	WHERE T.OCCUR_DT BETWEEN @V_BEGIN_TRAD_DATE AND @V_DATE
-	   GROUP BY T.BRH_ID,T.PROD_CD,T.PROD_TYPE;
+	FROM DM.T_EVT_PROD_TRD_D_BRH T1
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_YEARBGN AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.BRH_ID,T1.PROD_CD,T1.PROD_TYPE;
 
 	--插入目标表
 	INSERT INTO DM.T_EVT_PROD_TRD_M_BRH(
@@ -12487,54 +15922,54 @@ BEGIN
 		,CONTD_SALE_AMT_TY   				--续作销售金额_本年
 	)		
 	SELECT 
-		 T1.YEAR                        AS 		YEAR                	   --年
-		,T1.MTH                         AS 		MTH                 	   --月
-		,T1.BRH_ID                      AS 		BRH_ID              	   --营业部编码
-		,T1.PROD_CD                     AS 		PROD_CD             	   --产品代码
-		,T1.PROD_TYPE                   AS 		PROD_TYPE           	   --产品类型
-		,T1.OCCUR_DT                    AS 		OCCUR_DT            	   --发生日期
-		,T1.ITC_RETAIN_AMT_MDA          AS 		ITC_RETAIN_AMT_MDA  	   --场内保有金额_月日均
-		,T1.OTC_RETAIN_AMT_MDA          AS 		OTC_RETAIN_AMT_MDA  	   --场外保有金额_月日均
-		,T1.ITC_RETAIN_SHAR_MDA         AS 		ITC_RETAIN_SHAR_MDA 	   --场内保有份额_月日均
-		,T1.OTC_RETAIN_SHAR_MDA         AS 		OTC_RETAIN_SHAR_MDA 	   --场外保有份额_月日均  
+		 T2.YEAR                        AS 		YEAR                	   --年
+		,T2.MTH                         AS 		MTH                 	   --月
+		,T2.BRH_ID                      AS 		BRH_ID              	   --营业部编码
+		,T2.PROD_CD                     AS 		PROD_CD             	   --产品代码
+		,T2.PROD_TYPE                   AS 		PROD_TYPE           	   --产品类型
+		,T2.OCCUR_DT                    AS 		OCCUR_DT            	   --发生日期
+		,COALESCE(T1.ITC_RETAIN_AMT_MDA  ,0)        AS 		ITC_RETAIN_AMT_MDA  	   --场内保有金额_月日均
+		,COALESCE(T1.OTC_RETAIN_AMT_MDA  ,0)        AS 		OTC_RETAIN_AMT_MDA  	   --场外保有金额_月日均
+		,COALESCE(T1.ITC_RETAIN_SHAR_MDA ,0)        AS 		ITC_RETAIN_SHAR_MDA 	   --场内保有份额_月日均
+		,COALESCE(T1.OTC_RETAIN_SHAR_MDA ,0)        AS 		OTC_RETAIN_SHAR_MDA 	   --场外保有份额_月日均  
 		,T2.ITC_RETAIN_AMT_YDA          AS 		ITC_RETAIN_AMT_YDA  	   --场内保有金额_年日均
 		,T2.OTC_RETAIN_AMT_YDA          AS 		OTC_RETAIN_AMT_YDA  	   --场外保有金额_年日均
 		,T2.ITC_RETAIN_SHAR_YDA         AS 		ITC_RETAIN_SHAR_YDA 	   --场内保有份额_年日均
 		,T2.OTC_RETAIN_SHAR_YDA         AS 		OTC_RETAIN_SHAR_YDA 	   --场外保有份额_年日均  
-		,T1.OTC_SUBS_AMT_M              AS 		OTC_SUBS_AMT_M      	   --场外认购金额_本月
-		,T1.ITC_PURS_AMT_M              AS 		ITC_PURS_AMT_M      	   --场内申购金额_本月
-		,T1.ITC_BUYIN_AMT_M             AS 		ITC_BUYIN_AMT_M     	   --场内买入金额_本月
-		,T1.ITC_REDP_AMT_M              AS 		ITC_REDP_AMT_M      	   --场内赎回金额_本月
-		,T1.ITC_SELL_AMT_M              AS 		ITC_SELL_AMT_M      	   --场内卖出金额_本月
-		,T1.OTC_PURS_AMT_M              AS 		OTC_PURS_AMT_M      	   --场外申购金额_本月
-		,T1.OTC_CASTSL_AMT_M            AS 		OTC_CASTSL_AMT_M    	   --场外定投金额_本月
-		,T1.OTC_COVT_IN_AMT_M           AS 		OTC_COVT_IN_AMT_M   	   --场外转换入金额_本月
-		,T1.OTC_REDP_AMT_M              AS 		OTC_REDP_AMT_M      	   --场外赎回金额_本月
-		,T1.OTC_COVT_OUT_AMT_M          AS 		OTC_COVT_OUT_AMT_M  	   --场外转换出金额_本月
-		,T1.ITC_SUBS_SHAR_M             AS 		ITC_SUBS_SHAR_M     	   --场内认购份额_本月
-		,T1.ITC_PURS_SHAR_M             AS 		ITC_PURS_SHAR_M     	   --场内申购份额_本月
-		,T1.ITC_BUYIN_SHAR_M            AS 		ITC_BUYIN_SHAR_M    	   --场内买入份额_本月
-		,T1.ITC_REDP_SHAR_M             AS 		ITC_REDP_SHAR_M     	   --场内赎回份额_本月
-		,T1.ITC_SELL_SHAR_M             AS 		ITC_SELL_SHAR_M     	   --场内卖出份额_本月
-		,T1.OTC_SUBS_SHAR_M             AS 		OTC_SUBS_SHAR_M     	   --场外认购份额_本月
-		,T1.OTC_PURS_SHAR_M             AS 		OTC_PURS_SHAR_M     	   --场外申购份额_本月
-		,T1.OTC_CASTSL_SHAR_M           AS 		OTC_CASTSL_SHAR_M   	   --场外定投份额_本月
-		,T1.OTC_COVT_IN_SHAR_M          AS 		OTC_COVT_IN_SHAR_M  	   --场外转换入份额_本月
-		,T1.OTC_REDP_SHAR_M             AS 		OTC_REDP_SHAR_M     	   --场外赎回份额_本月
-		,T1.OTC_COVT_OUT_SHAR_M         AS 		OTC_COVT_OUT_SHAR_M 	   --场外转换出份额_本月
-		,T1.ITC_SUBS_CHAG_M             AS 		ITC_SUBS_CHAG_M     	   --场内认购手续费_本月
-		,T1.ITC_PURS_CHAG_M             AS 		ITC_PURS_CHAG_M     	   --场内申购手续费_本月
-		,T1.ITC_BUYIN_CHAG_M            AS 		ITC_BUYIN_CHAG_M    	   --场内买入手续费_本月
-		,T1.ITC_REDP_CHAG_M             AS 		ITC_REDP_CHAG_M     	   --场内赎回手续费_本月
-		,T1.ITC_SELL_CHAG_M             AS 		ITC_SELL_CHAG_M     	   --场内卖出手续费_本月
-		,T1.OTC_SUBS_CHAG_M             AS 		OTC_SUBS_CHAG_M     	   --场外认购手续费_本月
-		,T1.OTC_PURS_CHAG_M             AS 		OTC_PURS_CHAG_M     	   --场外申购手续费_本月
-		,T1.OTC_CASTSL_CHAG_M           AS 		OTC_CASTSL_CHAG_M   	   --场外定投手续费_本月
-		,T1.OTC_COVT_IN_CHAG_M          AS 		OTC_COVT_IN_CHAG_M  	   --场外转换入手续费_本月
-		,T1.OTC_REDP_CHAG_M             AS 		OTC_REDP_CHAG_M     	   --场外赎回手续费_本月
-		,T1.OTC_COVT_OUT_CHAG_M         AS 		OTC_COVT_OUT_CHAG_M 	   --场外转换出手续费_本月
-		,T1.CONTD_SALE_SHAR_M           AS 		CONTD_SALE_SHAR_M   	   --续作销售份额_本月
-		,T1.CONTD_SALE_AMT_M            AS 		CONTD_SALE_AMT_M    	   --续作销售金额_本月
+		,COALESCE(T1.OTC_SUBS_AMT_M        ,0)      AS 		OTC_SUBS_AMT_M      	   --场外认购金额_本月
+		,COALESCE(T1.ITC_PURS_AMT_M        ,0)      AS 		ITC_PURS_AMT_M      	   --场内申购金额_本月
+		,COALESCE(T1.ITC_BUYIN_AMT_M       ,0)      AS 		ITC_BUYIN_AMT_M     	   --场内买入金额_本月
+		,COALESCE(T1.ITC_REDP_AMT_M        ,0)      AS 		ITC_REDP_AMT_M      	   --场内赎回金额_本月
+		,COALESCE(T1.ITC_SELL_AMT_M        ,0)      AS 		ITC_SELL_AMT_M      	   --场内卖出金额_本月
+		,COALESCE(T1.OTC_PURS_AMT_M        ,0)      AS 		OTC_PURS_AMT_M      	   --场外申购金额_本月
+		,COALESCE(T1.OTC_CASTSL_AMT_M      ,0)      AS 		OTC_CASTSL_AMT_M    	   --场外定投金额_本月
+		,COALESCE(T1.OTC_COVT_IN_AMT_M     ,0)      AS 		OTC_COVT_IN_AMT_M   	   --场外转换入金额_本月
+		,COALESCE(T1.OTC_REDP_AMT_M        ,0)      AS 		OTC_REDP_AMT_M      	   --场外赎回金额_本月
+		,COALESCE(T1.OTC_COVT_OUT_AMT_M    ,0)      AS 		OTC_COVT_OUT_AMT_M  	   --场外转换出金额_本月
+		,COALESCE(T1.ITC_SUBS_SHAR_M       ,0)      AS 		ITC_SUBS_SHAR_M     	   --场内认购份额_本月
+		,COALESCE(T1.ITC_PURS_SHAR_M       ,0)      AS 		ITC_PURS_SHAR_M     	   --场内申购份额_本月
+		,COALESCE(T1.ITC_BUYIN_SHAR_M      ,0)      AS 		ITC_BUYIN_SHAR_M    	   --场内买入份额_本月
+		,COALESCE(T1.ITC_REDP_SHAR_M       ,0)      AS 		ITC_REDP_SHAR_M     	   --场内赎回份额_本月
+		,COALESCE(T1.ITC_SELL_SHAR_M       ,0)      AS 		ITC_SELL_SHAR_M     	   --场内卖出份额_本月
+		,COALESCE(T1.OTC_SUBS_SHAR_M       ,0)      AS 		OTC_SUBS_SHAR_M     	   --场外认购份额_本月
+		,COALESCE(T1.OTC_PURS_SHAR_M       ,0)      AS 		OTC_PURS_SHAR_M     	   --场外申购份额_本月
+		,COALESCE(T1.OTC_CASTSL_SHAR_M     ,0)      AS 		OTC_CASTSL_SHAR_M   	   --场外定投份额_本月
+		,COALESCE(T1.OTC_COVT_IN_SHAR_M    ,0)      AS 		OTC_COVT_IN_SHAR_M  	   --场外转换入份额_本月
+		,COALESCE(T1.OTC_REDP_SHAR_M       ,0)      AS 		OTC_REDP_SHAR_M     	   --场外赎回份额_本月
+		,COALESCE(T1.OTC_COVT_OUT_SHAR_M   ,0)      AS 		OTC_COVT_OUT_SHAR_M 	   --场外转换出份额_本月
+		,COALESCE(T1.ITC_SUBS_CHAG_M       ,0)      AS 		ITC_SUBS_CHAG_M     	   --场内认购手续费_本月
+		,COALESCE(T1.ITC_PURS_CHAG_M       ,0)      AS 		ITC_PURS_CHAG_M     	   --场内申购手续费_本月
+		,COALESCE(T1.ITC_BUYIN_CHAG_M      ,0)      AS 		ITC_BUYIN_CHAG_M    	   --场内买入手续费_本月
+		,COALESCE(T1.ITC_REDP_CHAG_M       ,0)      AS 		ITC_REDP_CHAG_M     	   --场内赎回手续费_本月
+		,COALESCE(T1.ITC_SELL_CHAG_M       ,0)      AS 		ITC_SELL_CHAG_M     	   --场内卖出手续费_本月
+		,COALESCE(T1.OTC_SUBS_CHAG_M       ,0)      AS 		OTC_SUBS_CHAG_M     	   --场外认购手续费_本月
+		,COALESCE(T1.OTC_PURS_CHAG_M       ,0)      AS 		OTC_PURS_CHAG_M     	   --场外申购手续费_本月
+		,COALESCE(T1.OTC_CASTSL_CHAG_M     ,0)      AS 		OTC_CASTSL_CHAG_M   	   --场外定投手续费_本月
+		,COALESCE(T1.OTC_COVT_IN_CHAG_M    ,0)      AS 		OTC_COVT_IN_CHAG_M  	   --场外转换入手续费_本月
+		,COALESCE(T1.OTC_REDP_CHAG_M       ,0)      AS 		OTC_REDP_CHAG_M     	   --场外赎回手续费_本月
+		,COALESCE(T1.OTC_COVT_OUT_CHAG_M   ,0)      AS 		OTC_COVT_OUT_CHAG_M 	   --场外转换出手续费_本月
+		,COALESCE(T1.CONTD_SALE_SHAR_M     ,0)      AS 		CONTD_SALE_SHAR_M   	   --续作销售份额_本月
+		,COALESCE(T1.CONTD_SALE_AMT_M      ,0)      AS 		CONTD_SALE_AMT_M    	   --续作销售金额_本月
 		,T2.OTC_SUBS_AMT_TY             AS 		OTC_SUBS_AMT_TY     	   --场外认购金额_本年
 		,T2.ITC_PURS_AMT_TY             AS 		ITC_PURS_AMT_TY     	   --场内申购金额_本年
 		,T2.ITC_BUYIN_AMT_TY            AS 		ITC_BUYIN_AMT_TY    	   --场内买入金额_本年
@@ -12569,10 +16004,11 @@ BEGIN
 		,T2.OTC_COVT_OUT_CHAG_TY        AS 		OTC_COVT_OUT_CHAG_TY	   --场外转换出手续费_本年
 		,T2.CONTD_SALE_SHAR_TY          AS 		CONTD_SALE_SHAR_TY  	   --续作销售份额_本年
 		,T2.CONTD_SALE_AMT_TY           AS 		CONTD_SALE_AMT_TY   	   --续作销售金额_本年
-	FROM #T_EVT_PROD_TRD_M_BRH_MTH T1,#T_EVT_PROD_TRD_M_BRH_YEAR T2
-	WHERE T1.BRH_ID = T2.BRH_ID 
-		AND T1.PROD_CD = T2.PROD_CD
-		AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #T_EVT_PROD_TRD_M_BRH_YEAR T2
+	left join #T_EVT_PROD_TRD_M_BRH_MTH T1
+		ON T1.BRH_ID = T2.BRH_ID 
+			AND T1.PROD_CD = T2.PROD_CD
+			AND T1.OCCUR_DT = T2.OCCUR_DT;
 	COMMIT;
 END
 GO
@@ -12603,7 +16039,8 @@ BEGIN
     DECLARE @V_BIN_NATRE_DAYS_MTH    INT ;    --自然天数_月
     DECLARE @V_BIN_TRD_DAYS_MTH      INT ;    --交易天数_月
     DECLARE @V_BIN_NATRE_DAYS_YEAR   INT ;    --自然天数_年
-    DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年
+    DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年 
+
 
 
     ----衍生变量
@@ -12616,10 +16053,19 @@ BEGIN
     SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND IF_TRD_DAY_FLAG=1);
     SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR  );
     SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE );
+    SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
     SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH AND DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
-    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE);
-    SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1);
+    SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=
+    																			CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       									ELSE @V_BIN_DATE END);
+                       									
+    SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND  DT<=@V_BIN_DATE AND IF_TRD_DAY_FLAG=1); 
+ 
+ 
+
 	
 --PART0 删除当月数据
   DELETE FROM DM.T_EVT_PROD_TRD_M_D WHERE YEAR=@V_BIN_YEAR AND MTH=@V_BIN_MTH;
@@ -12736,10 +16182,10 @@ BEGIN
 	,t_rq.年||t_rq.月||t1.PROD_CD as 年月产品代码
 	,t_rq.年||t_rq.月||t1.CUST_ID||t1.PROD_CD as 年月客户编码产品代码
 	
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.ITC_RETAIN_AMT,0) else 0 end) as 场内保有金额_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OTC_RETAIN_AMT,0) else 0 end) as 场外保有金额_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.ITC_RETAIN_SHAR,0) else 0 end) as 场内保有份额_期末
-	,sum(case when t_rq.日期=t_rq.自然日_月末 then COALESCE(t1.OTC_RETAIN_SHAR,0) else 0 end) as 场外保有份额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.ITC_RETAIN_AMT,0) else 0 end) as 场内保有金额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OTC_RETAIN_AMT,0) else 0 end) as 场外保有金额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.ITC_RETAIN_SHAR,0) else 0 end) as 场内保有份额_期末
+	,sum(case when t_rq.日期=@V_BIN_DATE then COALESCE(t1.OTC_RETAIN_SHAR,0) else 0 end) as 场外保有份额_期末
 
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.ITC_RETAIN_AMT,0) else 0 end)/t_rq.自然天数_月 as 场内保有金额_月日均
 	,sum(case when t_rq.日期>=t_rq.自然日_月初 then COALESCE(t1.OTC_RETAIN_AMT,0) else 0 end)/t_rq.自然天数_月 as 场外保有金额_月日均
@@ -12845,7 +16291,8 @@ from
 		,@V_BIN_TRD_DAYS_YEAR       as 交易天数_年
 	from DM.T_PUB_DATE t1 
 	where t1.YEAR=@V_BIN_YEAR
-	  AND T1.DT<=@V_BIN_DATE 
+	  AND T1.DT<= CASE WHEN @V_BIN_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                       ELSE @V_BIN_DATE END  
 ) t_rq
 --市值保有需填充节假日数据
 left join DM.T_EVT_PROD_TRD_D_D t1 on t_rq.交易日期=t1.OCCUR_DT
@@ -12858,6 +16305,8 @@ group by
 	,t1.PROD_CD
 	,t1.PROD_TYPE
 ;
+
+COMMIT;
 
 END
 GO
@@ -12873,6 +16322,7 @@ BEGIN
   简介：产品交易统计
   *********************************************************************
   修订记录： 修订日期       版本号    修订人             修改内容简要说明
+  					20180522										zq							修正月日均指标计算问题
   *********************************************************************/
   	DECLARE @V_YEAR VARCHAR(4);		-- 年份
   	DECLARE @V_MONTH VARCHAR(2);	-- 月份
@@ -12880,68 +16330,97 @@ BEGIN
  	DECLARE @V_YEAR_START_DATE INT; -- 本年开始交易日
  	DECLARE @V_ACCU_MDAYS INT;		-- 月累计天数
  	DECLARE @V_ACCU_YDAYS INT;		-- 年累计天数
+ 	
+  DECLARE @V_BIN_NATRE_DAY_MTHBEG  INT ;    --自然日_月初
+  DECLARE @V_BIN_NATRE_DAY_MTHEND  INT ;    --自然日_月末
+  DECLARE @V_BIN_TRD_DAY_MTHBEG    INT ;    --交易日_月初
+  DECLARE @V_BIN_TRD_DAY_MTHEND    INT ;    --交易日_月末
+  DECLARE @V_BIN_NATRE_DAY_YEARBGN INT ;    --自然日_年初
+  DECLARE @V_BIN_TRD_DAY_YEARBGN   INT ;    --交易日_年初
+  DECLARE @V_BIN_NATRE_DAYS_MTH    INT ;    --自然天数_月
+  DECLARE @V_BIN_TRD_DAYS_MTH      INT ;    --交易天数_月
+  DECLARE @V_BIN_NATRE_DAYS_YEAR   INT ;    --自然天数_年
+  DECLARE @V_BIN_TRD_DAYS_YEAR     INT ;    --交易天数_年
   
 	COMMIT;
 	
 	SET @V_YEAR = SUBSTRING(CONVERT(VARCHAR,@V_DATE),1,4);
 	SET @V_MONTH = SUBSTRING(CONVERT(VARCHAR,@V_DATE),5,2);
 	SET @V_BEGIN_TRAD_DATE = (SELECT MIN(RQ) FROM DBA.T_DDW_D_RQ WHERE SFJRBZ='1' AND NIAN=@V_YEAR AND YUE=@V_MONTH);
-    SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
-    SET @V_ACCU_MDAYS=(SELECT TM_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
-    SET @V_ACCU_YDAYS=(SELECT TY_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
+  SET @V_YEAR_START_DATE=(SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1 ); 
+  SET @V_ACCU_MDAYS=(SELECT TM_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
+  SET @V_ACCU_YDAYS=(SELECT TY_SNB_NORM_DAY FROM DM.T_PUB_DATE WHERE DT=@V_DATE);
+  
+  SET @V_BIN_NATRE_DAY_MTHBEG  =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_NATRE_DAY_MTHEND  =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH);
+  SET @V_BIN_TRD_DAY_MTHBEG    =(SELECT MIN(DT)	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_TRD_DAY_MTHEND    =(SELECT MAX(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAY_YEARBGN =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR  );
+  SET @V_BIN_TRD_DAY_YEARBGN   =(SELECT MIN(DT) 	FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_MTH    =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+                     									
+  SET @V_BIN_TRD_DAYS_MTH      =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH=@V_MONTH AND DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
+  SET @V_BIN_NATRE_DAYS_YEAR   =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=
+  																			CASE WHEN @V_DATE=@V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND
+                     									ELSE @V_DATE END);
+
+  SET @V_BIN_TRD_DAYS_YEAR     =(SELECT COUNT(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND  DT<=@V_DATE AND IF_TRD_DAY_FLAG=1);
 
 	DELETE FROM DM.T_EVT_PROD_TRD_M_EMP WHERE YEAR=@V_YEAR AND MTH=@V_MONTH;
 
 	-- 统计月指标
 	SELECT 
 		 @V_YEAR								AS    YEAR   					--年
-		,@V_MONTH 								AS    MTH 						--月
-		,EMP_ID									AS    EMP_ID                	--员工编码	
+		,@V_MONTH 							AS    MTH 						--月
+		,EMP_ID									AS    EMP_ID          --员工编码	
 		,PROD_CD								AS    PROD_CD					--产品代码 
-		,PROD_TYPE 							    AS    PROD_TYPE 				--产品类别
+		,PROD_TYPE 							AS    PROD_TYPE 				--产品类别
 		,@V_DATE 								AS    OCCUR_DT 		 			--发生日期
-		,SUM(ITC_RETAIN_AMT)/@V_ACCU_MDAYS 		AS	  ITC_RETAIN_AMT_MDA  		--场内保有金额_月日均
-		,SUM(OTC_RETAIN_AMT)/@V_ACCU_MDAYS  	AS 	  OTC_RETAIN_AMT_MDA  		--场外保有金额_月日均
-		,SUM(ITC_RETAIN_SHAR)/@V_ACCU_MDAYS 	AS 	  ITC_RETAIN_SHAR_MDA 		--场内保有份额_月日均
-		,SUM(OTC_RETAIN_SHAR)/@V_ACCU_MDAYS 	AS 	  OTC_RETAIN_SHAR_MDA 		--场外保有份额_月日均  
-		,SUM(ITC_SUBS_AMT)      				AS	  OTC_SUBS_AMT_M			--场外认购金额_本月
-		,SUM(ITC_PURS_AMT)      				AS	  ITC_PURS_AMT_M			--场内申购金额_本月
-		,SUM(ITC_BUYIN_AMT)     				AS	  ITC_BUYIN_AMT_M    		--场内买入金额_本月
-		,SUM(ITC_REDP_AMT)      				AS	  ITC_REDP_AMT_M     		--场内赎回金额_本月
-		,SUM(ITC_SELL_AMT)      				AS	  ITC_SELL_AMT_M     		--场内卖出金额_本月
-		,SUM(OTC_PURS_AMT)      				AS	  OTC_PURS_AMT_M     		--场外申购金额_本月
-		,SUM(OTC_CASTSL_AMT)    				AS	  OTC_CASTSL_AMT_M   		--场外定投金额_本月
-		,SUM(OTC_COVT_IN_AMT)   				AS	  OTC_COVT_IN_AMT_M  		--场外转换入金额_本月
-		,SUM(OTC_REDP_AMT)      				AS	  OTC_REDP_AMT_M     		--场外赎回金额_本月
-		,SUM(OTC_COVT_OUT_AMT)  				AS	  OTC_COVT_OUT_AMT_M 		--场外转换出金额_本月
-		,SUM(ITC_SUBS_SHAR)     				AS	  ITC_SUBS_SHAR_M    		--场内认购份额_本月
-		,SUM(ITC_PURS_SHAR)     				AS	  ITC_PURS_SHAR_M    		--场内申购份额_本月
-		,SUM(ITC_BUYIN_SHAR)    				AS	  ITC_BUYIN_SHAR_M   		--场内买入份额_本月
-		,SUM(ITC_REDP_SHAR)     				AS	  ITC_REDP_SHAR_M    		--场内赎回份额_本月
-		,SUM(ITC_SELL_SHAR)     				AS	  ITC_SELL_SHAR_M    		--场内卖出份额_本月
-		,SUM(OTC_SUBS_SHAR)     				AS	  OTC_SUBS_SHAR_M    		--场外认购份额_本月
-		,SUM(OTC_PURS_SHAR)     				AS	  OTC_PURS_SHAR_M    		--场外申购份额_本月
-		,SUM(OTC_CASTSL_SHAR)   				AS	  OTC_CASTSL_SHAR_M 		--场外定投份额_本月
-		,SUM(OTC_COVT_IN_SHAR)  				AS	  OTC_COVT_IN_SHAR_M 		--场外转换入份额_本月
-		,SUM(OTC_REDP_SHAR)     				AS	  OTC_REDP_SHAR_M    		--场外赎回份额_本月
-		,SUM(OTC_COVT_OUT_SHAR) 				AS	  OTC_COVT_OUT_SHAR_M		--场外转换出份额_本月
-		,SUM(ITC_SUBS_CHAG)     				AS	  ITC_SUBS_CHAG_M    		--场内认购手续费_本月
-		,SUM(ITC_PURS_CHAG)     				AS	  ITC_PURS_CHAG_M    		--场内申购手续费_本月
-		,SUM(ITC_BUYIN_CHAG)    				AS	  ITC_BUYIN_CHAG_M   		--场内买入手续费_本月
-		,SUM(ITC_REDP_CHAG)     				AS	  ITC_REDP_CHAG_M    		--场内赎回手续费_本月
-		,SUM(ITC_SELL_CHAG)     				AS	  ITC_SELL_CHAG_M    		--场内卖出手续费_本月
-		,SUM(OTC_SUBS_CHAG)     				AS	  OTC_SUBS_CHAG_M    		--场外认购手续费_本月
-		,SUM(OTC_PURS_CHAG)     				AS	  OTC_PURS_CHAG_M    		--场外申购手续费_本月
-		,SUM(OTC_CASTSL_CHAG)   				AS	  OTC_CASTSL_CHAG_M  		--场外定投手续费_本月
-		,SUM(OTC_COVT_IN_CHAG)  				AS	  OTC_COVT_IN_CHAG_M 		--场外转换入手续费_本月
-		,SUM(OTC_REDP_CHAG)    					AS	  OTC_REDP_CHAG_M    		--场外赎回手续费_本月
-		,SUM(OTC_COVT_OUT_CHAG) 				AS	  OTC_COVT_OUT_CHAG_M		--场外转换出手续费_本月
-		,SUM(CONTD_SALE_SHAR)   				AS	  CONTD_SALE_SHAR_M  		--续作销售份额_本月
-		,SUM(CONTD_SALE_AMT)    				AS	  CONTD_SALE_AMT_M  		--续作销售金额_本月
+		,SUM(ITC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_MTH 		AS	  ITC_RETAIN_AMT_MDA  		--场内保有金额_月日均
+		,SUM(OTC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_MTH  	AS 	  OTC_RETAIN_AMT_MDA  		--场外保有金额_月日均
+		,SUM(ITC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_MTH 	AS 	  ITC_RETAIN_SHAR_MDA 		--场内保有份额_月日均
+		,SUM(OTC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_MTH 	AS 	  OTC_RETAIN_SHAR_MDA 		--场外保有份额_月日均  
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_AMT ELSE 0 END)      				AS	  OTC_SUBS_AMT_M			--场外认购金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_AMT ELSE 0 END)      				AS	  ITC_PURS_AMT_M			--场内申购金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_AMT ELSE 0 END)     				AS	  ITC_BUYIN_AMT_M    		--场内买入金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_AMT ELSE 0 END)      				AS	  ITC_REDP_AMT_M     		--场内赎回金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_AMT ELSE 0 END)      				AS	  ITC_SELL_AMT_M     		--场内卖出金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_AMT ELSE 0 END)      				AS	  OTC_PURS_AMT_M     		--场外申购金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_AMT ELSE 0 END)    				AS	  OTC_CASTSL_AMT_M   		--场外定投金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_AMT ELSE 0 END)   				AS	  OTC_COVT_IN_AMT_M  		--场外转换入金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_AMT ELSE 0 END)      				AS	  OTC_REDP_AMT_M     		--场外赎回金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_AMT ELSE 0 END)  				AS	  OTC_COVT_OUT_AMT_M 		--场外转换出金额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_SHAR ELSE 0 END)     				AS	  ITC_SUBS_SHAR_M    		--场内认购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_SHAR ELSE 0 END)     				AS	  ITC_PURS_SHAR_M    		--场内申购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_SHAR ELSE 0 END)    				AS	  ITC_BUYIN_SHAR_M   		--场内买入份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_SHAR ELSE 0 END)     				AS	  ITC_REDP_SHAR_M    		--场内赎回份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_SHAR ELSE 0 END)     				AS	  ITC_SELL_SHAR_M    		--场内卖出份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_SHAR ELSE 0 END)     				AS	  OTC_SUBS_SHAR_M    		--场外认购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_SHAR ELSE 0 END)     				AS	  OTC_PURS_SHAR_M    		--场外申购份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_SHAR ELSE 0 END)   				AS	  OTC_CASTSL_SHAR_M 		--场外定投份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_SHAR ELSE 0 END)  				AS	  OTC_COVT_IN_SHAR_M 		--场外转换入份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_SHAR ELSE 0 END)     				AS	  OTC_REDP_SHAR_M    		--场外赎回份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_SHAR ELSE 0 END) 				AS	  OTC_COVT_OUT_SHAR_M		--场外转换出份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_CHAG ELSE 0 END)     				AS	  ITC_SUBS_CHAG_M    		--场内认购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_CHAG ELSE 0 END)     				AS	  ITC_PURS_CHAG_M    		--场内申购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_CHAG ELSE 0 END)    				AS	  ITC_BUYIN_CHAG_M   		--场内买入手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_CHAG ELSE 0 END)     				AS	  ITC_REDP_CHAG_M    		--场内赎回手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_CHAG ELSE 0 END)     				AS	  ITC_SELL_CHAG_M    		--场内卖出手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_CHAG ELSE 0 END)     				AS	  OTC_SUBS_CHAG_M    		--场外认购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_CHAG ELSE 0 END)     				AS	  OTC_PURS_CHAG_M    		--场外申购手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_CHAG ELSE 0 END)   				AS	  OTC_CASTSL_CHAG_M  		--场外定投手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_CHAG ELSE 0 END)  				AS	  OTC_COVT_IN_CHAG_M 		--场外转换入手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_CHAG ELSE 0 END)    					AS	  OTC_REDP_CHAG_M    		--场外赎回手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_CHAG ELSE 0 END) 				AS	  OTC_COVT_OUT_CHAG_M		--场外转换出手续费_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_SHAR ELSE 0 END)   				AS	  CONTD_SALE_SHAR_M  		--续作销售份额_本月
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_AMT ELSE 0 END)    				AS	  CONTD_SALE_AMT_M  		--续作销售金额_本月
 	INTO #T_EVT_PROD_TRD_D_EMP_MTH
-	FROM DM.T_EVT_PROD_TRD_D_EMP T 
-	WHERE T.OCCUR_DT BETWEEN @V_BEGIN_TRAD_DATE AND @V_DATE
-	   GROUP BY T.EMP_ID,T.PROD_CD,T.PROD_TYPE;
+	FROM DM.T_EVT_PROD_TRD_D_EMP T1
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_MTHBEG AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.EMP_ID,T1.PROD_CD,T1.PROD_TYPE;
 
 	-- 统计年指标
 	SELECT 
@@ -12951,48 +16430,49 @@ BEGIN
 		,PROD_CD								AS    PROD_CD					--产品代码 
 		,PROD_TYPE 							    AS    PROD_TYPE 				--产品类别
 		,@V_DATE 								AS    OCCUR_DT 		 			--发生日期	
-		,SUM(ITC_RETAIN_AMT)/@V_ACCU_YDAYS 		AS	  ITC_RETAIN_AMT_YDA  		--场内保有金额_年日均
-		,SUM(OTC_RETAIN_AMT)/@V_ACCU_YDAYS  	AS 	  OTC_RETAIN_AMT_YDA  		--场外保有金额_年日均
-		,SUM(ITC_RETAIN_SHAR)/@V_ACCU_YDAYS 	AS 	  ITC_RETAIN_SHAR_YDA 		--场内保有份额_年日均
-		,SUM(OTC_RETAIN_SHAR)/@V_ACCU_YDAYS 	AS 	  OTC_RETAIN_SHAR_YDA 		--场外保有份额_年日均  
-		,SUM(OTC_SUBS_AMT)      				AS	  OTC_SUBS_AMT_TY			--场外认购金额_本年
-		,SUM(ITC_PURS_AMT)      				AS	  ITC_PURS_AMT_TY			--场内申购金额_本年
-		,SUM(ITC_BUYIN_AMT)     				AS	  ITC_BUYIN_AMT_TY    		--场内买入金额_本年
-		,SUM(ITC_REDP_AMT)      				AS	  ITC_REDP_AMT_TY     		--场内赎回金额_本年
-		,SUM(ITC_SELL_AMT)      				AS	  ITC_SELL_AMT_TY     		--场内卖出金额_本年
-		,SUM(OTC_PURS_AMT)      				AS	  OTC_PURS_AMT_TY     		--场外申购金额_本年
-		,SUM(OTC_CASTSL_AMT)    				AS	  OTC_CASTSL_AMT_TY   		--场外定投金额_本年
-		,SUM(OTC_COVT_IN_AMT)   				AS	  OTC_COVT_IN_AMT_TY  		--场外转换入金额_本年
-		,SUM(OTC_REDP_AMT)      				AS	  OTC_REDP_AMT_TY     		--场外赎回金额_本年
-		,SUM(OTC_COVT_OUT_AMT)  				AS	  OTC_COVT_OUT_AMT_TY 		--场外转换出金额_本年
-		,SUM(ITC_SUBS_SHAR)     				AS	  ITC_SUBS_SHAR_TY    		--场内认购份额_本年
-		,SUM(ITC_PURS_SHAR)     				AS	  ITC_PURS_SHAR_TY    		--场内申购份额_本年
-		,SUM(ITC_BUYIN_SHAR)    				AS	  ITC_BUYIN_SHAR_TY   		--场内买入份额_本年
-		,SUM(ITC_REDP_SHAR)     				AS	  ITC_REDP_SHAR_TY    		--场内赎回份额_本年
-		,SUM(ITC_SELL_SHAR)     				AS	  ITC_SELL_SHAR_TY    		--场内卖出份额_本年
-		,SUM(OTC_SUBS_SHAR)     				AS	  OTC_SUBS_SHAR_TY    		--场外认购份额_本年
-		,SUM(OTC_PURS_SHAR)     				AS	  OTC_PURS_SHAR_TY    		--场外申购份额_本年
-		,SUM(OTC_CASTSL_SHAR)   				AS	  OTC_CASTSL_SHAR_TY		--场外定投份额_本年
-		,SUM(OTC_COVT_IN_SHAR)  				AS	  OTC_COVT_IN_SHAR_TY 		--场外转换入份额_本年
-		,SUM(OTC_REDP_SHAR)     				AS	  OTC_REDP_SHAR_TY    		--场外赎回份额_本年
-		,SUM(OTC_COVT_OUT_SHAR) 				AS	  OTC_COVT_OUT_SHAR_TY		--场外转换出份额_本年
-		,SUM(ITC_SUBS_CHAG)     				AS	  ITC_SUBS_CHAG_TY    		--场内认购手续费_本年
-		,SUM(ITC_PURS_CHAG)     				AS	  ITC_PURS_CHAG_TY    		--场内申购手续费_本年
-		,SUM(ITC_BUYIN_CHAG)    				AS	  ITC_BUYIN_CHAG_TY   		--场内买入手续费_本年
-		,SUM(ITC_REDP_CHAG)     				AS	  ITC_REDP_CHAG_TY    		--场内赎回手续费_本年
-		,SUM(ITC_SELL_CHAG)     				AS	  ITC_SELL_CHAG_TY    		--场内卖出手续费_本年
-		,SUM(OTC_SUBS_CHAG)     				AS	  OTC_SUBS_CHAG_TY    		--场外认购手续费_本年
-		,SUM(OTC_PURS_CHAG)     				AS	  OTC_PURS_CHAG_TY    		--场外申购手续费_本年
-		,SUM(OTC_CASTSL_CHAG)   				AS	  OTC_CASTSL_CHAG_TY  		--场外定投手续费_本年
-		,SUM(OTC_COVT_IN_CHAG)  				AS	  OTC_COVT_IN_CHAG_TY 		--场外转换入手续费_本年
-		,SUM(OTC_REDP_CHAG)    					AS	  OTC_REDP_CHAG_TY    		--场外赎回手续费_本年
-		,SUM(OTC_COVT_OUT_CHAG) 				AS	  OTC_COVT_OUT_CHAG_TY		--场外转换出手续费_本年
-		,SUM(CONTD_SALE_SHAR)   				AS	  CONTD_SALE_SHAR_TY  		--续作销售份额_本年
-		,SUM(CONTD_SALE_AMT)    				AS	  CONTD_SALE_AMT_TY  		--续作销售金额_本年
+		,SUM(ITC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_YEAR 		AS	  ITC_RETAIN_AMT_YDA  		--场内保有金额_年日均
+		,SUM(OTC_RETAIN_AMT)/@V_BIN_NATRE_DAYS_YEAR  	AS 	  OTC_RETAIN_AMT_YDA  		--场外保有金额_年日均
+		,SUM(ITC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_YEAR 	AS 	  ITC_RETAIN_SHAR_YDA 		--场内保有份额_年日均
+		,SUM(OTC_RETAIN_SHAR)/@V_BIN_NATRE_DAYS_YEAR 	AS 	  OTC_RETAIN_SHAR_YDA 		--场外保有份额_年日均  
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_AMT ELSE 0 END)      				AS	  OTC_SUBS_AMT_TY			--场外认购金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_AMT ELSE 0 END)      				AS	  ITC_PURS_AMT_TY			--场内申购金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_AMT ELSE 0 END)     				AS	  ITC_BUYIN_AMT_TY    		--场内买入金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_AMT ELSE 0 END)      				AS	  ITC_REDP_AMT_TY     		--场内赎回金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_AMT ELSE 0 END)      				AS	  ITC_SELL_AMT_TY     		--场内卖出金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_AMT ELSE 0 END)      				AS	  OTC_PURS_AMT_TY     		--场外申购金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_AMT ELSE 0 END)    				AS	  OTC_CASTSL_AMT_TY   		--场外定投金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_AMT ELSE 0 END)   				AS	  OTC_COVT_IN_AMT_TY  		--场外转换入金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_AMT ELSE 0 END)      				AS	  OTC_REDP_AMT_TY     		--场外赎回金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_AMT ELSE 0 END)  				AS	  OTC_COVT_OUT_AMT_TY 		--场外转换出金额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_SHAR ELSE 0 END)     				AS	  ITC_SUBS_SHAR_TY    		--场内认购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_SHAR ELSE 0 END)     				AS	  ITC_PURS_SHAR_TY    		--场内申购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_SHAR ELSE 0 END)    				AS	  ITC_BUYIN_SHAR_TY   		--场内买入份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_SHAR ELSE 0 END)     				AS	  ITC_REDP_SHAR_TY    		--场内赎回份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_SHAR ELSE 0 END)     				AS	  ITC_SELL_SHAR_TY    		--场内卖出份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_SHAR ELSE 0 END)     				AS	  OTC_SUBS_SHAR_TY    		--场外认购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_SHAR ELSE 0 END)     				AS	  OTC_PURS_SHAR_TY    		--场外申购份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_SHAR ELSE 0 END)   				AS	  OTC_CASTSL_SHAR_TY		--场外定投份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_SHAR ELSE 0 END)  				AS	  OTC_COVT_IN_SHAR_TY 		--场外转换入份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_SHAR ELSE 0 END)     				AS	  OTC_REDP_SHAR_TY    		--场外赎回份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_SHAR ELSE 0 END) 				AS	  OTC_COVT_OUT_SHAR_TY		--场外转换出份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SUBS_CHAG ELSE 0 END)     				AS	  ITC_SUBS_CHAG_TY    		--场内认购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_PURS_CHAG ELSE 0 END)     				AS	  ITC_PURS_CHAG_TY    		--场内申购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_BUYIN_CHAG ELSE 0 END)    				AS	  ITC_BUYIN_CHAG_TY   		--场内买入手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_REDP_CHAG ELSE 0 END)     				AS	  ITC_REDP_CHAG_TY    		--场内赎回手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN ITC_SELL_CHAG ELSE 0 END)     				AS	  ITC_SELL_CHAG_TY    		--场内卖出手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_SUBS_CHAG ELSE 0 END)     				AS	  OTC_SUBS_CHAG_TY    		--场外认购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_PURS_CHAG ELSE 0 END)     				AS	  OTC_PURS_CHAG_TY    		--场外申购手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_CASTSL_CHAG ELSE 0 END)   				AS	  OTC_CASTSL_CHAG_TY  		--场外定投手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_IN_CHAG ELSE 0 END)  				AS	  OTC_COVT_IN_CHAG_TY 		--场外转换入手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_REDP_CHAG ELSE 0 END)    					AS	  OTC_REDP_CHAG_TY    		--场外赎回手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN OTC_COVT_OUT_CHAG ELSE 0 END) 				AS	  OTC_COVT_OUT_CHAG_TY		--场外转换出手续费_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_SHAR ELSE 0 END)   				AS	  CONTD_SALE_SHAR_TY  		--续作销售份额_本年
+		,SUM(CASE WHEN T2.SFJRBZ='1' THEN CONTD_SALE_AMT ELSE 0 END)    				AS	  CONTD_SALE_AMT_TY  		--续作销售金额_本年
 	INTO #T_EVT_PROD_TRD_D_EMP_YEAR
-	FROM DM.T_EVT_PROD_TRD_D_EMP T 
-	WHERE T.OCCUR_DT BETWEEN @V_BEGIN_TRAD_DATE AND @V_DATE
-	   GROUP BY T.EMP_ID,T.PROD_CD,T.PROD_TYPE;
+	FROM DM.T_EVT_PROD_TRD_D_EMP T1
+	LEFT JOIN DBA.T_DDW_D_RQ T2 ON T1.OCCUR_DT = CASE WHEN T2.SFJRBZ='1' THEN T2.RQ ELSE T2.SYGGZR END
+	WHERE T2.RQ >= @V_BIN_NATRE_DAY_YEARBGN AND T2.RQ <= (CASE WHEN @V_DATE = @V_BIN_TRD_DAY_MTHEND THEN @V_BIN_NATRE_DAY_MTHEND ELSE @V_DATE END) 
+	   GROUP BY T1.EMP_ID,T1.PROD_CD,T1.PROD_TYPE;
 
 	--插入目标表
 	INSERT INTO DM.T_EVT_PROD_TRD_M_EMP(
@@ -13080,54 +16560,54 @@ BEGIN
 		,CONTD_SALE_AMT_TY   				--续作销售金额_本年
 	)		
 	SELECT 
-		 T1.YEAR                        AS 		YEAR                	   --年
-		,T1.MTH                         AS 		MTH                 	   --月
-		,T1.EMP_ID                      AS 		EMP_ID              	   --员工编码
-		,T1.PROD_CD                     AS 		PROD_CD             	   --产品代码
-		,T1.PROD_TYPE                   AS 		PROD_TYPE           	   --产品类型
-		,T1.OCCUR_DT                    AS 		OCCUR_DT            	   --发生日期
-		,T1.ITC_RETAIN_AMT_MDA          AS 		ITC_RETAIN_AMT_MDA  	   --场内保有金额_月日均
-		,T1.OTC_RETAIN_AMT_MDA          AS 		OTC_RETAIN_AMT_MDA  	   --场外保有金额_月日均
-		,T1.ITC_RETAIN_SHAR_MDA         AS 		ITC_RETAIN_SHAR_MDA 	   --场内保有份额_月日均
-		,T1.OTC_RETAIN_SHAR_MDA         AS 		OTC_RETAIN_SHAR_MDA 	   --场外保有份额_月日均  
-		,T2.ITC_RETAIN_AMT_YDA          AS 		ITC_RETAIN_AMT_YDA  	   --场内保有金额_年日均
-		,T2.OTC_RETAIN_AMT_YDA          AS 		OTC_RETAIN_AMT_YDA  	   --场外保有金额_年日均
-		,T2.ITC_RETAIN_SHAR_YDA         AS 		ITC_RETAIN_SHAR_YDA 	   --场内保有份额_年日均
-		,T2.OTC_RETAIN_SHAR_YDA         AS 		OTC_RETAIN_SHAR_YDA 	   --场外保有份额_年日均  
-		,T1.OTC_SUBS_AMT_M              AS 		OTC_SUBS_AMT_M      	   --场外认购金额_本月
-		,T1.ITC_PURS_AMT_M              AS 		ITC_PURS_AMT_M      	   --场内申购金额_本月
-		,T1.ITC_BUYIN_AMT_M             AS 		ITC_BUYIN_AMT_M     	   --场内买入金额_本月
-		,T1.ITC_REDP_AMT_M              AS 		ITC_REDP_AMT_M      	   --场内赎回金额_本月
-		,T1.ITC_SELL_AMT_M              AS 		ITC_SELL_AMT_M      	   --场内卖出金额_本月
-		,T1.OTC_PURS_AMT_M              AS 		OTC_PURS_AMT_M      	   --场外申购金额_本月
-		,T1.OTC_CASTSL_AMT_M            AS 		OTC_CASTSL_AMT_M    	   --场外定投金额_本月
-		,T1.OTC_COVT_IN_AMT_M           AS 		OTC_COVT_IN_AMT_M   	   --场外转换入金额_本月
-		,T1.OTC_REDP_AMT_M              AS 		OTC_REDP_AMT_M      	   --场外赎回金额_本月
-		,T1.OTC_COVT_OUT_AMT_M          AS 		OTC_COVT_OUT_AMT_M  	   --场外转换出金额_本月
-		,T1.ITC_SUBS_SHAR_M             AS 		ITC_SUBS_SHAR_M     	   --场内认购份额_本月
-		,T1.ITC_PURS_SHAR_M             AS 		ITC_PURS_SHAR_M     	   --场内申购份额_本月
-		,T1.ITC_BUYIN_SHAR_M            AS 		ITC_BUYIN_SHAR_M    	   --场内买入份额_本月
-		,T1.ITC_REDP_SHAR_M             AS 		ITC_REDP_SHAR_M     	   --场内赎回份额_本月
-		,T1.ITC_SELL_SHAR_M             AS 		ITC_SELL_SHAR_M     	   --场内卖出份额_本月
-		,T1.OTC_SUBS_SHAR_M             AS 		OTC_SUBS_SHAR_M     	   --场外认购份额_本月
-		,T1.OTC_PURS_SHAR_M             AS 		OTC_PURS_SHAR_M     	   --场外申购份额_本月
-		,T1.OTC_CASTSL_SHAR_M           AS 		OTC_CASTSL_SHAR_M   	   --场外定投份额_本月
-		,T1.OTC_COVT_IN_SHAR_M          AS 		OTC_COVT_IN_SHAR_M  	   --场外转换入份额_本月
-		,T1.OTC_REDP_SHAR_M             AS 		OTC_REDP_SHAR_M     	   --场外赎回份额_本月
-		,T1.OTC_COVT_OUT_SHAR_M         AS 		OTC_COVT_OUT_SHAR_M 	   --场外转换出份额_本月
-		,T1.ITC_SUBS_CHAG_M             AS 		ITC_SUBS_CHAG_M     	   --场内认购手续费_本月
-		,T1.ITC_PURS_CHAG_M             AS 		ITC_PURS_CHAG_M     	   --场内申购手续费_本月
-		,T1.ITC_BUYIN_CHAG_M            AS 		ITC_BUYIN_CHAG_M    	   --场内买入手续费_本月
-		,T1.ITC_REDP_CHAG_M             AS 		ITC_REDP_CHAG_M     	   --场内赎回手续费_本月
-		,T1.ITC_SELL_CHAG_M             AS 		ITC_SELL_CHAG_M     	   --场内卖出手续费_本月
-		,T1.OTC_SUBS_CHAG_M             AS 		OTC_SUBS_CHAG_M     	   --场外认购手续费_本月
-		,T1.OTC_PURS_CHAG_M             AS 		OTC_PURS_CHAG_M     	   --场外申购手续费_本月
-		,T1.OTC_CASTSL_CHAG_M           AS 		OTC_CASTSL_CHAG_M   	   --场外定投手续费_本月
-		,T1.OTC_COVT_IN_CHAG_M          AS 		OTC_COVT_IN_CHAG_M  	   --场外转换入手续费_本月
-		,T1.OTC_REDP_CHAG_M             AS 		OTC_REDP_CHAG_M     	   --场外赎回手续费_本月
-		,T1.OTC_COVT_OUT_CHAG_M         AS 		OTC_COVT_OUT_CHAG_M 	   --场外转换出手续费_本月
-		,T1.CONTD_SALE_SHAR_M           AS 		CONTD_SALE_SHAR_M   	   --续作销售份额_本月
-		,T1.CONTD_SALE_AMT_M            AS 		CONTD_SALE_AMT_M    	   --续作销售金额_本月
+		 T2.YEAR                        AS 		YEAR                	   --年
+		,T2.MTH                         AS 		MTH                 	   --月
+		,T2.EMP_ID                      AS 		EMP_ID              	   --员工编码
+		,T2.PROD_CD                     AS 		PROD_CD             	   --产品代码
+		,T2.PROD_TYPE                   AS 		PROD_TYPE           	   --产品类型
+		,T2.OCCUR_DT                    AS 		OCCUR_DT            	   --发生日期
+		,COALESCE(T1.ITC_RETAIN_AMT_MDA ,0)         AS 		ITC_RETAIN_AMT_MDA  	   --场内保有金额_月日均
+		,COALESCE(T1.OTC_RETAIN_AMT_MDA ,0)         AS 		OTC_RETAIN_AMT_MDA  	   --场外保有金额_月日均
+		,COALESCE(T1.ITC_RETAIN_SHAR_MDA,0)         AS 		ITC_RETAIN_SHAR_MDA 	   --场内保有份额_月日均
+		,COALESCE(T1.OTC_RETAIN_SHAR_MDA,0)         AS 		OTC_RETAIN_SHAR_MDA 	   --场外保有份额_月日均  
+		,COALESCE(T2.ITC_RETAIN_AMT_YDA ,0)         AS 		ITC_RETAIN_AMT_YDA  	   --场内保有金额_年日均
+		,COALESCE(T2.OTC_RETAIN_AMT_YDA ,0)         AS 		OTC_RETAIN_AMT_YDA  	   --场外保有金额_年日均
+		,COALESCE(T2.ITC_RETAIN_SHAR_YDA,0)         AS 		ITC_RETAIN_SHAR_YDA 	   --场内保有份额_年日均
+		,COALESCE(T2.OTC_RETAIN_SHAR_YDA,0)         AS 		OTC_RETAIN_SHAR_YDA 	   --场外保有份额_年日均  
+		,COALESCE(T1.OTC_SUBS_AMT_M     ,0)         AS 		OTC_SUBS_AMT_M      	   --场外认购金额_本月
+		,COALESCE(T1.ITC_PURS_AMT_M     ,0)         AS 		ITC_PURS_AMT_M      	   --场内申购金额_本月
+		,COALESCE(T1.ITC_BUYIN_AMT_M    ,0)         AS 		ITC_BUYIN_AMT_M     	   --场内买入金额_本月
+		,COALESCE(T1.ITC_REDP_AMT_M     ,0)         AS 		ITC_REDP_AMT_M      	   --场内赎回金额_本月
+		,COALESCE(T1.ITC_SELL_AMT_M     ,0)         AS 		ITC_SELL_AMT_M      	   --场内卖出金额_本月
+		,COALESCE(T1.OTC_PURS_AMT_M     ,0)         AS 		OTC_PURS_AMT_M      	   --场外申购金额_本月
+		,COALESCE(T1.OTC_CASTSL_AMT_M   ,0)         AS 		OTC_CASTSL_AMT_M    	   --场外定投金额_本月
+		,COALESCE(T1.OTC_COVT_IN_AMT_M  ,0)         AS 		OTC_COVT_IN_AMT_M   	   --场外转换入金额_本月
+		,COALESCE(T1.OTC_REDP_AMT_M     ,0)         AS 		OTC_REDP_AMT_M      	   --场外赎回金额_本月
+		,COALESCE(T1.OTC_COVT_OUT_AMT_M ,0)         AS 		OTC_COVT_OUT_AMT_M  	   --场外转换出金额_本月
+		,COALESCE(T1.ITC_SUBS_SHAR_M    ,0)         AS 		ITC_SUBS_SHAR_M     	   --场内认购份额_本月
+		,COALESCE(T1.ITC_PURS_SHAR_M    ,0)         AS 		ITC_PURS_SHAR_M     	   --场内申购份额_本月
+		,COALESCE(T1.ITC_BUYIN_SHAR_M   ,0)         AS 		ITC_BUYIN_SHAR_M    	   --场内买入份额_本月
+		,COALESCE(T1.ITC_REDP_SHAR_M    ,0)         AS 		ITC_REDP_SHAR_M     	   --场内赎回份额_本月
+		,COALESCE(T1.ITC_SELL_SHAR_M    ,0)         AS 		ITC_SELL_SHAR_M     	   --场内卖出份额_本月
+		,COALESCE(T1.OTC_SUBS_SHAR_M    ,0)         AS 		OTC_SUBS_SHAR_M     	   --场外认购份额_本月
+		,COALESCE(T1.OTC_PURS_SHAR_M    ,0)         AS 		OTC_PURS_SHAR_M     	   --场外申购份额_本月
+		,COALESCE(T1.OTC_CASTSL_SHAR_M  ,0)         AS 		OTC_CASTSL_SHAR_M   	   --场外定投份额_本月
+		,COALESCE(T1.OTC_COVT_IN_SHAR_M ,0)         AS 		OTC_COVT_IN_SHAR_M  	   --场外转换入份额_本月
+		,COALESCE(T1.OTC_REDP_SHAR_M    ,0)         AS 		OTC_REDP_SHAR_M     	   --场外赎回份额_本月
+		,COALESCE(T1.OTC_COVT_OUT_SHAR_M,0)         AS 		OTC_COVT_OUT_SHAR_M 	   --场外转换出份额_本月
+		,COALESCE(T1.ITC_SUBS_CHAG_M    ,0)         AS 		ITC_SUBS_CHAG_M     	   --场内认购手续费_本月
+		,COALESCE(T1.ITC_PURS_CHAG_M    ,0)         AS 		ITC_PURS_CHAG_M     	   --场内申购手续费_本月
+		,COALESCE(T1.ITC_BUYIN_CHAG_M   ,0)         AS 		ITC_BUYIN_CHAG_M    	   --场内买入手续费_本月
+		,COALESCE(T1.ITC_REDP_CHAG_M    ,0)         AS 		ITC_REDP_CHAG_M     	   --场内赎回手续费_本月
+		,COALESCE(T1.ITC_SELL_CHAG_M    ,0)         AS 		ITC_SELL_CHAG_M     	   --场内卖出手续费_本月
+		,COALESCE(T1.OTC_SUBS_CHAG_M    ,0)         AS 		OTC_SUBS_CHAG_M     	   --场外认购手续费_本月
+		,COALESCE(T1.OTC_PURS_CHAG_M    ,0)         AS 		OTC_PURS_CHAG_M     	   --场外申购手续费_本月
+		,COALESCE(T1.OTC_CASTSL_CHAG_M  ,0)         AS 		OTC_CASTSL_CHAG_M   	   --场外定投手续费_本月
+		,COALESCE(T1.OTC_COVT_IN_CHAG_M ,0)         AS 		OTC_COVT_IN_CHAG_M  	   --场外转换入手续费_本月
+		,COALESCE(T1.OTC_REDP_CHAG_M    ,0)         AS 		OTC_REDP_CHAG_M     	   --场外赎回手续费_本月
+		,COALESCE(T1.OTC_COVT_OUT_CHAG_M,0)         AS 		OTC_COVT_OUT_CHAG_M 	   --场外转换出手续费_本月
+		,COALESCE(T1.CONTD_SALE_SHAR_M  ,0)         AS 		CONTD_SALE_SHAR_M   	   --续作销售份额_本月
+		,COALESCE(T1.CONTD_SALE_AMT_M   ,0)         AS 		CONTD_SALE_AMT_M    	   --续作销售金额_本月
 		,T2.OTC_SUBS_AMT_TY             AS 		OTC_SUBS_AMT_TY     	   --场外认购金额_本年
 		,T2.ITC_PURS_AMT_TY             AS 		ITC_PURS_AMT_TY     	   --场内申购金额_本年
 		,T2.ITC_BUYIN_AMT_TY            AS 		ITC_BUYIN_AMT_TY    	   --场内买入金额_本年
@@ -13162,10 +16642,10 @@ BEGIN
 		,T2.OTC_COVT_OUT_CHAG_TY        AS 		OTC_COVT_OUT_CHAG_TY	   --场外转换出手续费_本年
 		,T2.CONTD_SALE_SHAR_TY          AS 		CONTD_SALE_SHAR_TY  	   --续作销售份额_本年
 		,T2.CONTD_SALE_AMT_TY           AS 		CONTD_SALE_AMT_TY   	   --续作销售金额_本年
-	FROM #T_EVT_PROD_TRD_D_EMP_MTH T1,#T_EVT_PROD_TRD_D_EMP_YEAR T2
-	WHERE T1.EMP_ID = T2.EMP_ID 
-		AND T1.PROD_CD = T2.PROD_CD
-		AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #T_EVT_PROD_TRD_D_EMP_YEAR T2
+	LEFT JOIN #T_EVT_PROD_TRD_D_EMP_MTH T1 
+		ON T1.EMP_ID = T2.EMP_ID AND T1.PROD_CD = T2.PROD_CD;
+		
 	COMMIT;
 END
 GO
@@ -13744,64 +17224,64 @@ BEGIN
 		,APPTBUYB_BUYB_TRD_AMT_TY							--约定购回购回交易金额_本年	
 	)		
 	SELECT 
-		 T1.YEAR  							AS			YEAR                 								--年
-		,T1.MTH 						    AS			MTH                  								--月		
-		,T1.BRH_ID							AS			BRH_ID												--营业部编码	
-		,T1.OCCUR_DT 						AS			OCCUR_DT											--发生日期		
-		,T1.STKF_TRD_QTY_M        	 		AS			STKF_TRD_QTY_M										--股基交易量_本月	
+		 T2.YEAR  							AS			YEAR                 								--年
+		,T2.MTH 						    AS			MTH                  								--月		
+		,T2.BRH_ID							AS			BRH_ID												--营业部编码	
+		,T2.OCCUR_DT 						AS			OCCUR_DT											--发生日期		
+		,COALESCE(T1.STKF_TRD_QTY_M,0)        	 		AS			STKF_TRD_QTY_M										--股基交易量_本月	
 		,T2.STKF_TRD_QTY_TY         		AS			STKF_TRD_QTY_TY										--股基交易量_本年	
-		,T1.SCDY_TRD_QTY_M          		AS			SCDY_TRD_QTY_M										--二级交易量_本月	
+		,COALESCE(T1.SCDY_TRD_QTY_M,0)          		AS			SCDY_TRD_QTY_M										--二级交易量_本月	
 		,T2.SCDY_TRD_QTY_TY          		AS			SCDY_TRD_QTY_TY										--二级交易量_本年		
-		,T1.S_REPUR_TRD_QTY_M       		AS			S_REPUR_TRD_QTY_M									--正回购交易量_本月		
+		,COALESCE(T1.S_REPUR_TRD_QTY_M,0)       		AS			S_REPUR_TRD_QTY_M									--正回购交易量_本月		
 		,T2.S_REPUR_TRD_QTY_TY       		AS			S_REPUR_TRD_QTY_TY									--正回购交易量_本年			
-		,T1.R_REPUR_TRD_QTY_M       		AS			R_REPUR_TRD_QTY_M									--逆回购交易量_本月			
+		,COALESCE(T1.R_REPUR_TRD_QTY_M,0)       		AS			R_REPUR_TRD_QTY_M									--逆回购交易量_本月			
 		,T2.R_REPUR_TRD_QTY_TY       		AS			R_REPUR_TRD_QTY_TY									--逆回购交易量_本年	
-		,T1.HGT_TRD_QTY_M           		AS			HGT_TRD_QTY_M										--沪港通交易量_本月	
+		,COALESCE(T1.HGT_TRD_QTY_M,0)           		AS			HGT_TRD_QTY_M										--沪港通交易量_本月	
 		,T2.HGT_TRD_QTY_TY           		AS			HGT_TRD_QTY_TY										--沪港通交易量_本年	
-		,T1.SGT_TRD_QTY_M           		AS			SGT_TRD_QTY_M										--深港通交易量_本月	
+		,COALESCE(T1.SGT_TRD_QTY_M,0)           		AS			SGT_TRD_QTY_M										--深港通交易量_本月	
 		,T2.SGT_TRD_QTY_TY           		AS			SGT_TRD_QTY_TY										--深港通交易量_本年	
-		,T1.STKPLG_TRD_QTY_M        		AS			STKPLG_TRD_QTY_M									--股票质押交易量_本月			
+		,COALESCE(T1.STKPLG_TRD_QTY_M,0)        		AS			STKPLG_TRD_QTY_M									--股票质押交易量_本月			
 		,T2.STKPLG_TRD_QTY_TY        		AS			STKPLG_TRD_QTY_TY									--股票质押交易量_本年		
-		,T1.APPTBUYB_TRD_QTY_M      		AS			APPTBUYB_TRD_QTY_M									--约定购回交易量_本月	
+		,COALESCE(T1.APPTBUYB_TRD_QTY_M,0)      		AS			APPTBUYB_TRD_QTY_M									--约定购回交易量_本月	
 		,T2.APPTBUYB_TRD_QTY_TY      		AS			APPTBUYB_TRD_QTY_TY									--约定购回交易量_本年	
-		,T1.OFFUND_TRD_QTY_M        		AS			OFFUND_TRD_QTY_M									--场内基金交易量_本月	
+		,COALESCE(T1.OFFUND_TRD_QTY_M,0)        		AS			OFFUND_TRD_QTY_M									--场内基金交易量_本月	
 		,T2.OFFUND_TRD_QTY_TY        		AS			OFFUND_TRD_QTY_TY									--场内基金交易量_本年	
-		,T1.OPFUND_TRD_QTY_M        		AS			OPFUND_TRD_QTY_M									--场外基金交易量_本月	
+		,COALESCE(T1.OPFUND_TRD_QTY_M,0)        		AS			OPFUND_TRD_QTY_M									--场外基金交易量_本月	
 		,T2.OPFUND_TRD_QTY_TY        		AS			OPFUND_TRD_QTY_TY									--场外基金交易量_本年	
-		,T1.BANK_CHRM_TRD_QTY_M     		AS			BANK_CHRM_TRD_QTY_M									--银行理财交易量_本月 	
+		,COALESCE(T1.BANK_CHRM_TRD_QTY_M,0)     		AS			BANK_CHRM_TRD_QTY_M									--银行理财交易量_本月 	
 		,T2.BANK_CHRM_TRD_QTY_TY     		AS			BANK_CHRM_TRD_QTY_TY								--银行理财交易量_本年 		
-		,T1.SECU_CHRM_TRD_QTY_M     		AS			SECU_CHRM_TRD_QTY_M									--证券理财交易量_本月	
+		,COALESCE(T1.SECU_CHRM_TRD_QTY_M,0)     		AS			SECU_CHRM_TRD_QTY_M									--证券理财交易量_本月	
 		,T2.SECU_CHRM_TRD_QTY_TY     		AS			SECU_CHRM_TRD_QTY_TY								--证券理财交易量_本年		
-		,T1.PSTK_OPTN_TRD_QTY_M     		AS			PSTK_OPTN_TRD_QTY_M									--个股期权交易量_本月		
+		,COALESCE(T1.PSTK_OPTN_TRD_QTY_M,0)     		AS			PSTK_OPTN_TRD_QTY_M									--个股期权交易量_本月		
 		,T2.PSTK_OPTN_TRD_QTY_TY     		AS			PSTK_OPTN_TRD_QTY_TY								--个股期权交易量_本年			
-		,T1.CREDIT_ODI_TRD_QTY_M    		AS			CREDIT_ODI_TRD_QTY_M								--信用账户普通交易量_本月 		
+		,COALESCE(T1.CREDIT_ODI_TRD_QTY_M,0)    		AS			CREDIT_ODI_TRD_QTY_M								--信用账户普通交易量_本月 		
 		,T2.CREDIT_ODI_TRD_QTY_TY    		AS			CREDIT_ODI_TRD_QTY_TY								--信用账户普通交易量_本年 		
-		,T1.CREDIT_CRED_TRD_QTY_M   		AS			CREDIT_CRED_TRD_QTY_M								--信用账户信用交易量_本月 		
+		,COALESCE(T1.CREDIT_CRED_TRD_QTY_M,0)   		AS			CREDIT_CRED_TRD_QTY_M								--信用账户信用交易量_本月 		
 		,T2.CREDIT_CRED_TRD_QTY_TY   		AS			CREDIT_CRED_TRD_QTY_TY								--信用账户信用交易量_本年 		
-		,T1.COVR_BUYIN_AMT_M        		AS			COVR_BUYIN_AMT_M									--平仓买入金额_本月 	
+		,COALESCE(T1.COVR_BUYIN_AMT_M,0)        		AS			COVR_BUYIN_AMT_M									--平仓买入金额_本月 	
 		,T2.COVR_BUYIN_AMT_TY        		AS			COVR_BUYIN_AMT_TY									--平仓买入金额_本年 	
-		,T1.COVR_SELL_AMT_M         		AS			COVR_SELL_AMT_M										--平仓卖出金额_本月 
+		,COALESCE(T1.COVR_SELL_AMT_M,0)         		AS			COVR_SELL_AMT_M										--平仓卖出金额_本月 
 		,T2.COVR_SELL_AMT_TY         		AS			COVR_SELL_AMT_TY									--平仓卖出金额_本年 	
-		,T1.CCB_AMT_M               		AS			CCB_AMT_M											--融资买入金额_本月 
+		,COALESCE(T1.CCB_AMT_M,0)               		AS			CCB_AMT_M											--融资买入金额_本月 
 		,T2.CCB_AMT_TY               		AS			CCB_AMT_TY											--融资买入金额_本年 
-		,T1.FIN_SELL_AMT_M          		AS			FIN_SELL_AMT_M										--融资卖出金额_本月 
+		,COALESCE(T1.FIN_SELL_AMT_M,0)          		AS			FIN_SELL_AMT_M										--融资卖出金额_本月 
 		,T2.FIN_SELL_AMT_TY          		AS			FIN_SELL_AMT_TY										--融资卖出金额_本年 
-		,T1.CRDT_STK_BUYIN_AMT_M    		AS			CRDT_STK_BUYIN_AMT_M								--融券买入金额_本月 		
+		,COALESCE(T1.CRDT_STK_BUYIN_AMT_M,0)    		AS			CRDT_STK_BUYIN_AMT_M								--融券买入金额_本月 		
 		,T2.CRDT_STK_BUYIN_AMT_TY    		AS			CRDT_STK_BUYIN_AMT_TY								--融券买入金额_本年 		
-		,T1.CSS_AMT_M               		AS			CSS_AMT_M											--融券卖出金额_本月 
+		,COALESCE(T1.CSS_AMT_M,0)               		AS			CSS_AMT_M											--融券卖出金额_本月 
 		,T2.CSS_AMT_TY               		AS			CSS_AMT_TY											--融券卖出金额_本年 
-		,T1.FIN_RTN_AMT_M           		AS			FIN_RTN_AMT_M        								--融资归还金额_本月		
+		,COALESCE(T1.FIN_RTN_AMT_M,0)           		AS			FIN_RTN_AMT_M        								--融资归还金额_本月		
 		,T2.FIN_RTN_AMT_TY           		AS			FIN_RTN_AMT_TY       								--融资归还金额_本年		
-		,T1.STKPLG_INIT_TRD_AMT_M   		AS			STKPLG_INIT_TRD_AMT_M 								--股票质押初始交易金额_本月		
+		,COALESCE(T1.STKPLG_INIT_TRD_AMT_M,0)   		AS			STKPLG_INIT_TRD_AMT_M 								--股票质押初始交易金额_本月		
 		,T2.STKPLG_INIT_TRD_AMT_TY   		AS			STKPLG_INIT_TRD_AMT_TY 								--股票质押初始交易金额_本年		
-		,T1.STKPLG_BUYB_TRD_AMT_M   		AS			STKPLG_REPO_TRD_AMT_M								--股票质押购回交易金额_本月		
+		,COALESCE(T1.STKPLG_BUYB_TRD_AMT_M,0)   		AS			STKPLG_REPO_TRD_AMT_M								--股票质押购回交易金额_本月		
 		,T2.STKPLG_BUYB_TRD_AMT_TY   		AS			STKPLG_REPO_TRD_AMT_TY								--股票质押购回交易金额_本年		
-		,T1.APPTBUYB_INIT_TRD_AMT_M 		AS			APPTBUYB_INIT_TRD_AMT_M 							--约定购回初始交易金额_本月			
+		,COALESCE(T1.APPTBUYB_INIT_TRD_AMT_M,0) 		AS			APPTBUYB_INIT_TRD_AMT_M 							--约定购回初始交易金额_本月			
 		,T2.APPTBUYB_INIT_TRD_AMT_TY 		AS			APPTBUYB_INIT_TRD_AMT_TY							--约定购回初始交易金额_本年			
-		,T1.APPTBUYB_BUYB_TRD_AMT_M 		AS			APPTBUYB_BUYB_TRD_AMT_M								--约定购回购回交易金额_本月			
+		,COALESCE(T1.APPTBUYB_BUYB_TRD_AMT_M,0) 		AS			APPTBUYB_BUYB_TRD_AMT_M								--约定购回购回交易金额_本月			
 		,T2.APPTBUYB_BUYB_TRD_AMT_TY 		AS			APPTBUYB_BUYB_TRD_AMT_TY							--约定购回购回交易金额_本年			
-	FROM #TMP_T_EVT_TRD_M_BRH_MTH T1,#TMP_T_EVT_TRD_M_BRH_YEAR T2
-	WHERE T1.BRH_ID = T2.BRH_ID AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #TMP_T_EVT_TRD_M_BRH_YEAR T2
+	LEFT JOIN #TMP_T_EVT_TRD_M_BRH_MTH T1 ON T1.BRH_ID = T2.BRH_ID AND T1.OCCUR_DT = T2.OCCUR_DT;
 	COMMIT;
 END
 GO
@@ -13966,64 +17446,65 @@ BEGIN
 		,APPTBUYB_BUYB_TRD_AMT_TY							--约定购回购回交易金额_本年	
 	)		
 	SELECT 
-		 T1.YEAR  							AS			YEAR                 								--年
-		,T1.MTH 						    AS			MTH                  								--月		
-		,T1.EMP_ID							AS			EMP_ID												--员工编码	
-		,T1.OCCUR_DT 						AS			OCCUR_DT											--发生日期		
-		,T1.STKF_TRD_QTY_M        	 		AS			STKF_TRD_QTY_M										--股基交易量_本月	
+		 T2.YEAR  							AS			YEAR                 								--年
+		,T2.MTH 						    AS			MTH                  								--月		
+		,T2.EMP_ID							AS			EMP_ID												--员工编码	
+		,T2.OCCUR_DT 						AS			OCCUR_DT											--发生日期		
+		,COALESCE(T1.STKF_TRD_QTY_M,0)        	 		AS			STKF_TRD_QTY_M										--股基交易量_本月	
 		,T2.STKF_TRD_QTY_TY         		AS			STKF_TRD_QTY_TY										--股基交易量_本年	
-		,T1.SCDY_TRD_QTY_M          		AS			SCDY_TRD_QTY_M										--二级交易量_本月	
+		,COALESCE(T1.SCDY_TRD_QTY_M,0)          		AS			SCDY_TRD_QTY_M										--二级交易量_本月	
 		,T2.SCDY_TRD_QTY_TY          		AS			SCDY_TRD_QTY_TY										--二级交易量_本年		
-		,T1.S_REPUR_TRD_QTY_M       		AS			S_REPUR_TRD_QTY_M									--正回购交易量_本月		
+		,COALESCE(T1.S_REPUR_TRD_QTY_M,0)       		AS			S_REPUR_TRD_QTY_M									--正回购交易量_本月		
 		,T2.S_REPUR_TRD_QTY_TY       		AS			S_REPUR_TRD_QTY_TY									--正回购交易量_本年			
-		,T1.R_REPUR_TRD_QTY_M       		AS			R_REPUR_TRD_QTY_M									--逆回购交易量_本月			
+		,COALESCE(T1.R_REPUR_TRD_QTY_M,0)       		AS			R_REPUR_TRD_QTY_M									--逆回购交易量_本月			
 		,T2.R_REPUR_TRD_QTY_TY       		AS			R_REPUR_TRD_QTY_TY									--逆回购交易量_本年	
-		,T1.HGT_TRD_QTY_M           		AS			HGT_TRD_QTY_M										--沪港通交易量_本月	
+		,COALESCE(T1.HGT_TRD_QTY_M,0)           		AS			HGT_TRD_QTY_M										--沪港通交易量_本月	
 		,T2.HGT_TRD_QTY_TY           		AS			HGT_TRD_QTY_TY										--沪港通交易量_本年	
-		,T1.SGT_TRD_QTY_M           		AS			SGT_TRD_QTY_M										--深港通交易量_本月	
+		,COALESCE(T1.SGT_TRD_QTY_M,0)           		AS			SGT_TRD_QTY_M										--深港通交易量_本月	
 		,T2.SGT_TRD_QTY_TY           		AS			SGT_TRD_QTY_TY										--深港通交易量_本年	
-		,T1.STKPLG_TRD_QTY_M        		AS			STKPLG_TRD_QTY_M									--股票质押交易量_本月			
+		,COALESCE(T1.STKPLG_TRD_QTY_M,0)        		AS			STKPLG_TRD_QTY_M									--股票质押交易量_本月			
 		,T2.STKPLG_TRD_QTY_TY        		AS			STKPLG_TRD_QTY_TY									--股票质押交易量_本年		
-		,T1.APPTBUYB_TRD_QTY_M      		AS			APPTBUYB_TRD_QTY_M									--约定购回交易量_本月	
+		,COALESCE(T1.APPTBUYB_TRD_QTY_M,0)      		AS			APPTBUYB_TRD_QTY_M									--约定购回交易量_本月	
 		,T2.APPTBUYB_TRD_QTY_TY      		AS			APPTBUYB_TRD_QTY_TY									--约定购回交易量_本年	
-		,T1.OFFUND_TRD_QTY_M        		AS			OFFUND_TRD_QTY_M									--场内基金交易量_本月	
+		,COALESCE(T1.OFFUND_TRD_QTY_M,0)        		AS			OFFUND_TRD_QTY_M									--场内基金交易量_本月	
 		,T2.OFFUND_TRD_QTY_TY        		AS			OFFUND_TRD_QTY_TY									--场内基金交易量_本年	
-		,T1.OPFUND_TRD_QTY_M        		AS			OPFUND_TRD_QTY_M									--场外基金交易量_本月	
+		,COALESCE(T1.OPFUND_TRD_QTY_M,0)        		AS			OPFUND_TRD_QTY_M									--场外基金交易量_本月	
 		,T2.OPFUND_TRD_QTY_TY        		AS			OPFUND_TRD_QTY_TY									--场外基金交易量_本年	
-		,T1.BANK_CHRM_TRD_QTY_M     		AS			BANK_CHRM_TRD_QTY_M									--银行理财交易量_本月 	
+		,COALESCE(T1.BANK_CHRM_TRD_QTY_M,0)     		AS			BANK_CHRM_TRD_QTY_M									--银行理财交易量_本月 	
 		,T2.BANK_CHRM_TRD_QTY_TY     		AS			BANK_CHRM_TRD_QTY_TY								--银行理财交易量_本年 		
-		,T1.SECU_CHRM_TRD_QTY_M     		AS			SECU_CHRM_TRD_QTY_M									--证券理财交易量_本月	
+		,COALESCE(T1.SECU_CHRM_TRD_QTY_M,0)     		AS			SECU_CHRM_TRD_QTY_M									--证券理财交易量_本月	
 		,T2.SECU_CHRM_TRD_QTY_TY     		AS			SECU_CHRM_TRD_QTY_TY								--证券理财交易量_本年		
-		,T1.PSTK_OPTN_TRD_QTY_M     		AS			PSTK_OPTN_TRD_QTY_M									--个股期权交易量_本月		
+		,COALESCE(T1.PSTK_OPTN_TRD_QTY_M,0)     		AS			PSTK_OPTN_TRD_QTY_M									--个股期权交易量_本月		
 		,T2.PSTK_OPTN_TRD_QTY_TY     		AS			PSTK_OPTN_TRD_QTY_TY								--个股期权交易量_本年			
-		,T1.CREDIT_ODI_TRD_QTY_M    		AS			CREDIT_ODI_TRD_QTY_M								--信用账户普通交易量_本月 		
+		,COALESCE(T1.CREDIT_ODI_TRD_QTY_M,0)    		AS			CREDIT_ODI_TRD_QTY_M								--信用账户普通交易量_本月 		
 		,T2.CREDIT_ODI_TRD_QTY_TY    		AS			CREDIT_ODI_TRD_QTY_TY								--信用账户普通交易量_本年 		
-		,T1.CREDIT_CRED_TRD_QTY_M   		AS			CREDIT_CRED_TRD_QTY_M								--信用账户信用交易量_本月 		
+		,COALESCE(T1.CREDIT_CRED_TRD_QTY_M,0)   		AS			CREDIT_CRED_TRD_QTY_M								--信用账户信用交易量_本月 		
 		,T2.CREDIT_CRED_TRD_QTY_TY   		AS			CREDIT_CRED_TRD_QTY_TY								--信用账户信用交易量_本年 		
-		,T1.COVR_BUYIN_AMT_M        		AS			COVR_BUYIN_AMT_M									--平仓买入金额_本月 	
+		,COALESCE(T1.COVR_BUYIN_AMT_M,0)        		AS			COVR_BUYIN_AMT_M									--平仓买入金额_本月 	
 		,T2.COVR_BUYIN_AMT_TY        		AS			COVR_BUYIN_AMT_TY									--平仓买入金额_本年 	
-		,T1.COVR_SELL_AMT_M         		AS			COVR_SELL_AMT_M										--平仓卖出金额_本月 
+		,COALESCE(T1.COVR_SELL_AMT_M,0)         		AS			COVR_SELL_AMT_M										--平仓卖出金额_本月 
 		,T2.COVR_SELL_AMT_TY         		AS			COVR_SELL_AMT_TY									--平仓卖出金额_本年 	
-		,T1.CCB_AMT_M               		AS			CCB_AMT_M											--融资买入金额_本月 
+		,COALESCE(T1.CCB_AMT_M,0)               		AS			CCB_AMT_M											--融资买入金额_本月 
 		,T2.CCB_AMT_TY               		AS			CCB_AMT_TY											--融资买入金额_本年 
-		,T1.FIN_SELL_AMT_M          		AS			FIN_SELL_AMT_M										--融资卖出金额_本月 
+		,COALESCE(T1.FIN_SELL_AMT_M,0)          		AS			FIN_SELL_AMT_M										--融资卖出金额_本月 
 		,T2.FIN_SELL_AMT_TY          		AS			FIN_SELL_AMT_TY										--融资卖出金额_本年 
-		,T1.CRDT_STK_BUYIN_AMT_M    		AS			CRDT_STK_BUYIN_AMT_M								--融券买入金额_本月 		
+		,COALESCE(T1.CRDT_STK_BUYIN_AMT_M,0)    		AS			CRDT_STK_BUYIN_AMT_M								--融券买入金额_本月 		
 		,T2.CRDT_STK_BUYIN_AMT_TY    		AS			CRDT_STK_BUYIN_AMT_TY								--融券买入金额_本年 		
-		,T1.CSS_AMT_M               		AS			CSS_AMT_M											--融券卖出金额_本月 
+		,COALESCE(T1.CSS_AMT_M,0)               		AS			CSS_AMT_M											--融券卖出金额_本月 
 		,T2.CSS_AMT_TY               		AS			CSS_AMT_TY											--融券卖出金额_本年 
-		,T1.FIN_RTN_AMT_M           		AS			FIN_RTN_AMT_M        								--融资归还金额_本月		
+		,COALESCE(T1.FIN_RTN_AMT_M,0)           		AS			FIN_RTN_AMT_M        								--融资归还金额_本月		
 		,T2.FIN_RTN_AMT_TY           		AS			FIN_RTN_AMT_TY       								--融资归还金额_本年		
-		,T1.STKPLG_INIT_TRD_AMT_M   		AS			STKPLG_INIT_TRD_AMT_M 								--股票质押初始交易金额_本月		
+		,COALESCE(T1.STKPLG_INIT_TRD_AMT_M,0)   		AS			STKPLG_INIT_TRD_AMT_M 								--股票质押初始交易金额_本月		
 		,T2.STKPLG_INIT_TRD_AMT_TY   		AS			STKPLG_INIT_TRD_AMT_TY 								--股票质押初始交易金额_本年		
-		,T1.STKPLG_BUYB_TRD_AMT_M   		AS			STKPLG_REPO_TRD_AMT_M								--股票质押购回交易金额_本月		
+		,COALESCE(T1.STKPLG_BUYB_TRD_AMT_M,0)   		AS			STKPLG_REPO_TRD_AMT_M								--股票质押购回交易金额_本月		
 		,T2.STKPLG_BUYB_TRD_AMT_TY   		AS			STKPLG_REPO_TRD_AMT_TY								--股票质押购回交易金额_本年		
-		,T1.APPTBUYB_INIT_TRD_AMT_M 		AS			APPTBUYB_INIT_TRD_AMT_M 							--约定购回初始交易金额_本月			
+		,COALESCE(T1.APPTBUYB_INIT_TRD_AMT_M,0) 		AS			APPTBUYB_INIT_TRD_AMT_M 							--约定购回初始交易金额_本月			
 		,T2.APPTBUYB_INIT_TRD_AMT_TY 		AS			APPTBUYB_INIT_TRD_AMT_TY							--约定购回初始交易金额_本年			
-		,T1.APPTBUYB_BUYB_TRD_AMT_M 		AS			APPTBUYB_BUYB_TRD_AMT_M								--约定购回购回交易金额_本月			
+		,COALESCE(T1.APPTBUYB_BUYB_TRD_AMT_M,0) 		AS			APPTBUYB_BUYB_TRD_AMT_M								--约定购回购回交易金额_本月			
 		,T2.APPTBUYB_BUYB_TRD_AMT_TY 		AS			APPTBUYB_BUYB_TRD_AMT_TY							--约定购回购回交易金额_本年			
-	FROM #TMP_T_EVT_TRD_M_EMP_MTH T1,#TMP_T_EVT_TRD_M_EMP_YEAR T2
-	WHERE T1.EMP_ID = T2.EMP_ID AND T1.OCCUR_DT = T2.OCCUR_DT;
+	FROM #TMP_T_EVT_TRD_M_EMP_YEAR T2 
+	left join #TMP_T_EVT_TRD_M_EMP_MTH T1 ON T1.EMP_ID = T2.EMP_ID AND T1.OCCUR_DT = T2.OCCUR_DT;
+	
 	COMMIT;
 END
 GO
@@ -14452,7 +17933,7 @@ BEGIN
 	,year||mth||CUST_ID AS YEAR_MTH_CUST_ID  --20180129新增
 	,IF_PROD_NEW_CUST  --是否产品新客户
 	FROM #TMP_CUST  TC
-	WHERE HS_ORG_ID NOT IN ('5','55','51','44','9999')--20180207 新增：排除"总部专用账户"
+	--WHERE HS_ORG_ID NOT IN ('5','55','51','44','9999')--20180207 新增：排除"总部专用账户"  20180525 删除总部专用账户
 	;
 	COMMIT;
 	
@@ -15290,8 +18771,7 @@ BEGIN
   创建日期: 2017-11-16
   简介：日期维表，里面包含日期的各个维度，方便日期变量取数
   *********************************************************************
-  修订记录： 修订日期       版本号    修订人             修改内容简要说明
-           
+  修订记录：               修订日期       版本号    修订人             修改内容简要说明
   *********************************************************************/
   
   SET @V_OUT_FLAG = -1;  --初始清洗赋值-1
@@ -16163,7 +19643,8 @@ select a.rq                        as 日期,
    and a.ygzt = '正常人员'
    and a.rylx='员工' 
     and is_virtual=0 
-    and hrid is not null;
+    and hrid is not null
+    and hrid not like 'QH%';
 
 commit;
 
@@ -16191,6 +19672,26 @@ commit;
 into #t_jg
 from dba.t_dim_org  a
 left join DBA.T_ODS_CF_V_BRANCH b on convert(varchar,b.branch_no)=convert(varchar,a.branch_no)
+where a.pk_org not in 
+         ('#20103',     --兴证证券资产管理有限公司
+          'XYNEW1071',  --兴全基金管理有限公司
+          'XYNEW1072',  --兴证期货有限公司
+          'XYNEW1108',  --兴证投资管理有限公司
+          'XYNEW1075',  --兴证创新资本管理有限公司
+          'XYNEW1109',  --兴业证券慈善基金会
+          'XYNEW1066',  --兴证国际金融集团有限公司
+          'XYNEW1092',  --海峡股权交易中心
+          '#20103',     --兴证证券资产管理有限公司
+          'XYNEW1073',  --福州兴证物业管理有限公司
+          'XYJYZB1400', --证券投资部
+          '#010000005', --兴业金麒麟
+          'XYRZRQ4400', --融资融券部
+          'XYXZBM0251', --网络发展部
+          '#20191'    ,--场外业务部
+          '##SRYHB'   ,--私人银行部
+          'XYNEW1066', --兴证国际金融集团有限公司
+          'XYNEW1002'  --分支机构（分公司与营业部） 
+ )
 order by jglb ;
 
 commit;
@@ -16728,6 +20229,7 @@ BEGIN
            
       -- 增加场内产品  update by chenhu  20180119
       -- 增加产内三种类型：  'A'  基金申赎， 'N'  ETF申赎， 'K'  基金认购，'M'  ETF认购； 场外两只代码：940002,940003    update by chenhu 20180207
+      -- 从DBA.T_DDW_D_JJ更新产品投向为空的信息                   update by chenhu   20180522
     *********************************************************************/
 
     COMMIT;
@@ -16825,6 +20327,24 @@ BEGIN
     AND A.STOCK_CODE NOT IN (
     SELECT DISTINCT PROD_CD FROM DM.T_VAR_PROD_OTC WHERE OCCUR_DT=@V_IN_DATE 
     );
+        
+   --从DBA.T_DDW_D_JJ更新产品投向为空的信息    update by chenhu   20180522
+    UPDATE dm.T_VAR_PROD_OTC
+	SET PROD_INVER_TYPE = CASE WHEN B.JJLB LIKE '%货币%' THEN '货币' 
+	              WHEN B.JJLB LIKE '%股票%' THEN '权益' 
+	              WHEN B.JJLB LIKE '%债券%' THEN '债券' 
+	              WHEN B.JJLB IS NULL THEN '未设置' 
+	              ELSE B.JJLB END,
+	    PROD_PAYF_FETUR = CASE WHEN B.JJLB LIKE '%货币%' THEN '现金型' 
+	              WHEN B.JJLB LIKE '%股票%' THEN '浮动收益' 
+	              WHEN B.JJLB LIKE '%债券%' THEN '类固定收益' 
+	              ELSE NULL END
+	FROM dm.T_VAR_PROD_OTC A
+	LEFT JOIN DBA.T_DDW_D_JJ B
+	    ON B.NIAN=SUBSTR(CONVERT(VARCHAR,A.OCCUR_DT),1,4) AND B.YUE=SUBSTR(CONVERT(VARCHAR,A.OCCUR_DT),5,2)
+	    AND A.PROD_CD = B.JJDM
+	WHERE A.OCCUR_DT=@V_IN_DATE 
+	AND A.PROD_INVER_TYPE ='';     
         
     COMMIT;
 END
@@ -16999,7 +20519,7 @@ begin
                                                                             end
   left join dba.t_ddw_d_jj                            d on a.zqdm=d.jjdm and d.nian=@v_bin_year and d.yue=@v_bin_mth
   where a.load_dt= @v_bin_date
-    and a.sclx in( '01','02','03','04','05','0G','0S')
+   -- and a.sclx in( '01','02','03','04','05','0G','0S') ---20180525 不做剔除
   group by zjzh; 
 
   commit;
