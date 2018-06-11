@@ -43,16 +43,16 @@ BEGIN
                                                               '#010000005',--兴业金麒麟 
                                                               '##JGXSSYB',--机构与销售交易事业总部
                                                               'XYRZRQ4400',--融资融券部
-                                                              'XYXZBM0034',--总部
-                                                              '#999999999')   THEN  T_JG.HR_ORG_NAME   
+                                                              'XYXZBM0034'--总部
+                                                              )   THEN  T_JG.HR_ORG_NAME   
        ELSE T_JG.TOP_SEPT_CORP_NAME END                         AS 分公司
       ,CASE WHEN T_JG.WH_ORG_ID IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
                                                               'XYXZBM0251',--网络发展部
                                                               '#010000005',--兴业金麒麟 
                                                               '##JGXSSYB',--机构与销售交易事业总部
                                                               'XYRZRQ4400',--融资融券部
-                                                              'XYXZBM0034',--总部
-                                                              '#999999999')  THEN '总部' 
+                                                              'XYXZBM0034'--总部
+                                                              )  THEN '总部' 
        ELSE T_JG.ORG_TYPE END                                   AS 分公司类型
       ,T_KHSX.是否年新增 
       ,T_KHSX.是否月新增
@@ -82,7 +82,7 @@ BEGIN
         ON T1.NIAN=T_JG.YEAR AND T1.YUE=T_JG.MTH 
           AND T_KHSX.机构编号=T_JG.WH_ORG_ID
   WHERE T1.NIAN = @V_YEAR AND T1.YUE = @V_MONTH
-    --AND T_KHSX.机构编号 IS NOT NULL
+    AND T_KHSX.机构编号 IS NOT NULL
   GROUP BY 
      T1.NIAN||T1.YUE
     ,T_KHSX.机构编号

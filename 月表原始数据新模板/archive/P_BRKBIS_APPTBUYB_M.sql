@@ -1,4 +1,4 @@
-﻿CREATE OR REPLACE PROCEDURE dm.P_BRKBIS_APPTBUYB_M(IN @V_BIN_DATE INT)
+CREATE OR REPLACE PROCEDURE dm.P_BRKBIS_APPTBUYB_M(IN @V_BIN_DATE INT)
 
 BEGIN 
   
@@ -55,25 +55,25 @@ BEGIN
   )
   SELECT 
        T1.YEAR||T1.MTH
-      , CASE WHEN t_jg.WH_ORG_ID IS NULL THEN t1.WH_ORG_ID_EMP ELSE t_jg.WH_ORG_ID END   as 机构编号	
-      , CASE WHEN t_jg.WH_ORG_ID IS NULL THEN '总部'           ELSE T_jg.HR_ORG_NAME END as 营业部
-      , CASE 
-           WHEN t_jg.WH_ORG_ID IS NULL THEN  '总部' 
-           WHEN t_jg.TOP_SEPT_CORP_NAME  IS NULL  OR  T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL THEN t1.WH_ORG_ID_EMP ELSE t_jg.WH_ORG_ID   END as 机构编号 
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL THEN '总部'           ELSE T_jg.HR_ORG_NAME END as 营业部
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL THEN  '总部' 
+          WHEN t_jg.TOP_SEPT_CORP_NAME IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
                                                               'XYXZBM0251',--网络发展部
                                                               '#010000005',--兴业金麒麟 
                                                               '##JGXSSYB',--机构与销售交易事业总部
                                                               'XYRZRQ4400',--融资融券部
-                                                              'XYXZBM0034',--总部
-                                                              '#999999999')   THEN  T_JG.HR_ORG_NAME   ELSE t_jg.TOP_SEPT_CORP_NAME END as 分公司
-       , CASE WHEN t_jg.WH_ORG_ID IS NULL OR  T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
+                                                              'XYXZBM0034'--总部
+                                                              )   THEN  T_JG.HR_ORG_NAME   
+       ELSE t_jg.TOP_SEPT_CORP_NAME END as 分公司
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
                                                               'XYXZBM0251',--网络发展部
                                                               '#010000005',--兴业金麒麟 
                                                               '##JGXSSYB',--机构与销售交易事业总部
                                                               'XYRZRQ4400',--融资融券部
-                                                              'XYXZBM0034',--总部
-                                                              '#999999999')  THEN '总部' 
-          ELSE T_JG.ORG_TYPE END   as 分公司类型
+                                                              'XYXZBM0034'--总部
+                                                              )  THEN '总部' 
+       ELSE T_JG.ORG_TYPE END   as 分公司类型
       ,T_KHSX.是否年新增 
       ,T_KHSX.是否月新增
       ,T_KHSX.客户类型
@@ -128,22 +128,22 @@ BEGIN
       ,CASE WHEN T3.IF_APPTBUYB_CUST=1 AND T3.APPTBUYB_OPEN_DT>=T2.NATRE_DAY_MTHBEG THEN 1 ELSE 0 END AS 是否约定购回客户_月新增
       ,CASE WHEN T3.IF_APPTBUYB_CUST=1 AND T3.APPTBUYB_OPEN_DT>=T2.NATRE_DAY_YEARBGN THEN 1 ELSE 0 END AS 是否约定购回客户_年新增   
       ,CASE 
-          WHEN COALESCE(T5.TOT_AST_MDA,0)<100                                     THEN '00-100以下'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 100      AND COALESCE(T5.TOT_AST_MDA,0)<1000     THEN '01-100_1000'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 1000     AND COALESCE(T5.TOT_AST_MDA,0)<2000     THEN '02-1000_2000'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 2000     AND COALESCE(T5.TOT_AST_MDA,0)<5000     THEN '03-2000_5000'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 5000     AND COALESCE(T5.TOT_AST_MDA,0)<10000    THEN '04-5000_1W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 10000    AND COALESCE(T5.TOT_AST_MDA,0)<50000    THEN '05-1W_5W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 50000    AND COALESCE(T5.TOT_AST_MDA,0)<100000   THEN '06-5W_10W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 100000   AND COALESCE(T5.TOT_AST_MDA,0)<200000   THEN '1-10W_20W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 200000   AND COALESCE(T5.TOT_AST_MDA,0)<500000   THEN '2-20W_50W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 500000   AND COALESCE(T5.TOT_AST_MDA,0)<1000000  THEN '3-50W_100W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 1000000  AND COALESCE(T5.TOT_AST_MDA,0)<2000000  THEN '4-100W_200W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 2000000  AND COALESCE(T5.TOT_AST_MDA,0)<3000000  THEN '5-200W_300W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 3000000  AND COALESCE(T5.TOT_AST_MDA,0)<5000000  THEN '6-300W_500W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 5000000  AND COALESCE(T5.TOT_AST_MDA,0)<10000000 THEN '7-500W_1000W'
-          WHEN COALESCE(T5.TOT_AST_MDA,0) >= 10000000 AND COALESCE(T5.TOT_AST_MDA,0)<30000000 THEN '8-1000W_3000W'
-        WHEN COALESCE(T5.TOT_AST_MDA,0) >= 30000000                             THEN '9-大于3000W'
+          WHEN T5.TOT_AST_MDA<100                                     THEN '00-100以下'
+          WHEN T5.TOT_AST_MDA >= 100      AND T5.TOT_AST_MDA<1000     THEN '01-100_1000'
+          WHEN T5.TOT_AST_MDA >= 1000     AND T5.TOT_AST_MDA<2000     THEN '02-1000_2000'
+          WHEN T5.TOT_AST_MDA >= 2000     AND T5.TOT_AST_MDA<5000     THEN '03-2000_5000'
+          WHEN T5.TOT_AST_MDA >= 5000     AND T5.TOT_AST_MDA<10000    THEN '04-5000_1W'
+          WHEN T5.TOT_AST_MDA >= 10000    AND T5.TOT_AST_MDA<50000    THEN '05-1W_5W'
+          WHEN T5.TOT_AST_MDA >= 50000    AND T5.TOT_AST_MDA<100000   THEN '06-5W_10W'
+          WHEN T5.TOT_AST_MDA >= 100000   AND T5.TOT_AST_MDA<200000   THEN '1-10W_20W'
+          WHEN T5.TOT_AST_MDA >= 200000   AND T5.TOT_AST_MDA<500000   THEN '2-20W_50W'
+          WHEN T5.TOT_AST_MDA >= 500000   AND T5.TOT_AST_MDA<1000000  THEN '3-50W_100W'
+          WHEN T5.TOT_AST_MDA >= 1000000  AND T5.TOT_AST_MDA<2000000  THEN '4-100W_200W'
+          WHEN T5.TOT_AST_MDA >= 2000000  AND T5.TOT_AST_MDA<3000000  THEN '5-200W_300W'
+          WHEN T5.TOT_AST_MDA >= 3000000  AND T5.TOT_AST_MDA<5000000  THEN '6-300W_500W'
+          WHEN T5.TOT_AST_MDA >= 5000000  AND T5.TOT_AST_MDA<10000000 THEN '7-500W_1000W'
+          WHEN T5.TOT_AST_MDA >= 10000000 AND T5.TOT_AST_MDA<30000000 THEN '8-1000W_3000W'
+        WHEN T5.TOT_AST_MDA >= 30000000                             THEN '9-大于3000W'
            END AS 资产段   
       FROM DM.T_PUB_CUST T1   
       LEFT JOIN DM.T_PUB_DATE_M T2 ON T1.YEAR=T2.YEAR AND T1.MTH=T2.MTH
@@ -152,15 +152,30 @@ BEGIN
       LEFT JOIN DM.T_AST_ODI_M_D T5 ON T1.YEAR=T5.YEAR AND T1.MTH=T5.MTH AND T1.CUST_ID=T5.CUST_ID
         WHERE T1.YEAR=@V_YEAR 
            AND T1.MTH=@V_MONTH
-           --AND 资产段 IS NOT NULL
+           AND 资产段 IS NOT NULL
   ) T_KHSX ON T1.YEAR=T_KHSX.YEAR AND T1.MTH=T_KHSX.MTH AND T1.CUST_ID=T_KHSX.CUST_ID
   WHERE T1.YEAR = @V_YEAR AND T1.MTH = @V_MONTH
   GROUP BY 
        T1.YEAR||T1.MTH
-,机构编号	
-	,营业部
-	,分公司
-    ,分公司类型
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL THEN t1.WH_ORG_ID_EMP ELSE t_jg.WH_ORG_ID   END
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL THEN '总部'           ELSE T_jg.HR_ORG_NAME END
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL THEN  '总部' 
+          WHEN t_jg.TOP_SEPT_CORP_NAME IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
+                                                              'XYXZBM0251',--网络发展部
+                                                              '#010000005',--兴业金麒麟 
+                                                              '##JGXSSYB',--机构与销售交易事业总部
+                                                              'XYRZRQ4400',--融资融券部
+                                                              'XYXZBM0034'--总部
+                                                              )   THEN  T_JG.HR_ORG_NAME   
+       ELSE t_jg.TOP_SEPT_CORP_NAME END
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
+                                                              'XYXZBM0251',--网络发展部
+                                                              '#010000005',--兴业金麒麟 
+                                                              '##JGXSSYB',--机构与销售交易事业总部
+                                                              'XYRZRQ4400',--融资融券部
+                                                              'XYXZBM0034'--总部
+                                                              )  THEN '总部' 
+       ELSE T_JG.ORG_TYPE END 
       ,T_KHSX.是否年新增 
       ,T_KHSX.是否月新增
       ,T_KHSX.客户类型

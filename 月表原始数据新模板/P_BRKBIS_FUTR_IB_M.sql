@@ -37,24 +37,25 @@ BEGIN
   SELECT 
        T1.NIAN||T1.YUE      AS      YEAR_MTH           --年月
       ,T1.JGBH              AS      ORG_NO             --机构编号
-      ,CASE WHEN T_JG.WH_ORG_ID IS NULL THEN '总部'  ELSE T_JG.HR_ORG_NAME END AS BRH    --营业部
-      ,CASE WHEN T_JG.WH_ORG_ID IS NULL THEN  '总部' 
-          WHEN T_JG.TOP_SEPT_CORP_NAME IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
+      ,CASE WHEN t_jg.WH_ORG_ID IS NULL THEN t1.WH_ORG_ID_EMP ELSE t_jg.WH_ORG_ID END   as 机构编号	
+      , CASE WHEN t_jg.WH_ORG_ID IS NULL THEN '总部'           ELSE T_jg.HR_ORG_NAME END as 营业部
+      , CASE 
+           WHEN t_jg.WH_ORG_ID IS NULL THEN  '总部' 
+           WHEN t_jg.TOP_SEPT_CORP_NAME  IS NULL  OR  T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
                                                               'XYXZBM0251',--网络发展部
                                                               '#010000005',--兴业金麒麟 
                                                               '##JGXSSYB',--机构与销售交易事业总部
                                                               'XYRZRQ4400',--融资融券部
-                                                              'XYXZBM0034'--总部
-                                                              )   THEN  T_JG.HR_ORG_NAME   
-       ELSE T_JG.TOP_SEPT_CORP_NAME END                         AS SEPT_CORP          --分公司
-      ,CASE WHEN T_JG.WH_ORG_ID IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
+                                                              'XYXZBM0034',--总部
+                                                              '#999999999')   THEN  T_JG.HR_ORG_NAME   ELSE t_jg.TOP_SEPT_CORP_NAME END as 分公司
+       , CASE WHEN t_jg.WH_ORG_ID IS NULL OR  T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
                                                               'XYXZBM0251',--网络发展部
                                                               '#010000005',--兴业金麒麟 
                                                               '##JGXSSYB',--机构与销售交易事业总部
                                                               'XYRZRQ4400',--融资融券部
-                                                              'XYXZBM0034'--总部
-                                                              )  THEN '总部' 
-       ELSE T_JG.ORG_TYPE END                                   AS  SEPT_CORP_TYPE     --分公司类型
+                                                              'XYXZBM0034',--总部
+                                                              '#999999999')  THEN '总部' 
+          ELSE T_JG.ORG_TYPE END   as 分公司类型
       ,T_KHSX.是否年新增                                        AS  IF_YEAR_NA         --是否年新增   
       ,T_KHSX.是否月新增                                        AS  IF_MTH_NA          --是否月新增 
       ,SUM(CASE WHEN T_KHSX.客户状态='0' THEN 1 ELSE 0 END)     AS    CUST_NUM           --客户数
@@ -85,26 +86,11 @@ BEGIN
           AND T1.JGBH=T_JG.WH_ORG_ID
   WHERE T1.NIAN = @V_YEAR AND T1.YUE = @V_MONTH
   GROUP BY 
-     T1.NIAN||T1.YUE
-    ,T1.JGBH
-    ,CASE WHEN T_JG.WH_ORG_ID IS NULL THEN '总部'  ELSE T_JG.HR_ORG_NAME END
-    ,CASE WHEN T_JG.WH_ORG_ID IS NULL THEN  '总部' 
-        WHEN T_JG.TOP_SEPT_CORP_NAME IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
-                                                            'XYXZBM0251',--网络发展部
-                                                            '#010000005',--兴业金麒麟 
-                                                            '##JGXSSYB',--机构与销售交易事业总部
-                                                            'XYRZRQ4400',--融资融券部
-                                                            'XYXZBM0034'--总部
-                                                            )   THEN  T_JG.HR_ORG_NAME   
-     ELSE T_JG.TOP_SEPT_CORP_NAME END                        
-    ,CASE WHEN T_JG.WH_ORG_ID IS NULL OR T_JG.WH_ORG_ID IN ('XYJYZB1400',--证券投资部
-                                                            'XYXZBM0251',--网络发展部
-                                                            '#010000005',--兴业金麒麟 
-                                                            '##JGXSSYB',--机构与销售交易事业总部
-                                                            'XYRZRQ4400',--融资融券部
-                                                            'XYXZBM0034'--总部
-                                                            )  THEN '总部' 
-     ELSE T_JG.ORG_TYPE END                                  
+     T1.NIAN||T1.YUE 
+    ,机构编号	
+	,营业部
+	,分公司
+    ,分公司类型                                  
     ,T_KHSX.是否年新增 
     ,T_KHSX.是否月新增
   ;
