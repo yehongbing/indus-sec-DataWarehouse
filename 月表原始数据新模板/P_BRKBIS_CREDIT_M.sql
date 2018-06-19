@@ -106,9 +106,9 @@ BEGIN
     ,T_KHSX.资产段
     ,T_KHSX.是否融资融券年新增  
     ,T_KHSX.是否融资融券月新增
-    ,SUM(CASE WHEN T_KHSX.客户状态='0' THEN T2.JXBL1 ELSE 0 END)
-    ,SUM(CASE WHEN T_KHSX.客户状态='0' AND T_KHSX.是否融资融券客户=1 AND T_KHSX.是否融资融券有效客户=1 THEN T2.JXBL9 ELSE 0 END)
-    ,SUM(COALESCE(T_KHSX.融资融券授信额度,0))         AS     CREDIT_CRED_QUO              --融资融券授信额度        
+    ,SUM(CASE WHEN T_KHSX.客户状态='正常' THEN T2.JXBL1 ELSE 0 END)
+    ,SUM(CASE WHEN T_KHSX.客户状态='正常' AND T_KHSX.是否融资融券客户=1 AND T_KHSX.是否融资融券有效客户=1 THEN T2.JXBL9 ELSE 0 END)
+    ,SUM(COALESCE(T_KHSX.融资融券授信额度,0)*T2.JXBL1)         AS     CREDIT_CRED_QUO              --融资融券授信额度        
     ,SUM(COALESCE(T1.TOT_AST_FINAL,0))                AS     CREDIT_TOTAST_FINAL          --总资产_期末
     ,SUM(COALESCE(T1.NET_AST_FINAL,0))                AS     CREDIT_NET_AST_FINAL         --净资产_期末
     ,SUM(COALESCE(T1.TOT_LIAB_FINAL,0))               AS     CREDIT_TOT_LIAB_FINAL        --总负债_期末

@@ -81,7 +81,7 @@ BEGIN
       ,T_KHSX.资产段
       ,T_KHSX.是否约定购回客户_月新增
       ,T_KHSX.是否约定购回客户_年新增
-      ,SUM(CASE WHEN T_KHSX.客户状态='0' THEN T2.JXBL1 ELSE 0 END)
+      ,SUM(CASE WHEN T_KHSX.客户状态='正常' THEN T2.JXBL1 ELSE 0 END)
       ,SUM(COALESCE(T1.GUAR_SECU_MVAL_FINAL,0))                         AS     APPTBUYB_TOTAST_FINAL        --约定购回总资产_期末                     
       ,SUM(COALESCE(T1.GUAR_SECU_MVAL_FINAL - T1.APPTBUYB_BAL_FINAL,0)) AS     APPTBUYB_NET_AST_FINAL       --约定购回净资产_期末                                         
       ,SUM(COALESCE(T1.APPTBUYB_BAL_FINAL,0))                           AS     APPTBUYB_BAL_FINAL           --约定购回余额_期末                   
@@ -99,7 +99,7 @@ BEGIN
       ,0                                                                AS     APPTBUYB_RECE_INT_YTD        --约定购回应收利息_年累计 
       ,SUM(COALESCE(T_XYSR.APPTBUYB_PAIDINT_YTD,0))                     AS     APPTBUYB_PAIDINT_YTD         --约定购回实收利息_年累计                     
       ,0                                                                AS     APPTBUYB_CPTL_COST_YTD       --约定购回资金成本_年累计 
-   FROM DM.T_AST_EMPCUS_APPTBUYB_M_D T1 
+  FROM DM.T_AST_EMPCUS_APPTBUYB_M_D T1 
   LEFT JOIN DBA.T_DDW_SERV_RELATION T2
         ON T1.YEAR=T2.NIAN 
           AND T1.MTH=T2.YUE 
@@ -157,10 +157,10 @@ BEGIN
   WHERE T1.YEAR = @V_YEAR AND T1.MTH = @V_MONTH
   GROUP BY 
        T1.YEAR||T1.MTH
-,机构编号	
-	,营业部
-	,分公司
-    ,分公司类型
+      ,机构编号	
+	    ,营业部
+	    ,分公司
+      ,分公司类型
       ,T_KHSX.是否年新增 
       ,T_KHSX.是否月新增
       ,T_KHSX.客户类型
