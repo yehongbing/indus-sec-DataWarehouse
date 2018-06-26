@@ -211,12 +211,12 @@ BEGIN
       ,SUM(COALESCE(T1.ASSM_FINAC_OUT_SIDE_BAL_YDA,0))                       AS   ASSM_FINOS_BAL_YDA             --资管融出方余额_年日均            
       ,SUM(COALESCE(T1.SM_LOAN_FINAC_OUT_BAL_YDA,0))                         AS   MINO_AMT_FINOS_BAL_YDA         --小额融出方余额_年日均                                                          
       ,SUM(COALESCE(T_XYSR.STKPLG_NET_CMS_MTD,0))                            AS   STKPLG_NET_CMS_MTD             --股票质押净佣金_月累计                                            
-      ,SUM(COALESCE(T_XYSR.STKPLG_PAIDINT_MTD ,0))                           AS   STKPLG_RECE_INT_MTD            --股票质押应收利息_月累计                                              
-      ,SUM(COALESCE(T_XYSR.STKPLG_RECE_INT_MTD,0))                           AS   STKPLG_PAIDINT_MTD             --股票质押实收利息_月累计                                              
+      ,SUM(COALESCE(T_XYSR.STKPLG_RECE_INT_MTD,0))                           AS   STKPLG_RECE_INT_MTD            --股票质押应收利息_月累计                                              
+      ,SUM(COALESCE(T_XYSR.STKPLG_PAIDINT_MTD,0))                            AS   STKPLG_PAIDINT_MTD             --股票质押实收利息_月累计                                              
       ,0                                                                     AS   STKPLG_CPTL_COST_MTD           --股票质押资金成本_月累计                                                                     
       ,SUM(COALESCE(T_XYSR.STKPLG_NET_CMS_YTD,0))                            AS   STKPLG_NET_CMS_YTD             --股票质押净佣金_年累计                                            
-      ,SUM(COALESCE(T_XYSR.STKPLG_PAIDINT_YTD ,0))                           AS   STKPLG_RECE_INT_YTD            --股票质押应收利息_年累计                                              
-      ,SUM(COALESCE(T_XYSR.STKPLG_RECE_INT_YTD,0))                           AS   STKPLG_PAIDINT_YTD             --股票质押实收利息_年累计                                              
+      ,SUM(COALESCE(T_XYSR.STKPLG_RECE_INT_YTD,0))                           AS   STKPLG_RECE_INT_YTD            --股票质押应收利息_年累计                                              
+      ,SUM(COALESCE(T_XYSR.STKPLG_PAIDINT_YTD,0))                            AS   STKPLG_PAIDINT_YTD             --股票质押实收利息_年累计                                              
       ,0                                                                     AS   STKPLG_CPTL_COST_YTD           --股票质押资金成本_年累计    
   FROM DM.T_AST_EMPCUS_STKPLG_M_D T1 
   LEFT JOIN DBA.T_DDW_SERV_RELATION T2
