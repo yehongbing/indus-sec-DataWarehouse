@@ -30,8 +30,8 @@ BEGIN
     ------------------------------------
     ----- 开基和证券理财 ----------------
     ------------------------------------
-    SELECT @V_YEAR                                                AS NIAN,       
-           @V_MONTH                                               AS YUE,        
+    SELECT @YEAR                                                 AS NIAN,       
+           @MONTH                                                AS YUE,        
            A.CURR_DATE                                            AS WTRQ,       
            H.HR_NAME                                              AS YYBMC,      
            A.FUND_ACCOUNT                                         AS ZJZH,       
@@ -105,8 +105,8 @@ BEGIN
     ------------------------------------
 
     -- UNFINISHED ENTRUST LISTS OF PRODUCT(BANK PRODUCT EXCLUDED)
-    SELECT @V_YEAR                                                    AS NIAN,                     
-           @V_MONTH                                                   AS YUE,                                          
+    SELECT @YEAR                                                    AS NIAN,                     
+           @MONTH                                                   AS YUE,                                          
            A.CURR_DATE                                                AS WTRQ,                        
            H.HR_NAME                                                  AS YYBMC,                                       
            A.FUND_ACCOUNT                                             AS ZJZH,                    
@@ -175,8 +175,8 @@ BEGIN
     ----- 银行理财 ----------------------
     ------------------------------------
     SELECT 
-           @V_YEAR                                                    AS NIAN,                         
-           @V_MONTH                                                   AS YUE,                                              
+           @YEAR                                                    AS NIAN,                         
+           @MONTH                                                   AS YUE,                                              
            A.CURR_DATE                                                AS WTRQ,                            
            H.HR_NAME                                                  AS YYBMC,                                           
            A.FUND_ACCOUNT                                             AS ZJZH,                        
@@ -232,8 +232,8 @@ BEGIN
     ----- 积极型客户处理 -----------------------
     -------------------------------------------
 
-    SELECT @V_YEAR                                            AS NIAN,     
-       @V_MONTH                                               AS YUE,      
+    SELECT @YEAR                                            AS NIAN,     
+       @MONTH                                               AS YUE,      
        A.CURR_DATE                                            AS WTRQ,     
        H.HR_NAME                                              AS YYBMC,    
        A.FUND_ACCOUNT                                         AS ZJZH,     
