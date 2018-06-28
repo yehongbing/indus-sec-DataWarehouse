@@ -28,7 +28,7 @@ BEGIN
   SET @V_NATRE_DAY_MTHBEG = (SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_YEAR AND MTH = @V_MONTH);
 
     ------------------------------------
-    ----- ??????֤ȯ???---------------
+    ----- 开基和证券理财 ----------------
     ------------------------------------
     SELECT @V_YEAR                                                AS NIAN,       
            @V_MONTH                                               AS YUE,        
@@ -44,7 +44,7 @@ BEGIN
            B.OPEN_DATE                                            AS KHRQ,       
            CASE WHEN A.BUSINESS_FLAG = 44020 THEN '认购'
                 WHEN A.BUSINESS_FLAG = 44022 THEN '申购'
-           END                                                    AS YWLB,       
+           END                                                    AS YWLX,       
            A.ENTRUST_BALANCE                                      AS WTJE,       
            A.PROD_CODE                                            AS JJDM,       
            A.PROD_NAME                                            AS JJMC,       
@@ -85,17 +85,17 @@ BEGIN
     ;
    
 
-    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH 
+    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH 
     INTO #T_ADD_SECUM 
     FROM #T_ADD_SECUM_TEMP
-    WHERE FUND_ACCOUNT||'-'||PROD_CODE||'-'||CURR_DATE NOT IN(
+    WHERE ZJZH||'-'||JJDM||'-'||WTRQ NOT IN(
     SELECT ZJZH||'-'||JJDM||'-'||WTRQ FROM DBA.T_YYBHF_FXPP_M 
     WHERE NIAN||YUE=@YEAR||@MONTH);
 
 
 
-    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
-    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
+    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
+    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
     FROM #T_ADD_SECUM;
 
     COMMIT;
@@ -105,29 +105,29 @@ BEGIN
     ------------------------------------
 
     -- UNFINISHED ENTRUST LISTS OF PRODUCT(BANK PRODUCT EXCLUDED)
-    SELECT @V_YEAR                                                    AS NIAN,        -- ?                              
-           @V_MONTH                                                   AS YUE,         -- ?                                                  
-           A.CURR_DATE                                                AS WTRQ,        -- ί???                              
-           H.HR_NAME                                                  AS YYBMC,       -- Ӫҵ??                                              
-           A.FUND_ACCOUNT                                             AS ZJZH,        -- ???˺?                         
-           A.CLIENT_ID                                                AS KHBH,        -- ?ͻ???                                    
-           ACC_NAME                                                   AS KHXM,        -- ?ͻ???                                                            
+    SELECT @V_YEAR                                                    AS NIAN,                     
+           @V_MONTH                                                   AS YUE,                                          
+           A.CURR_DATE                                                AS WTRQ,                        
+           H.HR_NAME                                                  AS YYBMC,                                       
+           A.FUND_ACCOUNT                                             AS ZJZH,                    
+           A.CLIENT_ID                                                AS KHBH,                               
+           ACC_NAME                                                   AS KHXM,                                                       
            CASE WHEN B.SEX_CODE = '1' THEN '男'
                 WHEN B.SEX_CODE = '2' THEN '女'
                 ELSE ''
-           END                                                        AS XB,          -- ???                                        
-           B.OPEN_DATE                                                AS KHRQ,        -- ??????
+           END                                                        AS XB,                                   
+           B.OPEN_DATE                                                AS KHRQ,       
            CASE WHEN A.BUSINESS_FLAG = 44020 THEN '认购'
                 WHEN A.BUSINESS_FLAG = 44022 THEN '申购'
-           END                                                        AS YWLB,        -- ҵ????
-           A.ENTRUST_BALANCE                                          AS WTJE,        -- ί???
-           A.PROD_CODE                                                AS JJDM,        -- ???
-           A.PROD_NAME                                                AS JJMC,        -- ֤ȯ??????
-           I.JJLB                                                     AS CPLX,        -- ??Ʒ???
-           E.DICT_PROMPT                                              AS CPFXDJ,      -- ??Ʒ??յȼ?
-           C.DICT_PROMPT                                              AS KHFXDJ,      -- ?ͻ???յȼ?
-           COALESCE(F.ZQLCCPE,0)                                      AS YMCCSZ,      -- ?ĩ?ֲ?г?
-           G.GMJE                                                     AS BYGMJE,      -- ????????
+           END                                                        AS YWLX,       
+           A.ENTRUST_BALANCE                                          AS WTJE,       
+           A.PROD_CODE                                                AS JJDM,       
+           A.PROD_NAME                                                AS JJMC,       
+           I.JJLB                                                     AS CPLX,       
+           E.DICT_PROMPT                                              AS CPFXDJ,     
+           C.DICT_PROMPT                                              AS KHFXDJ,     
+           COALESCE(F.ZQLCCPE,0)                                      AS YMCCSZ,     
+           G.GMJE                                                     AS BYGMJE,     
            CASE WHEN SUBSTR(A.ELIG_CHECK_STR,5,1)='1' THEN '1'
                 WHEN SUBSTR(A.ELIG_CHECK_STR,5,1)='0' AND A.ENTRUST_BALANCE <  1000000  THEN '7'
                 WHEN SUBSTR(A.ELIG_CHECK_STR,5,1)='0' AND A.ENTRUST_BALANCE >= 1000000  THEN '8' 
@@ -150,7 +150,7 @@ BEGIN
                    AND DEAL_FLAG<>'4'                       
                    AND BUSINESS_FLAG IN (44022,44020)       
                  GROUP BY FUND_ACCOUNT,PROD_CODE )  G  ON A.FUND_ACCOUNT=G.FUND_ACCOUNT AND A.PROD_CODE=G.PROD_CODE
-       LEFT  JOIN DBA.T_DIM_ORG                 AS  H  ON A.BRANCH_NO = H.BRANCH_NO
+       LEFT  JOIN DBA.T_DIM_ORG                 AS  H  ON CONVERT(VARCHAR,A.BRANCH_NO) = H.BRANCH_NO
        LEFT  JOIN DBA.T_DDW_D_JJ                    I  ON I.NIAN=@V_YEAR AND I.YUE=@V_MONTH AND A.PROD_CODE=I.JJDM
       WHERE A.CURR_DATE BETWEEN @V_LST_NATRE_DAY_MTHBEG AND @V_LST_NATRE_DAY_MTHEND
        AND A.ENTRUST_STATUS='8'                            
@@ -158,15 +158,15 @@ BEGIN
        AND A.BUSINESS_FLAG IN (44022, 44020)               
     ;
 
-    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH 
+    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH 
     INTO #T_ADD_SECUM_UNFINISH 
     FROM #T_ADD_SECUM_UNFINISH_TEMP
-    WHERE FUND_ACCOUNT||'-'||PROD_CODE||'-'||CURR_DATE NOT IN(
+    WHERE ZJZH||'-'||JJDM||'-'||WTRQ NOT IN(
     SELECT ZJZH||'-'||JJDM||'-'||WTRQ FROM DBA.T_YYBHF_FXPP_M 
     WHERE NIAN||YUE=@YEAR||@MONTH);
 
-    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
-    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
+    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
+    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
     FROM #T_ADD_SECUM_UNFINISH;
 
     COMMIT;
@@ -188,14 +188,14 @@ BEGIN
            END                                                        AS XB,                                       
            B.OPEN_DATE                                                AS KHRQ,       
            CASE WHEN A.BUSINESS_FLAG = 43130 THEN '认购'
-           END                                                        AS YWLB,       
+           END                                                        AS YWLX,       
            ABS(A.ENTRUST_BALANCE)                                     AS WTJE,       
            A.PROD_CODE                                                AS JJDM,       
            A.PROD_NAME                                                AS JJMC,       
            '银行理财'                                                  AS CPLX,       
            E.DICT_PROMPT                                              AS CPFXDJ,     
            C.DICT_PROMPT                                              AS KHFXDJ,     
-           COALESCE(F.ZQLCCPE,0)                                      AS YMCCSZ,     
+           COALESCE(F.YHLCCYJE,0)                                      AS YMCCSZ,     
            G.GMJE                                                     AS BYGMJE,     
            CASE WHEN A.ENTRUST_BALANCE <  1000000  THEN '7'
                 WHEN A.ENTRUST_BALANCE >= 1000000  THEN '8' 
@@ -216,14 +216,14 @@ BEGIN
                 WHERE T1.CURR_DATE BETWEEN @V_LST_NATRE_DAY_MTHBEG AND @V_LST_NATRE_DAY_MTHEND
                   AND T1.BUSINESS_FLAG = 43130           
                 GROUP BY FUND_ACCOUNT,PROD_CODE )    G   ON A.FUND_ACCOUNT=G.FUND_ACCOUNT AND A.PROD_CODE=G.PROD_CODE
-     LEFT  JOIN DBA.T_DIM_ORG                 AS     H  ON CONVERT(NUMERIC(10,0), A.BRANCH_NO) = CONVERT(NUMERIC(10,0),H.BRANCH_NO)
+     LEFT  JOIN DBA.T_DIM_ORG                 AS     H  ON CONVERT(VARCHAR, A.BRANCH_NO) = H.BRANCH_NO
       WHERE A.CURR_DATE BETWEEN @V_LST_NATRE_DAY_MTHBEG AND @V_LST_NATRE_DAY_MTHEND
         AND A.BUSINESS_FLAG = 43130                    
     ;
 
 
-    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
-    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
+    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
+    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
     FROM #T_ADD_BANKPROD;
 
     COMMIT;
@@ -246,7 +246,7 @@ BEGIN
        B.OPEN_DATE                                            AS KHRQ,     
        CASE WHEN A.BUSINESS_FLAG = 44020 THEN '认购'
             WHEN A.BUSINESS_FLAG = 44022 THEN '申购'
-       END                                                    AS YWLB,     
+       END                                                    AS YWLX,     
        A.ENTRUST_BALANCE                                      AS WTJE,     
        A.PROD_CODE                                            AS JJDM,     
        A.PROD_NAME                                            AS JJMC,     
@@ -290,8 +290,8 @@ BEGIN
     AND D.PRODRISK_LEVEL = 5                           
     ;
 
-    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
-    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLB,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
+    INSERT INTO DBA.T_YYBHF_FXPP_M(NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH)
+    SELECT NIAN,YUE,WTRQ,YYBMC,ZJZH,KHBH,KHXM,XB,KHRQ,YWLX,WTJE,JJDM,JJMC,CPLX,CPFXDJ,KHFXDJ,YMCCSZ,BYGMJE,LX,JGBH
     FROM #T_ADD_POS_SECUM_TEMP;
 
     COMMIT;
