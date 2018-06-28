@@ -144,7 +144,7 @@ BEGIN
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),1,4)=@V_BIN_YEAR
                   AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),5,2)=@V_BIN_MTH
-                  AND T_KHSX.开户日期 = T2.SUBSCR_DT
+                  AND T2.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND T_KHSX.开户日期 + 7
                 THEN T3.PERFM_RATI6 
             ELSE 0 
           END)                                                                            AS    OACOPN_CUST_NUM_M            --开户就开通客户数_本月
@@ -205,7 +205,7 @@ BEGIN
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND SUBSTR(CONVERT(VARCHAR,T1.SUBSCR_DT),1,4)=@V_BIN_YEAR
                   AND SUBSTR(CONVERT(VARCHAR,T1.SUBSCR_DT),5,2)=@V_BIN_MTH
-                  AND T_KHSX.开户日期 = T1.SUBSCR_DT 
+                  AND T1.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND T_KHSX.开户日期 + 7
                 THEN (COALESCE(T2.ITC_RETAIN_AMT_FINAL,0) + COALESCE(T2.OTC_RETAIN_AMT_FINAL,0)) 
             ELSE 0 
           END)                                                                            AS    OACOPN_CUST_RETAIN_AMT_M     --开户就开通客户保有金额_本月

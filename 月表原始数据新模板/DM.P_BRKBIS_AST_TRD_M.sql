@@ -161,8 +161,8 @@ BEGIN
     ,t_khsx.账户性质
     ,t_khsx.是否特殊账户
     ,t_khsx.资产段
-    ,sum(case when t_khsx.客户状态='0' then t2.JXBL1 else 0 end) as 客户数
-    ,sum(case when t_khsx.客户状态='0' and t_khsx.是否有效=1 then t2.JXBL1 else 0 end) as 有效客户数
+    ,sum(case when t_khsx.客户状态='正常' then t2.JXBL1 else 0 end) as 客户数
+    ,sum(case when t_khsx.客户状态='正常' and t_khsx.是否有效=1 then t2.JXBL1 else 0 end) as 有效客户数
     ,sum(COALESCE(t1.TOT_AST_FINAL,0)) as 普通资产_总资产_期末
     ,sum(COALESCE(t1.NET_AST_FINAL,0)) as 普通资产_净资产_期末
     ,sum(COALESCE(t1.STKF_MVAL_FINAL,0)) as 普通资产_股基市值_期末
