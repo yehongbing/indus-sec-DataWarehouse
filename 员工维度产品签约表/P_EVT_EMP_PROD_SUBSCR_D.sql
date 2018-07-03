@@ -14,15 +14,35 @@ BEGIN
   --DECLARE @V_BIN_DATE INT ;
   DECLARE @V_BIN_YEAR VARCHAR(4);    
   DECLARE @V_BIN_MTH  VARCHAR(2);   
+  DECLARE @V_NATRE_DAY_MTHBEG INT;
+  DECLARE @V_NATRE_DAY_YEARBEG INT;
 	
 	----衍生变量
   SET @V_BIN_DATE=@V_BIN_DATE;
   SET @V_BIN_YEAR=SUBSTR(CONVERT(VARCHAR,@V_BIN_DATE),1,4);
   SET @V_BIN_MTH =SUBSTR(CONVERT(VARCHAR,@V_BIN_DATE),5,2);
+  SET @V_NATRE_DAY_MTHBEG = (SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR AND MTH = @V_BIN_MTH);
+  SET @V_NATRE_DAY_YEARBEG = (SELECT MIN(DT) FROM DM.T_PUB_DATE WHERE YEAR=@V_BIN_YEAR);
+
 
   --PART0 删除当日数据
   DELETE FROM DM.T_EVT_EMP_PROD_SUBSCR_D WHERE OCCUR_DT = @V_BIN_DATE;
   DELETE FROM DM.T_EVT_CUST_PROD_SUBSCR_D WHERE OCCUR_DT = @V_BIN_DATE;
+
+  -- 对于每个资金账号，取其金9最早购买日期
+  SELECT ZJZH,MIN(RQ) AS INI_PURC_DT
+  INTO #TEMP_INI_PURC_ZJZH
+  FROM DBA.T_DDW_XY_JJZB_D
+  WHERE CWJE_SGQR_D > 0 AND JJDM = 'AB0009'
+  GROUP BY ZJZH;
+
+  -- 计算期末保有客户数
+  SELECT ZJZH,JJDM,COUNT(ZJZH) AS CUST_CNT
+  INTO #TEMP_RETAIN_CUST_NUM_FINAL
+  FROM DBA.T_DDW_XY_JJZB_D
+  WHERE JJDM = 'AB0009' 
+    AND RQ = @V_BIN_DATE
+  GROUP BY ZJZH,JJDM;
 
   --客户信息临时表
   SELECT 
@@ -31,9 +51,15 @@ BEGIN
       ,T1.CUST_ID
       ,T1.CUST_STAT_NAME AS 客户状态
       ,COALESCE(T1.IF_VLD,0) AS 是否有效
-      ,T1.TE_OACT_DT 开户日期  
+      ,T1.TE_OACT_DT AS 开户日期 
+      ,COALESCE(T2.INI_PURC_DT,29991231) AS 金九最早购买日期 --若空值则赋一个脏数值
+      ,COALESCE(T3.CUST_CNT,0) AS 金九保有客户数
   INTO #TEMP_CUST_INFO      
-  FROM DM.T_PUB_CUST T1   
+  FROM DM.T_PUB_CUST T1
+  LEFT JOIN #TEMP_INI_PURC_ZJZH T2 
+        ON T1.MAIN_CPTL_ACCT = T2.ZJZH   
+  LEFT JOIN #TEMP_RETAIN_CUST_NUM_FINAL T3
+        ON T1.MAIN_CPTL_ACCT = T2.ZJZH
   WHERE T1.YEAR=@V_BIN_YEAR 
     AND T1.MTH=@V_BIN_MTH;
 
@@ -107,17 +133,17 @@ BEGIN
       ,T2.PROD_CD                                                                         AS    PROD_CD                      --产品代码
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND T_KHSX.是否有效 = 1 
-                THEN 1 
+                THEN T3.PERFM_RATI6  
             ELSE 0 
           END)                                                                            AS   RETAIN_EFF_HOUS_FINAL        --保有有效户数_期末
+      ,SUM(T_KHSX.金九保有客户数 * T3.PERFM_RATI6)                                         AS   RETAIN_CUST_NUM_FINAL        --保有客户数_期末
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND T2.SUBSCR_DT = @V_BIN_DATE 
                 THEN T3.PERFM_RATI6 
            ELSE 0 
           END)                                                                            AS   NA_SUBSCR_CUST_NUM_D         --新增签约客户数_本日
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
-                  AND T2.SUBSCR_DT = @V_BIN_DATE 
-                  AND T_KHSX.是否有效 = 1 
+                  AND T_KHSX.金九最早购买日期 = @V_BIN_DATE 
                 THEN T3.PERFM_RATI6 
             ELSE 0 
           END)                                                                            AS   NA_EFF_CUST_NUM_D            --新增有效客户数_本日
@@ -135,16 +161,14 @@ BEGIN
                ELSE 0 
           END)                                                                            AS   NA_SUBSCR_CUST_NUM_M         --新增签约客户数_本月
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
-                  AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),1,4)=@V_BIN_YEAR
-                  AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),5,2)=@V_BIN_MTH
-                  AND T_KHSX.是否有效 = 1 
+                  AND T_KHSX.金九最早购买日期 BETWEEN @V_NATRE_DAY_MTHBEG AND @V_BIN_DATE
                 THEN T3.PERFM_RATI6 
             ELSE 0 
           END)                                                                            AS    NA_EFF_CUST_NUM_M            --新增有效客户数_本月
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),1,4)=@V_BIN_YEAR
                   AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),5,2)=@V_BIN_MTH
-                  AND T2.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND T_KHSX.开户日期 + 7
+                  AND T2.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND CONVERT(INTEGER,CONVERT(VARCHAR,DATEADD(DD,7,CONVERT(DATE,CONVERT(VARCHAR,T_KHSX.开户日期))),112))
                 THEN T3.PERFM_RATI6 
             ELSE 0 
           END)                                                                            AS    OACOPN_CUST_NUM_M            --开户就开通客户数_本月
@@ -154,8 +178,7 @@ BEGIN
            ELSE 0 
           END)                                                                            AS   NA_SUBSCR_CUST_NUM_TY         --新增签约客户数_本年
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
-                  AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),1,4)=@V_BIN_YEAR
-                  AND T_KHSX.是否有效 = 1 
+                  AND T_KHSX.金九最早购买日期 BETWEEN @V_NATRE_DAY_YEARBEG AND @V_BIN_DATE
                 THEN T3.PERFM_RATI6 
             ELSE 0 
           END)                                                                            AS   NA_EFF_CUST_NUM_TY            --新增有效客户数_本年
@@ -168,6 +191,8 @@ BEGIN
   LEFT JOIN #T_PUB_SER_RELA T3
         ON T3.OCCUR_DT = T2.OCCUR_DT
           AND T3.HS_CUST_ID = T2.CUST_NO
+  LEFT JOIN #TEMP_RETAIN_CUST_NUM_FINAL T4
+        ON T2.PROD_CD = T4.JJDM
   WHERE T2.OCCUR_DT = @V_BIN_DATE    
     AND T3.WH_ORG_ID_EMP IS NOT NULL
     AND T3.AFA_SEC_EMPID IS NOT NULL
@@ -205,7 +230,7 @@ BEGIN
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND SUBSTR(CONVERT(VARCHAR,T1.SUBSCR_DT),1,4)=@V_BIN_YEAR
                   AND SUBSTR(CONVERT(VARCHAR,T1.SUBSCR_DT),5,2)=@V_BIN_MTH
-                  AND T1.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND T_KHSX.开户日期 + 7
+                  AND T1.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND CONVERT(INTEGER,CONVERT(VARCHAR,DATEADD(DD,7,CONVERT(DATE,CONVERT(VARCHAR,T_KHSX.开户日期))),112))
                 THEN (COALESCE(T2.ITC_RETAIN_AMT_FINAL,0) + COALESCE(T2.OTC_RETAIN_AMT_FINAL,0)) 
             ELSE 0 
           END)                                                                            AS    OACOPN_CUST_RETAIN_AMT_M     --开户就开通客户保有金额_本月
@@ -242,6 +267,7 @@ BEGIN
       ,PROD_CD                      --产品代码
       ,RETAIN_AMT_FINAL             --保有金额_期末
       ,RETAIN_EFF_HOUS_FINAL        --保有有效户数_期末
+      ,RETAIN_CUST_NUM_FINAL		    --保有客户数_期末
       ,NA_SUBSCR_CUST_NUM_D         --新增签约客户数_本日
       ,NA_EFF_CUST_NUM_D            --新增有效客户数_本日
       ,NA_CUST_RETAIN_AMT_D         --新增客户保有金额_本日
@@ -265,6 +291,7 @@ BEGIN
       ,T1.PROD_CD                         AS    PROD_CD                      --产品代码
       ,T2.RETAIN_AMT_FINAL                AS    RETAIN_AMT_FINAL             --保有金额_期末
       ,T1.RETAIN_EFF_HOUS_FINAL           AS    RETAIN_EFF_HOUS_FINAL        --保有有效户数_期末
+      ,T1.RETAIN_CUST_NUM_FINAL 		      AS    RETAIN_CUST_NUM_FINAL        --保有客户数_期末
       ,T1.NA_SUBSCR_CUST_NUM_D            AS    NA_SUBSCR_CUST_NUM_D         --新增签约客户数_本日
       ,T1.NA_EFF_CUST_NUM_D               AS    NA_EFF_CUST_NUM_D            --新增有效客户数_本日
       ,T2.NA_CUST_RETAIN_AMT_D            AS    NA_CUST_RETAIN_AMT_D         --新增客户保有金额_本日
