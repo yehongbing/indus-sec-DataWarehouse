@@ -37,21 +37,29 @@ BEGIN
   GROUP BY ZJZH;
 
   -- 计算期末保有客户数
-  SELECT ZJZH,JJDM,COUNT(ZJZH) AS CUST_CNT
+  SELECT RQ,ZJZH,JJDM,COUNT(ZJZH) AS CUST_CNT
   INTO #TEMP_RETAIN_CUST_NUM_FINAL
   FROM DBA.T_DDW_XY_JJZB_D
   WHERE JJDM = 'AB0009' 
     AND RQ = @V_BIN_DATE
-  GROUP BY ZJZH,JJDM;
+  GROUP BY RQ,ZJZH,JJDM;
+
+  --开户日期7日后
+  SELECT T1.RQ 
+        ,T1.LJGZR
+  FROM DBA.T_DDW_D_RQ T1
+  WHERE 
 
   --客户信息临时表
   SELECT 
        T1.YEAR
       ,T1.MTH 
       ,T1.CUST_ID
+      ,T1.MAIN_CPTL_ACCT
       ,T1.CUST_STAT_NAME AS 客户状态
       ,COALESCE(T1.IF_VLD,0) AS 是否有效
-      ,T1.TE_OACT_DT AS 开户日期 
+      ,T1.TE_OACT_DT AS 开户日期
+      ,T4.LJGZR + 7   AS 七个工作日后的累计工作日
       ,COALESCE(T2.INI_PURC_DT,29991231) AS 金九最早购买日期 --若空值则赋一个脏数值
       ,COALESCE(T3.CUST_CNT,0) AS 金九保有客户数
   INTO #TEMP_CUST_INFO      
@@ -59,7 +67,9 @@ BEGIN
   LEFT JOIN #TEMP_INI_PURC_ZJZH T2 
         ON T1.MAIN_CPTL_ACCT = T2.ZJZH   
   LEFT JOIN #TEMP_RETAIN_CUST_NUM_FINAL T3
-        ON T1.MAIN_CPTL_ACCT = T2.ZJZH
+        ON T1.MAIN_CPTL_ACCT = T3.ZJZH
+  LEFT JOIN DBA.T_DDW_D_RQ T4
+        ON T1.TE_OACT_DT = T4.RQ
   WHERE T1.YEAR=@V_BIN_YEAR 
     AND T1.MTH=@V_BIN_MTH;
 
@@ -168,7 +178,7 @@ BEGIN
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),1,4)=@V_BIN_YEAR
                   AND SUBSTR(CONVERT(VARCHAR,T2.SUBSCR_DT),5,2)=@V_BIN_MTH
-                  AND T2.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND CONVERT(INTEGER,CONVERT(VARCHAR,DATEADD(DD,7,CONVERT(DATE,CONVERT(VARCHAR,T_KHSX.开户日期))),112))
+                  AND T2.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND T4.RQ
                 THEN T3.PERFM_RATI6 
             ELSE 0 
           END)                                                                            AS    OACOPN_CUST_NUM_M            --开户就开通客户数_本月
@@ -191,8 +201,8 @@ BEGIN
   LEFT JOIN #T_PUB_SER_RELA T3
         ON T3.OCCUR_DT = T2.OCCUR_DT
           AND T3.HS_CUST_ID = T2.CUST_NO
-  LEFT JOIN #TEMP_RETAIN_CUST_NUM_FINAL T4
-        ON T2.PROD_CD = T4.JJDM
+  LEFT JOIN DBA.T_DDW_D_RQ T4
+        ON T_KHSX.七个工作日后的累计工作日 = T4.LJGZR
   WHERE T2.OCCUR_DT = @V_BIN_DATE    
     AND T3.WH_ORG_ID_EMP IS NOT NULL
     AND T3.AFA_SEC_EMPID IS NOT NULL
@@ -230,7 +240,7 @@ BEGIN
       ,SUM(CASE WHEN T_KHSX.客户状态='正常' 
                   AND SUBSTR(CONVERT(VARCHAR,T1.SUBSCR_DT),1,4)=@V_BIN_YEAR
                   AND SUBSTR(CONVERT(VARCHAR,T1.SUBSCR_DT),5,2)=@V_BIN_MTH
-                  AND T1.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND CONVERT(INTEGER,CONVERT(VARCHAR,DATEADD(DD,7,CONVERT(DATE,CONVERT(VARCHAR,T_KHSX.开户日期))),112))
+                  AND T1.SUBSCR_DT BETWEEN T_KHSX.开户日期 AND T4.RQ
                 THEN (COALESCE(T2.ITC_RETAIN_AMT_FINAL,0) + COALESCE(T2.OTC_RETAIN_AMT_FINAL,0)) 
             ELSE 0 
           END)                                                                            AS    OACOPN_CUST_RETAIN_AMT_M     --开户就开通客户保有金额_本月
@@ -250,6 +260,8 @@ BEGIN
         ON SUBSTR(CONVERT(VARCHAR,T2.OCCUR_DT),1,4) = T_KHSX.YEAR 
           AND SUBSTR(CONVERT(VARCHAR,T2.OCCUR_DT),5,2) = T_KHSX.MTH 
           AND T1.CUST_NO = T_KHSX.CUST_ID  
+  LEFT JOIN DBA.T_DDW_D_RQ T4
+        ON T_KHSX.七个工作日后的累计工作日 = T4.LJGZR
   WHERE T1.OCCUR_DT = @V_BIN_DATE   
   GROUP BY 
        T1.OCCUR_DT     
@@ -314,5 +326,84 @@ BEGIN
           AND T1.EMP_ID = T2.EMP_ID
           AND T1.PROD_CD = T2.PROD_CD;
 COMMIT;
+
+
+  --插入DBA.T_DDW_XY_JJZB_D表中相比DM.T_EVT_CUST_PROD_SUBSCR_D多余的资金账号的数据
+  SELECT 
+     T1.RQ             AS OCCUR_DT     --业务日期
+    ,T2.CUST_ID        AS CUST_NO      --客户编号      
+    ,T1.JJDM           AS PROD_CD      --产品代码  
+    ,T1.ZJZH           AS CPTL_ACCT    --资金账号  
+    ,T1.CUST_CNT       AS CUST_CNT    --保有客户数  
+  INTO #TEMP_CUST_CNT_EXT     
+  FROM #TEMP_RETAIN_CUST_NUM_FINAL T1 
+  LEFT JOIN DM.T_PUB_CUST T2
+        ON T2.MAIN_CPTL_ACCT = T1.ZJZH
+          AND SUBSTR(CONVERT(VARCHAR,T1.RQ),1,4) = T2.YEAR 
+          AND SUBSTR(CONVERT(VARCHAR,T1.RQ),5,2) = T2.MTH 
+  LEFT JOIN #TEMP_INI_PURC_ZJZH T3
+        ON T1.ZJZH = T3.ZJZH
+  WHERE T2.CUST_ID NOT IN (SELECT DISTINCT CUST_NO FROM DM.T_EVT_CUST_PROD_SUBSCR_D WHERE OCCUR_DT = @V_BIN_DATE);
+
+  --准备临时表插入目标表
+  SELECT 
+       T2.OCCUR_DT                                                                        AS    OCCUR_DT                     --业务日期
+      ,T3.WH_ORG_ID_EMP                                                                   AS    WH_ORG_ID_EMP                --仓库机构编码_员工
+      ,T3.AFA_SEC_EMPID                                                                   AS    EMP_ID                       --员工编码
+      ,T2.PROD_CD                                                                         AS    PROD_CD                      --产品代码
+      ,SUM(T2.CUST_CNT * T3.PERFM_RATI6)                                                  AS    RETAIN_CUST_NUM_FINAL        --保有客户数_期末
+  INTO #TEMP_EXT_CUST_CNT
+  FROM #TEMP_CUST_CNT_EXT T2
+  LEFT JOIN #TEMP_CUST_INFO T_KHSX 
+        ON SUBSTR(CONVERT(VARCHAR,T2.OCCUR_DT),1,4) = T_KHSX.YEAR 
+          AND SUBSTR(CONVERT(VARCHAR,T2.OCCUR_DT),5,2) = T_KHSX.MTH 
+          AND T2.CUST_NO = T_KHSX.CUST_ID
+  LEFT JOIN #T_PUB_SER_RELA T3
+        ON T3.OCCUR_DT = T2.OCCUR_DT
+          AND T3.HS_CUST_ID = T2.CUST_NO
+  WHERE T2.OCCUR_DT = @V_BIN_DATE    
+    AND T3.WH_ORG_ID_EMP IS NOT NULL
+    AND T3.AFA_SEC_EMPID IS NOT NULL
+  GROUP BY 
+       T2.OCCUR_DT     
+      ,T3.WH_ORG_ID_EMP
+      ,T3.AFA_SEC_EMPID
+      ,T2.PROD_CD;
+
+  --对于主键已经存在在目标表中的，用UPDATE把客户数合计起来
+  UPDATE DM.T_EVT_EMP_PROD_SUBSCR_D T1 
+  SET T1.RETAIN_CUST_NUM_FINAL = T1.RETAIN_CUST_NUM_FINAL + B.RETAIN_CUST_NUM_FINAL 
+  FROM DM.T_EVT_EMP_PROD_SUBSCR_D T1,#TEMP_EXT_CUST_CNT B  
+  WHERE T1.OCCUR_DT = B.OCCUR_DT
+          AND T1.WH_ORG_ID_EMP = B.WH_ORG_ID_EMP
+          AND T1.EMP_ID = B.EMP_ID
+          AND T1.PROD_CD = B.PROD_CD;
+
+  --插入员工产品签约日表
+  INSERT INTO DM.T_EVT_EMP_PROD_SUBSCR_D(
+       OCCUR_DT                     --业务日期
+      ,WH_ORG_ID_EMP                --仓库机构编码_员工
+      ,EMP_ID                       --员工编码
+      ,PROD_CD                      --产品代码
+      ,RETAIN_CUST_NUM_FINAL        --保有客户数_期末
+  )
+  SELECT 
+      OCCUR_DT             
+     ,WH_ORG_ID_EMP        
+     ,EMP_ID               
+     ,PROD_CD              
+     ,RETAIN_CUST_NUM_FINAL
+  FROM #TEMP_EXT_CUST_CNT T1 
+  WHERE NOT EXISTS
+  (SELECT 1 FROM DM.T_EVT_EMP_PROD_SUBSCR_D T2 
+      WHERE T1.OCCUR_DT = T2.OCCUR_DT
+         AND T1.WH_ORG_ID_EMP = T2.WH_ORG_ID_EMP 
+         AND T1.EMP_ID = T2.EMP_ID 
+         AND T1.PROD_CD = T2.PROD_CD)
+;
+
+
+COMMIT;
+
 END
 
