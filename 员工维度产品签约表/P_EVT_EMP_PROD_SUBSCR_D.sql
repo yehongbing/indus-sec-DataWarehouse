@@ -44,12 +44,6 @@ BEGIN
     AND RQ = @V_BIN_DATE
   GROUP BY RQ,ZJZH,JJDM;
 
-  --开户日期7日后
-  SELECT T1.RQ 
-        ,T1.LJGZR
-  FROM DBA.T_DDW_D_RQ T1
-  WHERE 
-
   --客户信息临时表
   SELECT 
        T1.YEAR

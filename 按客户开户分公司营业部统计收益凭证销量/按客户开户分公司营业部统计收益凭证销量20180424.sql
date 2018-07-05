@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE dm.P_EVT_EMP_PROD_SUBSCR_D(IN @V_BIN_DATE INT)
+CREATE OR REPLACE PROCEDURE dm.P_REPORT_PAYF_VOU_SALE_STATS_M(IN @V_BIN_DATE INT)
 
 BEGIN 
 /********************************************************************
@@ -44,9 +44,20 @@ SET @I_ZRR_MTH_END    =(SELECT MAX(RQ) FROM DBA.T_DDW_D_RQ WHERE NIAN=@NIAN AND 
 SET @I_ZRR_YEAR_START =(SELECT MIN(RQ) FROM DBA.T_DDW_D_RQ WHERE NIAN=@NIAN);
   
 
-INSERT INTO DM.T_REPORT_CPXS_SYPZ_FGS_M 
-SELECT @NIAN  AS NIAN,        --年
-       @YUE   AS YUE,          --月
+INSERT INTO DM.T_REPORT_PAYF_VOU_SALE_STATS_M 
+(
+   YEAR                      --年
+  ,MTH                       --月
+  ,SEPT_CORP_DEVLOP_SEG      --分公司发展阶段
+  ,SEPT_CORP                 --分公司
+  ,BRH                       --营业部
+  ,PAYF_VOU_SALE_AMT_M       --收益凭证销售金额_本月
+  ,PAYF_VOU_SALE_CUST_NUM_M  --收益凭证销售客户数_本月
+  ,PAYF_VOU_SALE_CNT_M       --收益凭证销售笔数_本月
+  ,PAYF_VOU_SALE_AMT_TY      --收益凭证销售金额_本年
+)
+SELECT @NIAN                              AS YEAR,        --年
+       @YUE                               AS MTH,          --月
        CASE WHEN D.TOP_SEPT_CORP_NAME IN ('福州分公司','厦门分公司','泉州分公司','南平分公司','龙岩分公司','漳州分公司','三明分公司') THEN '成熟期'
             WHEN D.TOP_SEPT_CORP_NAME IN ('北京分公司','上海分公司','广东分公司','深圳分公司','江苏分公司','浙江分公司','山东分公司','陕西分公司',
                            '安徽分公司','四川分公司','湖北分公司','湖南分公司','莆田分公司','黑龙江分公司','内蒙古分公司'
@@ -55,16 +66,16 @@ SELECT @NIAN  AS NIAN,        --年
                            '广西分公司','辽宁分公司','山西分公司','河南分公司'
               ) THEN '培育期'
         ELSE NULL
-       END AS FZJD,                           --分公司发展阶段
-       D.TOP_SEPT_CORP_NAME AS FGS,           --分公司
-       D.HR_ORG_NAME AS YYB,                  --营业部
+       END                                AS SEPT_CORP_DEVLOP_SEG,    --分公司发展阶段
+       D.TOP_SEPT_CORP_NAME               AS SEPT_CORP,               --分公司
+       D.HR_ORG_NAME                      AS BRH,                     --营业部
        SUM(CASE WHEN A.OCCUR_DT>=@I_ZRR_MTH_START  
                   THEN COALESCE(A.ITC_SUBS_AMT,0)+COALESCE(A.OTC_SUBS_AMT,0)+COALESCE(A.OTC_PURS_AMT,0)+COALESCE(A.OTC_CASTSL_AMT,0)+COALESCE(A.OTC_COVT_IN_AMT,0)+COALESCE(A.CONTD_SALE_AMT,0)
             ELSE 0
-          END)      AS XSJE_M,                   --本月收益凭证销售金额
-       COUNT(DISTINCT CASE WHEN A.OCCUR_DT>=@I_ZRR_MTH_START THEN A.CUST_ID ELSE NULL END) AS XSKHS_M,           --本月收益凭证销售客户数
-       COUNT(DISTINCT CASE WHEN A.OCCUR_DT>=@I_ZRR_MTH_START THEN A.CUST_ID||A.PROD_CD ELSE NULL END) AS XSBS,   --本月收益凭证销售笔数
-     SUM(COALESCE(A.ITC_SUBS_AMT,0)+COALESCE(A.OTC_SUBS_AMT,0)+COALESCE(A.OTC_PURS_AMT,0)+COALESCE(A.OTC_CASTSL_AMT,0)+COALESCE(A.OTC_COVT_IN_AMT,0)+COALESCE(A.CONTD_SALE_AMT,0)) AS XSJE_Y   --本年收益凭证销售金额
+          END)                            AS PAYF_VOU_SALE_AMT_M,     --本月收益凭证销售金额
+       COUNT(DISTINCT CASE WHEN A.OCCUR_DT>=@I_ZRR_MTH_START THEN A.CUST_ID ELSE NULL END)                AS PAYF_VOU_SALE_CUST_NUM_M,           --本月收益凭证销售客户数
+       COUNT(DISTINCT CASE WHEN A.OCCUR_DT>=@I_ZRR_MTH_START THEN A.CUST_ID||A.PROD_CD ELSE NULL END)     AS PAYF_VOU_SALE_CNT_M,   --本月收益凭证销售笔数
+     SUM(COALESCE(A.ITC_SUBS_AMT,0)+COALESCE(A.OTC_SUBS_AMT,0)+COALESCE(A.OTC_PURS_AMT,0)+COALESCE(A.OTC_CASTSL_AMT,0)+COALESCE(A.OTC_COVT_IN_AMT,0)+COALESCE(A.CONTD_SALE_AMT,0)) AS PAYF_VOU_SALE_AMT_TY   --本年收益凭证销售金额
  FROM DM.T_EVT_PROD_TRD_D_D A
  LEFT JOIN DM.T_VAR_PROD_OTC B ON A.PROD_CD = B.PROD_CD AND B.OCCUR_DT = @I_JYR_MTH_END 
  LEFT JOIN DM.T_PUB_CUST C ON A.CUST_ID = C.CUST_ID AND C.YEAR=@NIAN AND C.MTH = @YUE
@@ -72,7 +83,8 @@ SELECT @NIAN  AS NIAN,        --年
  WHERE A.OCCUR_DT>=@I_ZRR_YEAR_START AND A.OCCUR_DT<=@I_ZRR_MTH_END
       AND COALESCE(A.ITC_SUBS_AMT,0)+COALESCE(A.OTC_SUBS_AMT,0)+COALESCE(A.OTC_PURS_AMT,0)+COALESCE(A.OTC_CASTSL_AMT,0)+COALESCE(A.OTC_COVT_IN_AMT,0)+COALESCE(A.CONTD_SALE_AMT,0)>0
       AND B.PROD_TYPE ='收益凭证' 
- GROUP BY FZJD,FGS,YYB;
+ GROUP BY SEPT_CORP_DEVLOP_SEG,SEPT_CORP,BRH;
 
+COMMIT;
 END;
 
