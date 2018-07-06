@@ -1,14 +1,14 @@
 
 CREATE TABLE DM.T_REPORT_PAYF_VOU_SALE_STATS_M
-(	YEAR                 varchar(4) NULL,
-	MTH                  varchar(2) NULL,
-	SEPT_CORP_DEVLOP_SEG varchar(30) NULL,
-	SEPT_CORP            varchar(50) NULL,
-	BRH                  varchar(60) NULL,
-	PAYF_VOU_SALE_AMT_M  numeric(38,8) NULL,
-	PAYF_VOU_SALE_CUST_NUM_M numeric(38,8) NULL,
-	PAYF_VOU_SALE_CNT_M  numeric(38,8) NULL,
-	PAYF_VOU_SALE_AMT_TY numeric(38,8) NULL
+(	YEAR                      varchar(4) NULL,
+	MTH                       varchar(2) NULL,
+	SEPT_CORP_DEVLOP_SEG      varchar(30) NULL,
+	SEPT_CORP                 varchar(50) NULL,
+	BRH                       varchar(60) NULL,
+	PAYF_VOU_SALE_AMT_M       numeric(38,8) NULL,
+	PAYF_VOU_SALE_CUST_NUM_M   numeric(38,8) NULL,
+	PAYF_VOU_SALE_CNT_M       numeric(38,8) NULL,
+	PAYF_VOU_SALE_AMT_TY      numeric(38,8) NULL
 );
 
 
