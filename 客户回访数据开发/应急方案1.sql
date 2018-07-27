@@ -1,62 +1,37 @@
-create procedure dba.p_yybhf_fxpp_m_new(@i_nian varchar(4), @i_yue varchar(2))
-begin
-
-  /******************************************************************
-  ³ÌĞò¹¦ÄÜ: ÓªÒµ²¿»Ø·Ã¿Í»§¡¢²úÆ··çÏÕÆ¥ÅäÇé¿ö
-  ±àĞ´Õß: ÕÅçù
-  ´´½¨ÈÕÆÚ: 2014-10-10
-  ¼ò½é£º
-
-  *********************************************************************
-  ĞŞ¶©¼ÇÂ¼£º ĞŞ¶©ÈÕÆÚ       °æ±¾ºÅ    ĞŞ¶©ÈË             ĞŞ¸ÄÄÚÈİ¼òÒªËµÃ÷
-             20180314                 rengz              ĞŞ¸Ä·çÏÕµÈ¼¶ÅĞ¶ÏÌõ¼ş£¬ÓÉ¡°a.PROD_RISK_FLAG = '0' -- ºÏ¹æ¡±µ÷ÕûÖÁ£¬ÒÀ¾İ¡°elig_check_str¡±µÚ5Î»ÅĞ¶Ï¡£´ú±í·çÏÕµÈ¼¶  ÊıÖµ0´ú±íÆ¥Åä£¬1´ú±í²»Æ¥Åä 
-                                                         secumentrust ±íÖĞ elig_check_str ×Ö¶Î£¬8Î»×Ö·û´®º¬Òå£¨1-ÊÇ·ñĞèÒªÖØĞÂÆÀ¼Û£»2-²úÆ·ÆÚÏŞ£»3-²úÆ·Àà±ğ£»4-×Ê²úÒªÇó£»5-·çÏÕµÈ¼¶£»6-ÊôÓÚ¸ßÁä¿Í»§£»7-¿÷ËğÂÊ£»8-ÊÕÒæÀàĞÍ£©
-                                                                      È¡Öµ£º0-Æ¥Åä£¬1-²»Æ¥Åä£¬2-ÎŞĞèÆ¥Åä
-  *********************************************************************/
+   -- æ›¿æ¢ä¸€ä¸‹å˜é‡
+   -- @i_nian     å¹´
+   -- @i_yue      æœˆ
+   -- @v_kszzr_m  æœˆåˆ
+   -- @v_jszzr_m  æœˆæœ«
 
 
-
+  insert into dba.t_yybhf_fxpp_m(nian,yue,wtrq,yybmc,zjzh,khbh,khxm,xb,khrq,ywlx,wtje,jjdm,jjmc,cplx,cpfxdj,khfxdj,ymccsz,bygmje,lx,JGBH)
+    select @i_nian,                 -- å¹´      
+           @i_yue,                  -- æœˆ
+           a.curr_date,               -- å§”æ‰˜æ—¥æœŸ
     
-    declare @v_kszzr_m int;
-    declare @v_jszzr_m int;
-    
-    commit;
-    
-    set @v_kszzr_m = (select min(rq) from dba.t_ddw_d_rq where nian||yue=@i_nian||@i_yue);
-    set @v_jszzr_m = (select max(rq) from dba.t_ddw_d_rq where nian||yue=@i_nian||@i_yue);
-
-    delete from dba.t_yybhf_fxpp_m where nian||yue=@i_nian||@i_yue;
-    commit;
-    ------------------------------------
-    -----  ¿ª»ù¼°Ö¤È¯Àí²Æ
-    ------------------------------------
-    insert into dba.t_yybhf_fxpp_m(nian,yue,wtrq,yybmc,zjzh,khbh,khxm,xb,khrq,ywlx,wtje,jjdm,jjmc,cplx,cpfxdj,khfxdj,ymccsz,bygmje,lx,JGBH)
-    select @i_nian,                 -- Äê      
-           @i_yue,                  -- ÔÂ
-           a.curr_date,               -- Î¯ÍĞÈÕÆÚ
-    
-           h.hr_name,               --ÓªÒµ²¿
-           a.fund_account,          -- ×Ê½ğÕËºÅ
-           a.client_id,             -- ¿Í»§±àºÅ
-           acc_name,                -- ¿Í»§ĞÕÃû
-           case when b.sex_code = '1' then 'ÄĞ'
-                when b.sex_code = '2' then 'Å®'
+           h.hr_name,               --è¥ä¸šéƒ¨
+           a.fund_account,          -- èµ„é‡‘è´¦å·
+           a.client_id,             -- å®¢æˆ·ç¼–å·
+           acc_name,                -- å®¢æˆ·å§“å
+           case when b.sex_code = '1' then 'ç”·'
+                when b.sex_code = '2' then 'å¥³'
                 else ''
-           end              as sex, --ĞÔ±ğ
-           b.open_date,             -- ¿ª»§ÈÕÆÚ
-           case when a.business_flag = 44020 then 'ÈÏ¹º'
-                when a.business_flag = 44022 then 'Éê¹º'
-                when a.business_flag = 44039 then '¶¨Í¶'
-           end              as ywlb, -- ÒµÎñÀàĞÍ
-           a.entrust_balance,        -- Î¯ÍĞ½ğ¶î
-           a.prod_code,              -- ´úÂë
-           a.prod_name,              -- Ö¤È¯Àí²ÆÃû³Æ
-           case when a.prod_ta_no='CZZ' then 'Ö¤È¯Àí²Æ'
-                else i.jjlb  end         as cplx, -- ²úÆ·ÀàĞÍ
-           e.dict_prompt    as cpfxdj,-- ²úÆ··çÏÕµÈ¼¶
-           c.dict_prompt    as khfxdj,-- ¿Í»§·çÏÕµÈ¼¶
-           coalesce(f.zqlccpe,0)        as ymccsz,-- ÔÂÄ©³Ö²ÖÊĞ³¡
-           g.gmje           as gmje  ,-- ±¾ÔÂ¹ºÂò½ğ¶î
+           end              as sex, --æ€§åˆ«
+           b.open_date,             -- å¼€æˆ·æ—¥æœŸ
+           case when a.business_flag = 44020 then 'è®¤è´­'
+                when a.business_flag = 44022 then 'ç”³è´­'
+                when a.business_flag = 44039 then 'å®šæŠ•'
+           end              as ywlb, -- ä¸šåŠ¡ç±»å‹
+           a.entrust_balance,        -- å§”æ‰˜é‡‘é¢
+           a.prod_code,              -- ä»£ç 
+           a.prod_name,              -- è¯åˆ¸ç†è´¢åç§°
+           case when a.prod_ta_no='CZZ' then 'è¯åˆ¸ç†è´¢'
+                else i.jjlb  end         as cplx, -- äº§å“ç±»å‹
+           e.dict_prompt    as cpfxdj,-- äº§å“é£é™©ç­‰çº§
+           c.dict_prompt    as khfxdj,-- å®¢æˆ·é£é™©ç­‰çº§
+           coalesce(f.zqlccpe,0)        as ymccsz,-- æœˆæœ«æŒä»“å¸‚åœº
+           g.gmje           as gmje  ,-- æœ¬æœˆè´­ä¹°é‡‘é¢
            case when substr(a.elig_check_str,5,1)='1' then '1'
                 when substr(a.elig_check_str,5,1)='0' and a.entrust_balance <  1000000  then '7'
                 when substr(a.elig_check_str,5,1)='0' and a.entrust_balance >= 1000000  then '8' 
@@ -75,45 +50,45 @@ begin
       left join (select fund_account,prod_code,sum(business_balance) as gmje
                  from dba.T_EDW_UF2_HIS_SECUMENTRUST 
                  where curr_date between @v_kszzr_m and @v_jszzr_m
-                   and DEAL_FLAG<>'4'                       -- ÅÅ³ı³·µ¥
-                   and BUSINESS_FLAG in (44022,44020,44039)       -- Éê¹º¡¢ÈÏ¹º
+                   and DEAL_FLAG<>'4'                       -- æ’é™¤æ’¤å•
+                   and BUSINESS_FLAG in (44022,44020,44039)       -- ç”³è´­ã€è®¤è´­
                  group by fund_account,prod_code )  g  on a.fund_account=g.fund_account and a.prod_code=g.prod_code
        left  join dba.t_dim_org                 as  h  on convert(numeric(10,0), a.branch_no) = convert(numeric(10,0),h.branch_no)
        left  join dba.t_ddw_d_jj                    i  on i.nian=@i_nian and i.yue=@i_yue and a.prod_code=i.jjdm
       where a.curr_date between @v_kszzr_m and @v_jszzr_m
-       and  substr(elig_check_str,5,1)='0'                  -- 20180314 µ÷ÕûÅĞ¶¨Ìõ¼ş ·çÏÕµÈ¼¶Æ¥Åä
-       and a.entrust_status='8'	                            -- Î¯ÍĞ³É¹¦
-       and a.DEAL_FLAG <> '4'                               -- ÅÅ³ı³·µ¥
-       and a.BUSINESS_FLAG in (44022,44020,44039)                -- Éê¹º¡¢ÈÏ¹º
+       and  substr(elig_check_str,5,1)='0'                  -- 20180314 è°ƒæ•´åˆ¤å®šæ¡ä»¶ é£é™©ç­‰çº§åŒ¹é…
+       and a.entrust_status='8'                             -- å§”æ‰˜æˆåŠŸ
+       and a.DEAL_FLAG <> '4'                               -- æ’é™¤æ’¤å•
+       and a.BUSINESS_FLAG in (44022,44020,44039)                -- ç”³è´­ã€è®¤è´­
     ;
     
     ------------------------------------
-    -----  ÒøĞĞÀí²Æ
+    -----  é“¶è¡Œç†è´¢
     ------------------------------------
     insert into dba.t_yybhf_fxpp_m(nian,yue,wtrq,yybmc,zjzh,khbh,khxm,xb,khrq,ywlx,wtje,jjdm,jjmc,cplx,cpfxdj,khfxdj,ymccsz,bygmje,lx,JGBH)
-    select @i_nian,                 -- Äê      
-           @i_yue,                  -- ÔÂ
-           a.curr_date,               -- Î¯ÍĞÈÕÆÚ
+    select @i_nian,                 -- å¹´      
+           @i_yue,                  -- æœˆ
+           a.curr_date,               -- å§”æ‰˜æ—¥æœŸ
     
-           h.hr_name,               --ÓªÒµ²¿
-           a.fund_account,          -- ×Ê½ğÕËºÅ
-           a.client_id,             -- ¿Í»§±àºÅ
-           acc_name,                -- ¿Í»§ĞÕÃû
-           case when b.sex_code = '1' then 'ÄĞ'
-                when b.sex_code = '2' then 'Å®'
+           h.hr_name,               --è¥ä¸šéƒ¨
+           a.fund_account,          -- èµ„é‡‘è´¦å·
+           a.client_id,             -- å®¢æˆ·ç¼–å·
+           acc_name,                -- å®¢æˆ·å§“å
+           case when b.sex_code = '1' then 'ç”·'
+                when b.sex_code = '2' then 'å¥³'
                 else ''
-           end              as sex, --ĞÔ±ğ
-           b.open_date,             -- ¿ª»§ÈÕÆÚ
-           case when a.business_flag = 43130 then 'ÈÏ¹º'
-           end              as ywlb, -- ÒµÎñÀàĞÍ
-           abs(a.entrust_balance),   -- Î¯ÍĞ½ğ¶î
-           a.prod_code,              -- ´úÂë
-           a.prod_name,              -- ÒøĞĞÀí²ÆÃû³Æ
-           'ÒøĞĞÀí²Æ'       as cplx, -- ²úÆ·ÀàĞÍ
-           e.dict_prompt    as cpfxdj,-- ²úÆ··çÏÕµÈ¼¶
-           c.dict_prompt    as khfxdj,-- ¿Í»§·çÏÕµÈ¼¶
-           coalesce(f.yhlccyje,0)        as ymccsz,-- ÔÂÄ©³Ö²ÖÊĞ³¡
-           g.gmje           as gmje  ,-- ±¾ÔÂ¹ºÂò½ğ¶î
+           end              as sex, --æ€§åˆ«
+           b.open_date,             -- å¼€æˆ·æ—¥æœŸ
+           case when a.business_flag = 43130 then 'è®¤è´­'
+           end              as ywlb, -- ä¸šåŠ¡ç±»å‹
+           abs(a.entrust_balance),   -- å§”æ‰˜é‡‘é¢
+           a.prod_code,              -- ä»£ç 
+           a.prod_name,              -- é“¶è¡Œç†è´¢åç§°
+           'é“¶è¡Œç†è´¢'       as cplx, -- äº§å“ç±»å‹
+           e.dict_prompt    as cpfxdj,-- äº§å“é£é™©ç­‰çº§
+           c.dict_prompt    as khfxdj,-- å®¢æˆ·é£é™©ç­‰çº§
+           coalesce(f.yhlccyje,0)        as ymccsz,-- æœˆæœ«æŒä»“å¸‚åœº
+           g.gmje           as gmje  ,-- æœ¬æœˆè´­ä¹°é‡‘é¢
            case when a.entrust_balance <  1000000  then '7'
                 when a.entrust_balance >= 1000000  then '8' 
            end as fenlei,
@@ -131,15 +106,15 @@ begin
       left join (select fund_account,prod_code,sum(entrust_balance) as gmje
                 from dba.t_edw_uf2_his_bankmdeliver a
                 where a.curr_date between @v_kszzr_m and @v_jszzr_m
-                  and a.business_flag = 43130           ---ÒøĞĞÀí²ÆÈÏ¹º³ÉÁ¢
+                  and a.business_flag = 43130           ---é“¶è¡Œç†è´¢è®¤è´­æˆç«‹
                 group by fund_account,prod_code )    g   on a.fund_account=g.fund_account and a.prod_code=g.prod_code
      left  join DBA.t_dim_org                 as     h  on convert(numeric(10,0), a.branch_no) = convert(numeric(10,0),h.branch_no)
       where a.curr_date between @v_kszzr_m and @v_jszzr_m
-        and a.business_flag = 43130                     ---ÒøĞĞÀí²ÆÈÏ¹º³ÉÁ¢
+        and a.business_flag = 43130                     ---é“¶è¡Œç†è´¢è®¤è´­æˆç«‹
     ;
     commit;
 
-    -- »ı¼«ĞÍ¿Í»§µÄÔÂ³õÊı¾İ´¦Àí
+    -- ç§¯æå‹å®¢æˆ·çš„æœˆåˆæ•°æ®å¤„ç†
     insert into dba.t_yybhf_fxpp_m(nian,yue,wtrq,yybmc,zjzh,khbh,khxm,xb,khrq,ywlx,wtje,jjdm,jjmc,cplx,cpfxdj,khfxdj,ymccsz,bygmje,lx,JGBH)
     SELECT @i_nian                                            AS NIAN,     
        @i_yue                                               AS YUE,      
@@ -148,21 +123,21 @@ begin
        A.FUND_ACCOUNT                                         AS ZJZH,     
        A.CLIENT_ID                                            AS KHBH,     
        ACC_NAME                                               AS KHXM,     
-       CASE WHEN B.SEX_CODE = '1' THEN 'ÄĞ'
-            WHEN B.SEX_CODE = '2' THEN 'Å®'
+       CASE WHEN B.SEX_CODE = '1' THEN 'ç”·'
+            WHEN B.SEX_CODE = '2' THEN 'å¥³'
             ELSE ''
        END                                                    AS XB,       
        B.OPEN_DATE                                            AS KHRQ,     
-       CASE WHEN A.BUSINESS_FLAG = 44020 THEN 'ÈÏ¹º'
-            WHEN A.BUSINESS_FLAG = 44022 THEN 'Éê¹º'
-            WHEN A.BUSINESS_FLAG = 44039 THEN '¶¨Í¶'
+       CASE WHEN A.BUSINESS_FLAG = 44020 THEN 'è®¤è´­'
+            WHEN A.BUSINESS_FLAG = 44022 THEN 'ç”³è´­'
+            WHEN A.BUSINESS_FLAG = 44039 THEN 'å®šæŠ•'
        END                                                    AS YWLX,     
        A.ENTRUST_BALANCE                                      AS WTJE,     
        A.PROD_CODE                                            AS JJDM,     
        A.PROD_NAME                                            AS JJMC,     
-       CASE WHEN A.PROD_TA_NO='CZZ' THEN 'Ö¤È¯Àí²Æ'
-            WHEN J.TYPE_ID = '59' THEN I.JJLB||'(Ğ¡¼¯ºÏ)'
-            WHEN J.TYPE_ID = '58' THEN I.JJLB||'(´ó¼¯ºÏ)'
+       CASE WHEN A.PROD_TA_NO='CZZ' THEN 'è¯åˆ¸ç†è´¢'
+            WHEN J.TYPE_ID = '59' THEN I.JJLB||'(å°é›†åˆ)'
+            WHEN J.TYPE_ID = '58' THEN I.JJLB||'(å¤§é›†åˆ)'
             ELSE I.JJLB  END                                  AS CPLX,     
        E.DICT_PROMPT                                          AS CPFXDJ,   
        C.DICT_PROMPT                                          AS KHFXDJ,   
@@ -195,4 +170,3 @@ begin
     AND A.BUSINESS_FLAG IN (44022, 44020,44039)              
     AND D.PRODRISK_LEVEL = 5                           
     ;
-end
